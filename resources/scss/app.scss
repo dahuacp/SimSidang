@@ -1,0 +1,53 @@
+// SIMSIDANG — Main SCSS Entry
+@import "~bootstrap/scss/functions";
+
+@import "abstracts/variables";
+
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/variables-dark";
+@import "~bootstrap/scss/maps";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/utilities";
+
+@import "~bootstrap-icons/font/bootstrap-icons";
+@import "~bootstrap/scss/bootstrap";
+
+@import "layout/sidebar";
+@import "layout/header";
+
+// Small custom overrides
+body {
+    background-color: $gray-100;
+    color: $gray-800;
+}
+
+.text-primary-strong {
+    color: $primary-text-emphasis;
+}
+
+.btn-primary {
+    --bs-btn-color: #1e2327;
+    --bs-btn-hover-color: #1e2327;
+    --bs-btn-active-color: #1e2327;
+    --bs-btn-disabled-color: #1e2327;
+}
+
+.badge-open,
+.badge-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badge-resolved,
+.badge-selesai {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-pill {
+    display: inline-block;
+    padding: 0.35em 0.8em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 999px;
+}

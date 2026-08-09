@@ -1,0 +1,95 @@
+.sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 1030;
+    width: 260px;
+    background: $dark;
+    color: #fff;
+    transition: transform 0.3s ease;
+
+    .sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 1.1rem 1.25rem;
+        color: #fff;
+        font-weight: 600;
+        text-decoration: none;
+
+        .brand-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: $primary;
+            color: $primary-text-emphasis;
+            font-weight: 700;
+        }
+    }
+
+    .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        padding: 0.75rem 0.75rem;
+
+        .nav-item {
+            width: 100%;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.6rem 0.85rem;
+            border-radius: 0.5rem;
+            color: rgba(255, 255, 255, 0.75);
+            font-weight: 500;
+            transition: background 0.2s ease, color 0.2s ease;
+
+            i {
+                font-size: 1.05rem;
+            }
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.08);
+                color: #fff;
+            }
+
+            &.active {
+                background: $primary;
+                color: $primary-text-emphasis;
+            }
+        }
+    }
+}
+
+.main-wrapper {
+    margin-inline-start: 260px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+    padding: 1.5rem;
+}
+
+@media (max-width: 991.98px) {
+    .sidebar {
+        transform: translateX(-100%);
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .main-wrapper {
+        margin-inline-start: 0;
+    }
+}
