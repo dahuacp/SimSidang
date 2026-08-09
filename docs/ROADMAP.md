@@ -37,8 +37,8 @@ Tujuan: fitur pembeda, aman ditunda ke rilis berikutnya.
 - [x] **FR-05:** UI chat panel (adaptasi halaman Messages Metis)
 - [x] **FR-05:** Guardrail read-only + rate limiting percakapan
 - [ ] Passkey authentication (Fortify)
-- [ ] Dark mode toggle
-- [ ] Dashboard analitik agregat lintas ruang/jadwal (ApexCharts)
+- [x] Dark mode toggle
+- [x] Dashboard analitik agregat lintas ruang/jadwal (ApexCharts)
 
 ---
 
