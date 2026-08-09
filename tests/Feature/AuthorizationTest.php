@@ -3,6 +3,7 @@
 use App\Models\Schedule;
 use App\Models\Submission;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 test('dosen tidak bisa mengakses route mahasiswa', function () {
     $dosen = User::factory()->dosen()->create();
@@ -59,4 +60,34 @@ test('admin dapat mengakses dashboard admin', function () {
     $this->actingAs($admin)
         ->get(route('admin.dashboard'))
         ->assertOk();
+});
+
+test('admin tidak bisa mengakses route dosen', function () {
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin)
+        ->get(route('dosen.submissions.index'))
+        ->assertForbidden();
+});
+
+test('dosen bisa mengakses route dosen', function () {
+    $dosen = User::factory()->dosen()->create();
+
+    $this->actingAs($dosen)
+        ->get(route('dosen.submissions.index'))
+        ->assertOk();
+});
+
+test('admin tidak bisa melihat menu dosen di sidebar', function () {
+    $admin = User::factory()->admin()->create();
+
+    $this->actingAs($admin);
+    expect(Gate::allows('viewDosenMenu', $admin))->toBeFalse();
+});
+
+test('dosen bisa melihat menu dosen di sidebar', function () {
+    $dosen = User::factory()->dosen()->create();
+
+    $this->actingAs($dosen);
+    expect(Gate::allows('viewDosenMenu', $dosen))->toBeTrue();
 });

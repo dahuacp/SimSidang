@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('isDosen', fn ($user) => $user->role === 'dosen');
         Gate::define('isMahasiswa', fn ($user) => $user->role === 'mahasiswa');
 
-        Gate::define('viewDosenMenu', fn ($user) => $user->role === 'dosen' || $user->role === 'admin');
+        Gate::define('viewDosenMenu', fn ($user) => $user->role === 'dosen');
         Gate::define('viewAdminMenu', fn ($user) => $user->role === 'admin');
         Gate::define('use-virtual-assistant', fn ($user) => $user->role === 'admin');
 
