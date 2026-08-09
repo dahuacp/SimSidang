@@ -71,6 +71,20 @@ Alpine.data('notificationBell', () => ({
     }
 }));
 
+Alpine.data('themeSwitch', () => ({
+    currentTheme: 'light',
+    init() {
+        this.currentTheme = localStorage.getItem('theme')
+            || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
+    },
+    toggle() {
+        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
+        localStorage.setItem('theme', this.currentTheme);
+    }
+}));
+
 Alpine.start();
 
 document.addEventListener('DOMContentLoaded', () => {

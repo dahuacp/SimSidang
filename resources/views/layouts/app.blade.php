@@ -80,6 +80,12 @@
                 </button>
             </div>
             <div class="d-flex align-items-center gap-3">
+                <div x-data="themeSwitch" x-init="init()" class="d-flex align-items-center">
+                    <button @click="toggle()" class="btn btn-sm btn-ghost" data-bs-toggle="tooltip" title="Ganti tema">
+                        <i class="bi bi-sun-fill" x-show="currentTheme === 'light'"></i>
+                        <i class="bi bi-moon-fill" x-show="currentTheme === 'dark'"></i>
+                    </button>
+                </div>
                 <div x-data="notificationBell()" x-init="init()" data-bs-auto-drop="outside">
                     <button class="btn btn-sm btn-outline-secondary position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi" :class="unread > 0 ? 'bi-bell-fill' : 'bi-bell'"></i>
