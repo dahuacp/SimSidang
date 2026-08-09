@@ -80,8 +80,8 @@
                 </button>
             </div>
             <div class="d-flex align-items-center gap-3">
-                <div x-data="themeSwitch" x-init="init()" class="d-flex align-items-center">
-                    <button @click="toggle()" class="btn btn-sm btn-ghost" data-bs-toggle="tooltip" title="Ganti tema">
+                <div x-data="themeSwitch" class="d-flex align-items-center">
+                    <button @click="toggle()" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Ganti tema">
                         <i class="bi bi-sun-fill" x-show="currentTheme === 'light'"></i>
                         <i class="bi bi-moon-fill" x-show="currentTheme === 'dark'"></i>
                     </button>
