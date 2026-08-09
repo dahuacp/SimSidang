@@ -23,7 +23,7 @@ class GetScheduleSummaryTool implements AssistantToolInterface
     {
         return [
             'type' => 'object',
-            'properties' => [],
+            'properties' => (object) [],
             'additionalProperties' => false,
         ];
     }

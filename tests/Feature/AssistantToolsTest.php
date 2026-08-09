@@ -128,3 +128,23 @@ test('getScheduleSummary mengembalikan ringkasan jadwal', function () {
     expect($result['distribusi_status']['pending'])->toBe(3);
     expect($result['distribusi_status']['selesai'])->toBe(1);
 });
+
+test('semua tool parameters menghasilkan JSON schema valid', function () {
+    $tools = [
+        new GetStudentProgressTool,
+        new GetDosenWorkloadTool,
+        new GetStalledRevisionsTool,
+        new GetScheduleSummaryTool,
+    ];
+
+    foreach ($tools as $tool) {
+        $params = $tool->parameters();
+
+        expect($params)->toHaveKeys(['type', 'properties']);
+        expect($params['type'])->toBe('object');
+
+        $json = json_encode($params);
+
+        expect($json)->not->toContain('"properties":[]');
+    }
+});
