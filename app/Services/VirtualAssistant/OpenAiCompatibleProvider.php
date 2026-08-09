@@ -26,6 +26,7 @@ class OpenAiCompatibleProvider implements LlmProviderInterface
         $payload = [
             'model' => $this->model,
             'messages' => $messages,
+            'stream' => false,
             'temperature' => 0.7,
             'max_tokens' => 2000,
         ];
