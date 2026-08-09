@@ -8,22 +8,191 @@
   --bs-border-color: #{$gray-800};
   --bs-border-color-translucent: rgba(255, 255, 255, 0.1);
 
+  body {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+  }
+
+  // Forms
+  .form-control,
+  .form-select {
+    background-color: #{$gray-800};
+    border-color: #{$gray-700};
+    color: #{$gray-100};
+
+    &::placeholder {
+      color: #{$gray-400};
+    }
+
+    &:focus {
+      background-color: #{$gray-700};
+      border-color: #{$primary};
+      color: #{$gray-50};
+      box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
+    }
+
+    &:disabled {
+      background-color: #{$gray-800};
+      color: #{$gray-500};
+    }
+  }
+
+  textarea.form-control {
+    background-color: #{$gray-800};
+    color: #{$gray-100};
+  }
+
+  // Dropdowns
+  .dropdown-menu {
+    background-color: #{$gray-800};
+    border-color: #{$gray-700};
+    color: #{$gray-100};
+
+    .dropdown-item {
+      color: #{$gray-100};
+
+      &:hover,
+      &:focus {
+        background-color: #{$gray-700};
+        color: #{$gray-50};
+      }
+
+      &.text-danger {
+        color: #{$danger} !important;
+      }
+    }
+
+    .dropdown-item-text {
+      color: #{$gray-400};
+    }
+
+    .dropdown-divider {
+      border-color: #{$gray-700};
+    }
+  }
+
+  // Cards
+  .card {
+    background-color: rgba(30, 41, 59, 0.7);
+    border-color: var(--bs-border-color);
+  }
+
+  .card-body,
+  .card-header,
+  .card-footer {
+    color: #{$gray-100};
+  }
+
+  .card-header {
+    background-color: rgba(30, 41, 59, 0.5);
+    border-bottom-color: #{$gray-700};
+  }
+
+  // Tables
+  .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: #{$gray-100};
+    --bs-table-border-color: #{$gray-700};
+
+    &.table-hover tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  thead th {
+    color: #{$gray-300};
+    border-bottom-color: #{$gray-700};
+  }
+
+  // Text & muted
+  .text-muted {
+    color: #{$gray-400} !important;
+  }
+
+  .text-dark {
+    color: #{$gray-100} !important;
+  }
+
+  // Alerts
+  .alert-success {
+    background-color: rgba($success, 0.15);
+    border-color: rgba($success, 0.3);
+    color: lighten($success, 30%);
+  }
+
+  .alert-danger {
+    background-color: rgba($danger, 0.15);
+    border-color: rgba($danger, 0.3);
+    color: lighten($danger, 30%);
+  }
+
+  .alert-warning {
+    background-color: rgba($warning, 0.15);
+    border-color: rgba($warning, 0.3);
+    color: lighten($warning, 20%);
+  }
+
+  // Badges
+  .badge {
+    &.bg-primary {
+      background-color: rgba($primary, 0.2) !important;
+      color: lighten($primary, 15%) !important;
+    }
+  }
+
+  // Badges custom status
+  .badge-open,
+  .badge-pending {
+    background-color: rgba($warning, 0.2);
+    color: lighten($warning, 15%);
+  }
+
+  .badge-resolved,
+  .badge-selesai {
+    background-color: rgba($success, 0.2);
+    color: lighten($success, 20%);
+  }
+
+  // Links
+  a {
+    color: lighten($primary, 15%);
+
+    &:hover {
+      color: lighten($primary, 25%);
+    }
+  }
+
+  // Spinner / text utilities
+  .text-primary {
+    color: lighten($primary, 10%) !important;
+  }
+
+  .text-success {
+    color: lighten($success, 15%) !important;
+  }
+
+  .text-warning {
+    color: lighten($warning, 15%) !important;
+  }
+
+  .text-danger {
+    color: lighten($danger, 15%) !important;
+  }
+
+  // Sidebar
+  .sidebar {
+    background-color: var(--bs-body-bg);
+    border-right-color: var(--bs-border-color);
+  }
+
+  // Header
   .app-header {
     background-color: rgba(15, 23, 42, 0.95) !important;
     backdrop-filter: blur(12px);
     border-bottom-color: var(--bs-border-color);
   }
 
-  .sidebar {
-    background-color: var(--bs-body-bg);
-    border-right-color: var(--bs-border-color);
-  }
-
-  .card {
-    background-color: rgba(30, 41, 59, 0.7);
-    border-color: var(--bs-border-color);
-  }
-
+  // Stats card
   .stats-card {
     .stats-icon {
       &.bg-primary {
@@ -42,5 +211,31 @@
         background-color: rgba($info, 0.2) !important;
       }
     }
+  }
+
+  // Pre / code
+  pre {
+    background-color: #{$gray-800};
+    color: #{$gray-100};
+    border-color: #{$gray-700};
+  }
+
+  code {
+    color: lighten($primary, 20%);
+  }
+
+  // Footer
+  .text-center.text-muted {
+    color: #{$gray-500} !important;
+  }
+
+  // Close button
+  .btn-close {
+    filter: invert(1);
+  }
+
+  // Page title
+  h1, h2, h3, h4, h5, h6 {
+    color: #{$gray-50};
   }
 }
