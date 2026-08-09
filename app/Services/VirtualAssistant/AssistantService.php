@@ -10,6 +10,8 @@ use App\Services\VirtualAssistant\Tools\GetDosenWorkloadTool;
 use App\Services\VirtualAssistant\Tools\GetScheduleSummaryTool;
 use App\Services\VirtualAssistant\Tools\GetStalledRevisionsTool;
 use App\Services\VirtualAssistant\Tools\GetStudentProgressTool;
+use App\Services\VirtualAssistant\Tools\QueryDataTool;
+use App\Services\VirtualAssistant\Tools\RunSqlQueryTool;
 use Illuminate\Support\Collection;
 
 class AssistantService
@@ -27,6 +29,17 @@ class AssistantService
             new GetStalledRevisionsTool,
             new GetScheduleSummaryTool,
         ];
+
+        if (config('assistant.query.enabled', true)) {
+            $guard = app(ReadOnlyGuard::class);
+            $catalog = app(SchemaCatalog::class);
+
+            $this->tools[] = new QueryDataTool($guard, $catalog);
+
+            if (config('assistant.query.raw_sql_enabled', true)) {
+                $this->tools[] = new RunSqlQueryTool($guard);
+            }
+        }
     }
 
     public function getToolsSchema(): array
@@ -192,6 +205,9 @@ class AssistantService
     protected function buildMessageContext(AssistantConversation $conversation): array
     {
         $systemPrompt = config('assistant.llm.system_prompt', '');
+
+        $systemPrompt .= PHP_EOL.PHP_EOL.'Skema database yang tersedia untuk query (read-only):'.PHP_EOL;
+        $systemPrompt .= app(SchemaCatalog::class)->schemaDescription();
 
         $messages = [
             ['role' => 'system', 'content' => $systemPrompt],

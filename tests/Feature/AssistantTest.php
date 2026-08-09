@@ -5,10 +5,52 @@ use App\Models\AssistantMessage;
 use App\Models\Schedule;
 use App\Models\Submission;
 use App\Models\User;
+use App\Services\VirtualAssistant\AssistantService;
 use App\Services\VirtualAssistant\LlmProviderInterface;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+
+test('asisten memiliki tool queryData dan runSqlQuery', function () {
+    $service = app(AssistantService::class);
+
+    $schema = $service->getToolsSchema();
+    $names = collect($schema)->pluck('function.name')->all();
+
+    expect($names)->toContain('queryData');
+    expect($names)->toContain('runSqlQuery');
+});
+
+test('asisten masih memiliki 4 tool agregat', function () {
+    $service = app(AssistantService::class);
+
+    $schema = $service->getToolsSchema();
+    $names = collect($schema)->pluck('function.name')->all();
+
+    expect($names)->toContain('getStudentProgress');
+    expect($names)->toContain('getDosenWorkload');
+    expect($names)->toContain('getStalledRevisions');
+    expect($names)->toContain('getScheduleSummary');
+});
+
+test('system prompt asisten memuat deskripsi skema database', function () {
+    $admin = User::factory()->create([
+        'role' => 'admin',
+        'username' => 'admin_schema',
+        'email' => 'admin_schema@test.local',
+    ]);
+    $conversation = AssistantConversation::factory()->create(['admin_id' => $admin->id]);
+
+    $service = app(AssistantService::class);
+    $reflection = new ReflectionClass($service);
+    $method = $reflection->getMethod('buildMessageContext');
+    $method->setAccessible(true);
+
+    $messages = $method->invoke($service, $conversation);
+
+    expect($messages[0]['content'])->toContain('submissions (');
+    expect($messages[0]['content'])->toContain('read-only');
+});
 
 test('admin dapat membuka halaman asisten', function () {
     $admin = User::factory()->create([
