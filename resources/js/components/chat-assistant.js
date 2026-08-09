@@ -1,3 +1,5 @@
+import Alpine from 'alpinejs';
+
 Alpine.data('chatAssistant', ({ conversationId, initialMessages = [] }) => ({
     conversationId,
     messages: initialMessages,
