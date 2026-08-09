@@ -38,3 +38,9 @@ $box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 
 // Text over $primary (yellow) uses dark color, not white, for contrast
 $primary-text-emphasis: #1e2327;
+
+// Dark theme link color overrides
+[data-bs-theme="dark"] {
+  --bs-link-color: #{lighten($primary, 20%)};
+  --bs-link-hover-color: #{lighten($primary, 30%)};
+}
