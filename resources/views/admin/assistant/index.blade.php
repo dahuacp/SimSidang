@@ -34,8 +34,8 @@
             <template x-for="msg in messages" :key="msg.id">
                 <div class="d-flex mb-3" :class="msg.role === 'user' ? 'justify-content-end' : 'justify-content-start'">
                     <div class="card border-0 shadow-sm" style="max-width: 75%;">
-                        <div class="card-body p-3" :class="msg.role === 'user' ? 'bg-primary bg-opacity-10' : 'bg-light'">
-                            <div class="small fw-medium mb-2" :class="msg.role === 'user' ? 'text-primary' : 'text-muted'">
+                        <div class="card-body p-3" :class="msg.role === 'user' ? 'bg-primary bg-opacity-10' : 'bg-body-tertiary'">
+                            <div class="small fw-medium mb-2 text-body-secondary">
                                 <i :class="msg.role === 'user' ? 'bi bi-person-circle' : 'bi bi-robot'"></i>
                                 <span x-text="msg.role === 'user' ? 'Anda' : 'Asisten'"></span>
                                 <span class="text-muted ms-2" x-text="formatDate(msg.created_at)"></span>
@@ -44,13 +44,13 @@
 
                             <template x-if="msg.tool_calls && msg.tool_calls.length">
                                 <div class="mt-2 small text-muted">
-                                    <div class="border rounded p-2 bg-white" style="font-size: 0.75rem;">
+                                    <div class="border rounded p-2 bg-body-secondary" style="font-size: 0.75rem;">
                                         <div class="fw-medium mb-1">Tool yang dipanggil:</div>
                                         <template x-for="tc in msg.tool_calls" :key="tc.tool">
                                             <div>
                                                 <span class="fw-medium" x-text="tc.tool"></span>
                                                 <span class="text-muted ms-1">→</span>
-                                                <pre class="mb-0 mt-1 bg-light p-1 rounded" style="font-size: 0.7rem;" x-text="formatToolResult(tc.result)"></pre>
+                                                <pre class="mb-0 mt-1 bg-body-tertiary p-1 rounded" style="font-size: 0.7rem;" x-text="formatToolResult(tc.result)"></pre>
                                             </div>
                                         </template>
                                     </div>
@@ -63,7 +63,7 @@
 
             <template x-if="loading && messages.length > 0">
                 <div class="d-flex justify-content-start mb-3">
-                    <div class="card border-0 shadow-sm bg-light">
+                    <div class="card border-0 shadow-sm bg-body-secondary">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center gap-2 text-muted small">
                                 <div class="spinner-border spinner-border-sm" role="status"></div>
@@ -75,9 +75,10 @@
             </template>
         </div>
 
-        <div class="card-footer bg-white border-top">
+        <div class="card-footer bg-body border-top">
             <form @submit.prevent="sendMessage()" class="d-flex gap-2">
                 <textarea x-model="input"
+                    @keydown.enter.prevent="sendMessage()"
                     class="form-control"
                     placeholder="Ketik pertanyaan Anda..."
                     :disabled="loading"
