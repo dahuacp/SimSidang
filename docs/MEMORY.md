@@ -9,7 +9,8 @@
 *(Bagian ini di-overwrite/update tiap sesi — bukan log historis, tapi snapshot kondisi terkini project.)*
 
 - **Tahap MVP aktif:** Tahap 1 (MVP inti) SELESAI + Tahap 2 (Peningkatan Operasional) SELESAI + Tahap 3 FR-05 SELESAI + Dark Mode + Dashboard Analitik SELESAI. ROADMAP.md: semua item Tahap 1, 2 & FR-05 Tahap 3 + Dark Mode + Dashboard Analitik dicentang. Sisa: Passkey auth.
-- **Fitur terakhir dikerjakan:** Tahap 3 — Dark mode toggle (port Metis SCSS themes + Alpine.js themeSwitch + localStorage persistence) + Dashboard Analitik (4 chart ApexCharts: Status Submission donut, Submission per Jadwal bar, Revisi Open/Resolved donut, Tren Status per Hari area). Subagent-driven development dengan 6 task, semua approved.
+- **Fitur terakhir dikerjakan:** Fix kontras chat Asisten Virtual — bubble balasan pakai `bg-body-tertiary`, kotak tool `bg-body-secondary`, footer `bg-body`, label role `text-body-secondary` (bukan `text-primary` kuning). Mengganti kelas hardcoded `bg-light`/`bg-white`/`text-primary` yang tidak ikut theme dengan Bootstrap 5.3 theme-aware utilities.
+- **Sebelumnya:** Tahap 3 — Dark mode toggle (port Metis SCSS themes + Alpine.js themeSwitch + localStorage persistence) + Dashboard Analitik (4 chart ApexCharts: Status Submission donut, Submission per Jadwal bar, Revisi Open/Resolved donut, Tren Status per Hari area). Subagent-driven development dengan 6 task, semua approved.
 - **Blocker/isu terbuka:** (1) Warning build Vite: font `bootstrap-icons.woff/woff2` tidak ter-resolve. (2) Git initialized dengan initial commit + feature commits. (3) `laravel boost:mcp` belum dikonfigurasi. (4) Vite/Sass deprecation warnings (Bootstrap 5 legacy, Dart Sass 3.0) — non-blocking.
 - **Environment:** Laravel 13.8.0, PHP 8.4.23, MariaDB 11.8.6 (MySQL-compatible), DB `sidangapp2`/user `sidang`/pass `sidang` @ 127.0.0.1:3306. `APP_NAME=SISIDANG`, `APP_LOCALE=id`, `FILESYSTEM_DISK=local`. Packages: `maatwebsite/excel` ^3.1, `barryvdh/laravel-dompdf` ^3.1, `apexcharts` ^6.7.0 (npm).
 - **Seed:** admin `telo`/`kaspe`, 4 dosen, 6 mahasiswa, 4 schedules, 6 submissions, 2 revision notes. `migrate:fresh` sukses; semua migration termasuk Tahap 3 (`assistant_conversations`, `assistant_messages`).
@@ -37,6 +38,19 @@
 
 ## Log Sesi
 *(Append-only. Entri terbaru di paling atas. Format: tanggal — ringkasan — file yang diubah — catatan untuk sesi berikutnya.)*
+
+### 2026-08-09 — Asisten bebas query semua data (read-only) — queryData + runSqlQuery
+- **Ringkasan:** Asisten Virtual kini bisa query SEMUA tabel domain (raw rows) via 2 tool baru: `queryData` (structured JSON → Query Builder, bind params) & `runSqlQuery` (raw SQL SELECT, divalidasi `ReadOnlyGuard`). 4 tool agregat lama dipertahankan. Kolom sensitif & tabel non-domain di-blocklist. System prompt kini memuat deskripsi skema (`SchemaCatalog::schemaDescription()`).
+- **File baru:** `SchemaCatalog.php`, `ReadOnlyGuard.php`, `ReadOnlyViolationException.php`, `Tools/QueryDataTool.php`, `Tools/RunSqlQueryTool.php`.
+- **File diubah:** `config/assistant.php` (+blok `query`), `.env.example`, `AssistantService.php`, `docs/SCHEMA.md`.
+- **Keputusan penting:** Validasi SQL di aplikasi (bukan DB user terpisah) — defense-in-depth via transaksi rollback. Deviasi constraint lama "hanya aggregated results" — kini raw rows diizinkan untuk tabel domain.
+- **Catatan sesi berikutnya:** Dokumentasikan di SETUP.md saran DB user `sidang_readonly` (SELECT grant) bila ingin defense-in-depth lebih kuat. Verifikasi manual di `/admin/asisten`.
+
+### 2026-08-09 — Fix kontras chat Asisten Virtual (dark & light mode)
+- **Ringkasan:** Bubble balasan Asisten memakai `bg-light`/`bg-white`/`text-primary` yang hardcoded — tidak ikut theme. Di dark mode: kotak putih + teks terang = tidak terbaca; di light mode label "Anda" `text-primary` (kuning #F5B400) kontras rendah. Diganti dengan Bootstrap 5.3 theme-aware utilities yang berubah otomatis via CSS vars (`_variables-dark.scss` sudah di-import di `app.scss`).
+- **Perubahan:** `resources/views/admin/assistant/index.blade.php` — bubble Asisten `bg-light`→`bg-body-tertiary`; label role `text-primary`/`text-muted`→`text-body-secondary`; kotak tool `bg-white`→`bg-body-secondary`; `<pre>` tool `bg-light`→`bg-body-tertiary`; bubble "sedang menjawab" `bg-light`→`bg-body-secondary`; footer chat `bg-white`→`bg-body`.
+- **Catatan:** Tidak ada perubahan SCSS — utility `bg-body-*` sudah ada di build CSS dan dark vars sudah di-override di `_dark.scss` (`.card-body color: gray-100` tetap kompatibel karena bubble sekarang bg gelap di dark mode). 62 test pass, lint bersih. Belum di-commit.
+- **Catatan sesi berikutnya:** Verifikasi manual di browser `/admin/asisten` dark + light mode. Audit global `bg-white`/`bg-light` di view lain: `layouts/auth.blade.php` masih `bg-light` (di luar scope chat, dibiarkan).
 
 ### 2026-08-09 — Tahap 3: Dark mode toggle + Dashboard analitik (ApexCharts)
 - **Ringkasan:** Port dark mode SCSS dari Metis template (`_dark.scss`, `_light.scss`, token overrides). Alpine.js `themeSwitch` component di header dengan localStorage persistence + system preference fallback. Install `apexcharts` ^6.7.0 via npm, modular entry `resources/js/apex.js`, vendor chunk di `vite.config.js`. Extend `DashboardController@index` dengan 4 aggregate queries. 4 chart ApexCharts di admin dashboard: Status Submission (donut), Submission per Jadwal (bar), Revisi Open/Resolved (donut), Tren Status per Hari (area). Subagent-driven development: 6 tasks, semua approved. 57 test lulus (148 assertions).

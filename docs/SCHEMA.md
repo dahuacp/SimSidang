@@ -116,4 +116,4 @@ assistant_conversations (1) ───< assistant_messages
 
 ## Catatan Query
 - Selalu eager load relasi saat menampilkan daftar mahasiswa per dosen: `Submission::with(['user', 'revisionNotes'])`.
-- `getStudentProgress`, `getDosenWorkload`, dst. (tool untuk Asisten Virtual di FR-05) harus pakai query agregat (`COUNT`, `AVG`) — **jangan** kirim raw row data ke LLM, cukup hasil agregasi.
+- Tool Asisten Virtual (FR-05) read-only. Fitur "bebas query" menambah 2 tool: `queryData` (query builder terstruktur) & `runSqlQuery` (raw SQL SELECT). Keduanya bisa mengakses raw rows SEMUA tabel domain, tapi kolom sensitif (`users.password`, `remember_token`, `two_factor_*`) dan tabel non-domain (cache/sessions/jobs/dll.) diblokir. Guard read-only: validasi SQL (SELECT-only, no multi-statement, no komentar, force LIMIT) + transaksi rollback. Sebelumnya: tool agregat hanya mengembalikan hasil agregasi — kebijakan ini dilonggarkan.
