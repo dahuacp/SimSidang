@@ -26,14 +26,16 @@ class OpenAiCompatibleProvider implements LlmProviderInterface
         $payload = [
             'model' => $this->model,
             'messages' => $messages,
-            'tools' => $tools,
-            'tool_choice' => 'auto',
             'temperature' => 0.7,
             'max_tokens' => 2000,
         ];
 
+        if ($tools !== []) {
+            $payload['tools'] = $tools;
+        }
+
         $response = Http::withToken($this->apiKey)
-            ->timeout(30)
+            ->timeout(60)
             ->post(rtrim($this->url, '/').'/chat/completions', $payload);
 
         if ($response->failed()) {
@@ -43,6 +45,15 @@ class OpenAiCompatibleProvider implements LlmProviderInterface
             ];
         }
 
-        return $response->json();
+        $json = $response->json();
+
+        if (! is_array($json)) {
+            return [
+                'error' => true,
+                'message' => 'Respons dari LLM provider tidak valid.',
+            ];
+        }
+
+        return $json;
     }
 }

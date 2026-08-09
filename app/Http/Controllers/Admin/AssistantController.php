@@ -12,6 +12,7 @@ use App\Services\VirtualAssistant\AssistantService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AssistantController extends Controller
 {
@@ -78,6 +79,12 @@ class AssistantController extends Controller
                 'conversation_id' => $result['conversation_id'],
             ]);
         } catch (\Throwable $e) {
+            Log::error('Assistant chat error', [
+                'user_id' => auth()->id(),
+                'conversation_id' => $conversationId,
+                'exception' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat memproses permintaan Anda.',
