@@ -3,39 +3,51 @@
 @section('title', 'Semua Submission')
 
 @section('content')
-<div class="container-fluid">
-    <h4 class="mb-3">Semua Submission</h4>
+    <h1 class="mb-4 text-xl font-bold text-gray-800 dark:text-white/90 sm:text-2xl">Semua Submission</h1>
 
-    <form method="GET" class="mb-3" role="search">
-        <div class="input-group">
-            <input type="search" name="search" class="form-control" placeholder="Cari judul atau NIM..." value="{{ $search }}" aria-label="Cari">
-            <button class="btn btn-outline-secondary">Cari</button>
-        </div>
+    <form method="GET" class="mb-4 flex max-w-md gap-2" role="search">
+        <input type="search" name="search" placeholder="Cari judul atau NIM..." value="{{ $search }}" aria-label="Cari"
+               class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+        <button type="submit"
+                class="rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+            Cari
+        </button>
     </form>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>NIM</th><th>Mahasiswa</th><th>Grup</th><th>Judul</th><th>Status</th><th>Dibuat</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($submissions as $s)
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
                     <tr>
-                        <td>{{ $s->user->username }}</td>
-                        <td>{{ $s->user->name }}</td>
-                        <td>{{ $s->schedule->nama_grup_sidang ?? '-' }}</td>
-                        <td>{{ $s->judul_laporan ?? '-' }}</td>
-                        <td><x-status-badge :status="$s->status" /></td>
-                        <td><small class="text-muted">{{ $s->created_at->format('d M Y') }}</small></td>
+                        <th class="px-4 py-3 font-medium">NIM</th>
+                        <th class="px-4 py-3 font-medium">Mahasiswa</th>
+                        <th class="px-4 py-3 font-medium">Grup</th>
+                        <th class="px-4 py-3 font-medium">Judul</th>
+                        <th class="px-4 py-3 font-medium">Status</th>
+                        <th class="px-4 py-3 font-medium">Dibuat</th>
                     </tr>
-                @empty
-                    <tr><td colspan="6" class="text-center text-muted">Tidak ada submission.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                    @forelse($submissions as $s)
+                        <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $s->user->username }}</td>
+                            <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">{{ $s->user->name }}</td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $s->schedule->nama_grup_sidang ?? '-' }}</td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $s->judul_laporan ?? '-' }}</td>
+                            <td class="px-4 py-3"><x-status-badge :status="$s->status" /></td>
+                            <td class="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{{ $s->created_at->format('d M Y') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada submission.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
-    {{ $submissions->appends(['search'=>$search])->links() }}
-</div>
+
+    <div class="mt-4">
+        {{ $submissions->appends(['search'=>$search])->links() }}
+    </div>
 @endsection

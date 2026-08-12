@@ -3,52 +3,62 @@
 @section('title', 'Tambah Pengguna')
 
 @section('content')
-<div class="container-fluid">
-    <h4 class="mb-3">Tambah Pengguna</h4>
+    <h1 class="mb-4 text-xl font-bold text-gray-800 dark:text-white/90 sm:text-2xl">Tambah Pengguna</h1>
 
-    <form method="POST" action="{{ route('admin.users.store') }}">
+    <form method="POST" action="{{ route('admin.users.store') }}" class="max-w-3xl">
         @csrf
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Nama</label>
-                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>
-                @error('name') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Nama</label>
+                <input type="text" name="name" value="{{ old('name') }}" required
+                       class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                @error('name') <div class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</div> @enderror
             </div>
-            <div class="col-md-6">
-                <label class="form-label">NIM/NIDN (username)</label>
-                <input type="text" name="username" class="form-control @error('username') is-invalid @enderror" value="{{ old('username') }}" required>
-                @error('username') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">NIM/NIDN (username)</label>
+                <input type="text" name="username" value="{{ old('username') }}" required
+                       class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                @error('username') <div class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</div> @enderror
             </div>
-            <div class="col-md-6">
-                <label class="form-label">Email</label>
-                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}">
-                @error('email') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Email</label>
+                <input type="email" name="email" value="{{ old('email') }}"
+                       class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                @error('email') <div class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</div> @enderror
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Password</label>
-                <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
-                @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Konfirmasi Password</label>
-                <input type="password" name="password_confirmation" class="form-control" required>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Peran</label>
-                <select name="role" class="form-select @error('role') is-invalid @enderror" required>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Peran</label>
+                <select name="role" required
+                        class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
                     <option value="">Pilih...</option>
                     <option value="mahasiswa" {{ old('role') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
                     <option value="dosen" {{ old('role') == 'dosen' ? 'selected' : '' }}>Dosen</option>
                     <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                 </select>
-                @error('role') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                @error('role') <div class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</div> @enderror
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Password</label>
+                <input type="password" name="password" required
+                       class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                @error('password') <div class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</div> @enderror
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Konfirmasi Password</label>
+                <input type="password" name="password_confirmation" required
+                       class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
             </div>
         </div>
 
-        <div class="mt-4">
-            <button class="btn btn-primary">Simpan</button>
-            <a href="{{ route('admin.users.index') }}" class="btn btn-link">Batal</a>
+        <div class="mt-6 flex gap-3">
+            <button type="submit"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-brand-600">
+                Simpan
+            </button>
+            <a href="{{ route('admin.users.index') }}"
+               class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:text-brand-500 dark:text-gray-300">
+                Batal
+            </a>
         </div>
     </form>
-</div>
 @endsection

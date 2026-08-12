@@ -1,10 +1,12 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import './apex';
 import './components/chat-assistant';
 
 window.Alpine = Alpine;
 
 Alpine.data('notificationBell', () => ({
+    open: false,
     unread: 0,
     notifications: [],
     loading: false,
@@ -71,37 +73,4 @@ Alpine.data('notificationBell', () => ({
     }
 }));
 
-Alpine.data('themeSwitch', () => ({
-    currentTheme: 'light',
-    init() {
-        this.currentTheme = localStorage.getItem('theme')
-            || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
-    },
-    toggle() {
-        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
-        localStorage.setItem('theme', this.currentTheme);
-    }
-}));
-
 Alpine.start();
-
-document.addEventListener('DOMContentLoaded', () => {
-    const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
-    const sidebar = document.querySelector('.sidebar');
-
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('show');
-        });
-    }
-
-    document.querySelectorAll('.nav-link').forEach((link) => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth < 992) {
-                sidebar.classList.remove('show');
-            }
-        });
-    });
-});

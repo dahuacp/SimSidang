@@ -3,61 +3,85 @@
 @section('title', 'Detail Submission')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Detail Submission</h4>
-        <a href="{{ route('dosen.submissions.index') }}" class="btn btn-link btn-sm">Kembali</a>
+    <div class="mb-4 flex items-center justify-between">
+        <h1 class="text-xl font-bold text-gray-800 dark:text-white/90 sm:text-2xl">Detail Submission</h1>
+        <a href="{{ route('dosen.submissions.index') }}"
+           class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Kembali
+        </a>
     </div>
 
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5>{{ $submission->judul_laporan ?: '(Belum ada judul)' }}</h5>
-            <p class="mb-1"><small class="text-muted">Mahasiswa:</small> {{ $submission->user->name }} ({{ $submission->user->username }})</p>
-            <p class="mb-1"><small class="text-muted">Grup:</small> {{ $submission->schedule->nama_grup_sidang ?? '-' }}</p>
-            <p class="mb-1"><small class="text-muted">Status:</small>
-                <span class="badge bg-{{ $submission->status === 'selesai' ? 'success' : ($submission->status === 'revisi' ? 'warning' : 'secondary') }}">{{ ucfirst($submission->status) }}</span>
+    <div class="mb-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <h2 class="mb-3 text-lg font-semibold text-gray-800 dark:text-gray-200">{{ $submission->judul_laporan ?: '(Belum ada judul)' }}</h2>
+        <div class="space-y-2 text-sm">
+            <p class="text-gray-600 dark:text-gray-400">
+                <span class="font-medium text-gray-500 dark:text-gray-400">Mahasiswa:</span> {{ $submission->user->name }} ({{ $submission->user->username }})
             </p>
-            <p class="mb-2"><small class="text-muted">Diupload:</small> {{ $submission->created_at->format('d M Y H:i') }}</p>
-            @if($submission->file_path)
-                <a href="{{ route('files.submission', $submission) }}" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-download"></i> Unduh Laporan
-                </a>
-            @endif
+            <p class="text-gray-600 dark:text-gray-400">
+                <span class="font-medium text-gray-500 dark:text-gray-400">Grup:</span> {{ $submission->schedule->nama_grup_sidang ?? '-' }}
+            </p>
+            <p class="text-gray-600 dark:text-gray-400">
+                <span class="font-medium text-gray-500 dark:text-gray-400">Status:</span>
+                <x-status-badge :status="$submission->status" />
+            </p>
+            <p class="text-gray-600 dark:text-gray-400">
+                <span class="font-medium text-gray-500 dark:text-gray-400">Diupload:</span> {{ $submission->created_at->format('d M Y H:i') }}
+            </p>
         </div>
+        @if($submission->file_path)
+            <a href="{{ route('files.submission', $submission) }}"
+               class="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border border-brand-500 px-4 py-2 text-sm font-medium text-brand-500 transition hover:bg-brand-50 dark:border-brand-500 dark:text-brand-400 dark:hover:bg-brand-500/10">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 9l5 5 5-5M12 14V4"></path>
+                </svg>
+                Unduh Laporan
+            </a>
+        @endif
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Catatan Revisi</h5>
-        <a href="{{ route('dosen.revision-notes.create', $submission) }}" class="btn btn-sm btn-primary">
-            <i class="bi bi-plus-lg"></i> Tambah Catatan Revisi
+    <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Catatan Revisi</h2>
+        <a href="{{ route('dosen.revision-notes.create', $submission) }}"
+           class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-brand-600">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Tambah Catatan Revisi
         </a>
     </div>
 
     @if($submission->revisionNotes->isNotEmpty())
-        <div class="list-group mb-3">
+        <div class="space-y-3">
             @foreach($submission->revisionNotes as $note)
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between">
-                        <strong>{{ $note->dosen->name ?? '-' }}</strong>
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+                    <div class="flex items-center justify-between gap-2">
+                        <strong class="text-sm text-gray-800 dark:text-gray-200">{{ $note->dosen->name ?? '-' }}</strong>
                         @if($note->status_poin === 'open')
                             <span class="status-pill badge-open">Open</span>
                         @else
                             <span class="status-pill badge-resolved">Resolved</span>
                         @endif
                     </div>
-                    <p class="mb-1 mt-1">{{ $note->catatan_revisi }}</p>
-                    <small class="text-muted">{{ $note->created_at->format('d M Y H:i') }}</small>
+                    <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">{{ $note->catatan_revisi }}</p>
+                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $note->created_at->format('d M Y H:i') }}</div>
 
                     @if($note->attachments->isNotEmpty())
-                        <div class="mt-2">
-                            <small class="fw-semibold">Balasan / Bukti:</small>
+                        <div class="mt-3">
+                            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Balasan / Bukti:</span>
                             @foreach($note->attachments as $att)
-                                <div class="mt-1">
-                                    <a href="{{ route('files.attachment', $att) }}" class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-paperclip"></i> Unduh Lampiran
+                                <div class="mt-2">
+                                    <a href="{{ route('files.attachment', $att) }}"
+                                       class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                        </svg>
+                                        Unduh Lampiran
                                     </a>
                                     @if($att->keterangan_mahasiswa)
-                                        <small class="text-muted d-block">{{ $att->keterangan_mahasiswa }}</small>
+                                        <span class="mt-1 block text-xs text-gray-500 dark:text-gray-400">{{ $att->keterangan_mahasiswa }}</span>
                                     @endif
                                 </div>
                             @endforeach
@@ -65,13 +89,17 @@
                     @endif
 
                     @if($note->status_poin === 'open')
-                        <form method="POST" action="{{ route('dosen.revision-notes.resolve', $note) }}" class="d-inline mt-2">
+                        <form method="POST" action="{{ route('dosen.revision-notes.resolve', $note) }}" class="mt-3 inline-block">
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="status_poin" value="resolved">
-                            <button type="submit" class="btn btn-success btn-sm"
+                            <button type="submit"
+                                    class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-success-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-success-700"
                                     onclick="return confirm('Tandai poin ini sebagai resolved?')">
-                                <i class="bi bi-check-lg"></i> Tandai Resolved
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Tandai Resolved
                             </button>
                         </form>
                     @endif
@@ -79,9 +107,8 @@
             @endforeach
         </div>
     @else
-        <p class="text-muted">Belum ada catatan revisi.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Belum ada catatan revisi.</p>
     @endif
 
     <x-status-history :submission="$submission" />
-</div>
 @endsection

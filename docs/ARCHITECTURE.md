@@ -1,10 +1,12 @@
 # ARCHITECTURE.md — SIMSIDANG
 
-Dokumen ini menjelaskan struktur folder final dan bagaimana Laravel (backend) dan template Metis (frontend) disatukan dalam satu project. Lihat `PRD-SIMSIDANG-v2.md` bagian 4.1–4.2 untuk konteks keputusan.
+Dokumen ini menjelaskan struktur folder final dan bagaimana Laravel (backend) dan template TailAdmin (frontend) disatukan dalam satu project. Lihat `PRD-SIMSIDANG-v2.md` bagian 4.1–4.2 untuk konteks keputusan.
+
+> Migrasi Mei 2026: frontend diganti dari Metis (Bootstrap 5.3 + SCSS) → TailAdmin (Tailwind CSS v4). `resources/scss/` sudah dihapus, diganti `resources/css/app.css`. Bagian yang menyebut Metis/SCSS di bawah sudah diperbarui.
 
 ## 1. Prinsip Dasar
-- Laravel adalah **satu-satunya** aplikasi yang di-deploy. Template Metis **tidak** dijalankan sebagai project Vite terpisah — semua asetnya di-porting masuk ke struktur `resources/` Laravel dan di-build lewat `laravel-vite-plugin`.
-- Sumber template Metis (repo `puikinsh/Bootstrap-Admin-Template`) hanya dipakai sebagai **referensi/sumber aset** selama porting, boleh disimpan sementara di folder `_reference/metis-template/` (di-gitignore, tidak ikut ter-deploy) untuk memudahkan copy-paste terkontrol — jangan biarkan folder ini tercampur dengan `resources/`.
+- Laravel adalah **satu-satunya** aplikasi yang di-deploy. Template TailAdmin **tidak** dijalankan sebagai project Vite terpisah — semua asetnya di-porting masuk ke struktur `resources/` Laravel dan di-build lewat `laravel-vite-plugin`.
+- Sumber template TailAdmin (TailAdmin/free-react-tailwind-admin-dashboard dan TailAdmin/tailadmin-laravel) hanya dipakai sebagai **referensi/sumber aset** selama porting, boleh disimpan sementara di folder `_reference/tailadmin-*/` (di-gitignore, tidak ikut ter-deploy) untuk memudahkan copy-paste terkontrol — jangan biarkan folder ini tercampur dengan `resources/`.
 
 ## 2. Struktur Folder Final
 
@@ -36,19 +38,20 @@ simsidang/
 ├── resources/
 │   ├── views/
 │   │   ├── layouts/
-│   │   │   ├── app.blade.php       # hasil porting layout utama Metis (sidebar+topbar+footer)
-│   │   │   └── auth.blade.php      # hasil porting layout kosong (blank) untuk login/register
-│   │   ├── components/             # Blade component reusable (badge status, card KPI, dsb)
+│   │   │   ├── app.blade.php       # hasil porting layout utama TailAdmin (sidebar+header+footer)
+│   │   │   ├── sidebar.blade.php   # sidebar role-based
+│   │   │   ├── header.blade.php    # header sticky: toggle tema, notifikasi, user menu
+│   │   │   ├── backdrop.blade.php  # overlay mobile sidebar
+│   │   │   └── auth.blade.php      # hasil porting layout kosong (blank) untuk login
+│   │   ├── components/             # Blade component reusable (badge status, riwayat status, dsb)
 │   │   ├── mahasiswa/
 │   │   ├── dosen/
 │   │   └── admin/
-│   ├── scss/
-│   │   ├── app.scss                # entry point, meng-import semua partial di bawah
-│   │   └── abstracts/
-│   │       └── _variables.scss     # TEMPAT OVERRIDE WARNA KUNING — lihat FRONTEND-GUIDE.md
+│   ├── css/
+│   │   └── app.css                 # Tailwind v4 entry + @theme + @utility (porting TailAdmin)
 │   └── js/
 │       ├── app.js                  # entry point Alpine.js
-│       └── components/             # hasil porting components/*.js dari Metis
+│       └── components/             # hasil porting components/*.js dari TailAdmin
 │
 ├── database/
 │   └── migrations/                 # urutan sesuai SCHEMA.md
@@ -57,7 +60,8 @@ simsidang/
 │   └── web.php                     # route group per role (middleware role:mahasiswa/dosen/admin)
 │
 ├── _reference/
-│   └── metis-template/             # (gitignored) source asli Metis untuk referensi porting
+│   └── tailadmin-laravel/          # (gitignored) source asli TailAdmin Blade untuk referensi porting
+│   └── tailadmin-react/            # (gitignored) source asli TailAdmin React untuk referensi porting
 │
 ├── AGENTS.md
 ├── PRD-SIMSIDANG-v2.md
@@ -75,18 +79,17 @@ simsidang/
 1. `routes/web.php` — route `POST /dosen/submissions/{submission}/revision-notes`, middleware `auth`, `role:dosen`.
 2. `Http/Requests/StoreRevisionNoteRequest.php` — validasi `catatan_revisi` wajib, dsb.
 3. `Http/Controllers/Dosen/RevisionNoteController.php` — cek Policy (`RevisionNotePolicy::create`, pastikan dosen ditugaskan ke schedule submission ini via `schedule_dosen`), lalu simpan.
-4. Redirect/response ke Blade view yang sudah pakai layout `layouts/app.blade.php` (porting Metis).
+4. Redirect/response ke Blade view yang sudah pakai layout `layouts/app.blade.php` (porting TailAdmin).
 
 ## 4. Kenapa Bukan SPA/API Terpisah
-Semua rendering pakai Blade + Livewire (untuk bagian yang butuh reaktivitas seperti polling notifikasi dan chat asisten). Tidak ada REST API terpisah untuk frontend, karena template Metis sudah cukup dengan render server-side + Alpine.js untuk interaksi ringan. Ini menyederhanakan auth (session-based, bukan token) dan cocok dengan Fortify.
+Semua rendering pakai Blade + Livewire (untuk bagian yang butuh reaktivitas seperti polling notifikasi dan chat asisten). Tidak ada REST API terpisah untuk frontend, karena template TailAdmin sudah cukup dengan render server-side + Alpine.js untuk interaksi ringan. Ini menyederhanakan auth (session-based, bukan token) dan cocok dengan Fortify.
 
 ## 5. Batas Tanggung Jawab Folder (untuk agent)
 | Folder | Boleh diubah bebas? | Catatan |
 |---|---|---|
 | `app/` | Ya | Logic bisnis utama |
 | `resources/views/` | Ya | Tapi ikuti struktur layout yang sudah di-porting, jangan bikin layout baru dari nol |
-| `resources/scss/abstracts/_variables.scss` | Ya | Satu-satunya tempat yang boleh diubah untuk theming warna |
-| `resources/scss/` (selain `_variables.scss`) | Hati-hati | Ini hasil porting Metis — perubahan struktural harus dicatat di `MEMORY.md` karena bisa bikin drift dari template asli |
-| `resources/js/components/` | Hati-hati | Sama seperti di atas — porting dari Metis |
-| `_reference/metis-template/` | Jangan diubah | Read-only, hanya untuk dibaca/dicopy saat porting |
+| `resources/css/app.css` | Ya (token theming) | Hanya bagian `@theme` yang boleh diubah bebas untuk warna; struktur utility `@utility` diubah hati-hati & dicatat di `MEMORY.md` |
+| `resources/js/components/` | Hati-hati | Hasil porting dari TailAdmin |
+| `_reference/tailadmin-*/` | Jangan diubah | Read-only, hanya untuk dibaca/dicopy saat porting |
 | `database/migrations/` | Ya, tapi jangan edit migration yang sudah di-`migrate` di lingkungan lain — buat migration baru |

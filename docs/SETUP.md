@@ -67,7 +67,7 @@ Jalankan dua proses secara paralel (dua terminal terpisah):
 # Terminal 1 — Laravel
 php artisan serve
 
-# Terminal 2 — Vite (HMR untuk resources/scss & resources/js)
+# Terminal 2 — Vite (HMR untuk resources/css & resources/js)
 npm run dev
 ```
 

@@ -22,9 +22,9 @@ SIMSIDANG mendigitalisasi proses revisi pasca-sidang (Tugas Akhir/Kerja Praktek)
 - **Backend:** Laravel 13.x, PHP 8.4+
 - **Auth:** Laravel Fortify (login via `username` = NIM/NIDN, bukan email), Gate untuk RBAC (`mahasiswa`, `dosen`, `admin`)
 - **Database:** MySQL 8.x
-- **Frontend:** Template Metis (Bootstrap 5.3.8 + Alpine.js + SCSS + ApexCharts), diintegrasikan via `laravel-vite-plugin` — BUKAN dipakai sebagai aset statis terpisah
+- **Frontend:** Template TailAdmin (Tailwind CSS v4 + Alpine.js + ApexCharts), diintegrasikan via `laravel-vite-plugin` — BUKAN dipakai sebagai aset statis terpisah. Tanpa `tailwind.config.js`; styling di `resources/css/app.css`
 - **Realtime/polling:** Livewire polling (bukan websocket) untuk notifikasi & chat asisten
-- **Warna aksen:** Indigo (`$primary: #6366f1`), lihat `FRONTEND-GUIDE.md`
+- **Warna aksen:** Indigo (`brand-500: #6366f1`), lihat `FRONTEND-GUIDE.md`
 
 ## 3. Command Penting
 ```bash
@@ -57,9 +57,9 @@ app/
   Http/Requests/     # Form Request untuk validasi terpusat
   Policies/ Gates/   # RBAC
 resources/
-  views/             # Blade, hasil porting dari template Metis
-  scss/              # SCSS hasil porting Metis, _variables.scss = tempat override warna
-  js/                # Alpine.js components hasil porting Metis
+  views/             # Blade, hasil porting dari template TailAdmin
+  css/app.css        # Tailwind v4 (entry + @theme + @utility), porting dari TailAdmin
+  js/                # Alpine.js components hasil porting TailAdmin
 database/migrations/
 routes/web.php
 ```

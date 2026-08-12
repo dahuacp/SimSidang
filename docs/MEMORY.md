@@ -9,13 +9,13 @@
 *(Bagian ini di-overwrite/update tiap sesi — bukan log historis, tapi snapshot kondisi terkini project.)*
 
 - **Tahap MVP aktif:** Tahap 1 (MVP inti) SELESAI + Tahap 2 (Peningkatan Operasional) SELESAI + Tahap 3 FR-05 SELESAI + Dark Mode + Dashboard Analitik SELESAI. ROADMAP.md: semua item Tahap 1, 2 & FR-05 Tahap 3 + Dark Mode + Dashboard Analitik dicentang. Sisa: Passkey auth.
-- **Fitur terakhir dikerjakan:** Theme color diubah dari kuning ke indigo (`$primary: #6366f1`) sesuai default Metis template. `$warning: #f59e0b` (amber), `$info: #06b6d4` (cyan), `$dark: #1e293b` (slate 800). `$primary-text-emphasis` diubah ke `#ffffff`. `btn-primary` text color diubah ke white. Dokumentasi (AGENTS.md, FRONTEND-GUIDE.md) diupdate.
-- **Sebelumnya:** Plotting Mahasiswa ke grup sidang (admin) + view dosen semua jadwal. Pivot table `schedule_mahasiswa`, relasi `Schedule::mahasiswas()`, section "Plotting Mahasiswa" di edit jadwal, kolom "Jml Mahasiswa" di index. Dosen kini lihat SEMUA jadwal (bukan hanya hari ini) + filter tab Semua/Hari Ini + mahasiswa ter-plot tanpa submission ditampilkan berstatus "Belum upload". Fix bug laten: filter tanggal pakai `whereDate()` (cast `date` menyimpan `2026-08-10 00:00:00` → `where(..., 'Y-m-d')` gagal di SQLite).
-- **Blocker/isu terbuka:** (1) Warning build Vite: font `bootstrap-icons.woff/woff2` tidak ter-resolve. (2) Git initialized dengan initial commit + feature commits. (3) `laravel boost:mcp` belum dikonfigurasi. (4) Vite/Sass deprecation warnings (Bootstrap 5 legacy, Dart Sass 3.0) — non-blocking.
-- **Environment:** Laravel 13.8.0, PHP 8.4.23, MariaDB 11.8.6 (MySQL-compatible), DB `sidangapp2`/user `sidang`/pass `sidang` @ 127.0.0.1:3306. `APP_NAME=SISIDANG`, `APP_LOCALE=id`, `FILESYSTEM_DISK=local`. Packages: `maatwebsite/excel` ^3.1, `barryvdh/laravel-dompdf` ^3.1, `apexcharts` ^6.7.0 (npm).
+- **Fitur terakhir dikerjakan:** **Migrasi frontend Metis (Bootstrap 5.3 + SCSS) → TailAdmin (Tailwind CSS v4)**. `resources/scss/` dihapus, diganti `resources/css/app.css` (Tailwind v4: `@import 'tailwindcss'`, `@custom-variant dark`, `@theme` palet brand indigo `#6366f1`, `@utility` menu/badge/status). package.json: hapus `bootstrap`/`bootstrap-icons`/`@popperjs/core`/`sass`, tambah `@tailwindcss/vite` + `tailwindcss` ^4.1.12 + `heroicons`. Semua 24 view Blade + layout di-port ke Tailwind (layout app/sidebar/header/backdrop/auth, komponen status-badge/status-history, views mahasiswa/dosen/admin/rekap/asisten). Ikon `bi bi-*` → SVG Heroicons inline. Dark mode kini class `.dark` (bukan `data-bs-theme`), Alpine stores `theme` + `sidebar` di app.blade.php. AGENTS.md, docs/AGENTS.md, ARCHITECTURE.md, FRONTEND-GUIDE.md, ROADMAP.md, SETUP.md diupdate. 105 test lulus, build/lint/pint bersih.
+- **Sebelumnya:** Theme color diubah dari kuning ke indigo (`$primary: #6366f1`) di SCSS Metis (sekarang sudah jadi Tailwind `brand-500` di `resources/css/app.css`).
+- **Blocker/isu terbuka:** (1) ~~Warning build Vite bootstrap-icons.woff~~ — RESOLVED: bootstrap-icons dihapus, diganti Heroicons SVG. (2) Git initialized dengan initial commit + feature commits. (3) `laravel boost:mcp` belum dikonfigurasi. (4) ~Vite/Sass deprecation warnings (Bootstrap legacy, Dart Sass)~ — RESOLVED: Sass & Bootstrap dihapus.
+- **Environment:** Laravel 13.8.0, PHP 8.4.23, MariaDB 11.8.6 (MySQL-compatible), DB `sidangapp2`/user `sidang`/pass `sidang` @ 127.0.0.1:3306. `APP_NAME=SISIDANG`, `APP_LOCALE=id`, `FILESYSTEM_DISK=local`. Packages: `maatwebsite/excel` ^3.1, `barryvdh/laravel-dompdf` ^3.1, `apexcharts` ^6.7.0 (npm), `tailwindcss`/`@tailwindcss/vite` ^4.1.12 (npm). Frontend: TailAdmin (Tailwind v4), tanpa `tailwind.config.js`.
 - **Seed:** admin `telo`/`kaspe`, 4 dosen, 6 mahasiswa, 4 schedules, 6 submissions, 2 revision notes. `migrate:fresh` sukses; semua migration termasuk Tahap 3 (`assistant_conversations`, `assistant_messages`).
 - **Migration terakhir:** semua 11 migration (6 Tahap1 + 2 Tahap2 + 2 Tahap3 + `schedule_mahasiswa`) terakhir dijalankan via `php artisan migrate` pada DB nyata.
-- **Test:** 105 test Pest (SQLite :memory: + RefreshDatabase), **semua lulus** (254 assertion). `pint`, `npm run lint` bersih/sukses.
+- **Test:** 105 test Pest (SQLite :memory: + RefreshDatabase), **semua lulus** (254 assertion). `pint`, `npm run lint`, `npm run build` bersih/sukses.
 
 ---
 
@@ -38,6 +38,14 @@
 
 ## Log Sesi
 *(Append-only. Entri terbaru di paling atas. Format: tanggal — ringkasan — file yang diubah — catatan untuk sesi berikutnya.)*
+
+### 2026-08-13 — Migrasi Frontend: Metis (Bootstrap) → TailAdmin (Tailwind CSS v4)
+- **Ringkasan:** Full porting frontend dari Metis (Bootstrap 5.3 + SCSS) ke TailAdmin (Tailwind CSS v4). Hapus `bootstrap`, `bootstrap-icons`, `@popperjs/core`, `sass` dari package.json; tambah `@tailwindcss/vite`, `tailwindcss` ^4.1.12, `heroicons`. Hapus seluruh `resources/scss/`; buat `resources/css/app.css` (Tailwind v4: `@import 'tailwindcss'`, `@custom-variant dark`, `@theme` palet brand indigo `#6366f1` = `brand-500`, `gray` slate, `success`/`warning`/`error`, token `--status-*` & `--chart-*`, `@utility` menu-item/badge-status/status-pill/stats-card/main-wrapper/app-header, styling ApexCharts dark). vite.config: entry `resources/css/app.css` + `resources/js/app.js`, plugin `@tailwindcss/vite`. Layout di-port: `layouts/app.blade.php` (Alpine stores `theme`+`sidebar`, IIFE anti-flash dark), `sidebar.blade.php` (role-based, collapsible, Heroicons), `header.blade.php` (sidebar toggle, theme toggle, notificationBell, user dropdown+logout), `backdrop.blade.php` (mobile overlay), `layouts/auth.blade.php`. Semua 24 view Blade + komponen (`status-badge` sudah kompatibel, `status-history` di-port) migrasi ke Tailwind. Ikon `bi bi-*` → SVG Heroicons inline. ApexCharts di admin dashboard: `import ApexCharts from '../apex.js'` inline → `window.ApexCharts` (apex.js di-import di app.js). Perbaikan bug: `catch` tanpa `e` di `chat-assistant.js` (throw ReferenceError). Tambah shade `error-200/300/700/800` ke palette & style `[x-cloak]`. Berhasil eliminasi warning Vite bootstrap-icons.woff (terselesaikan).
+- **File baru:** `resources/css/app.css`, `resources/views/layouts/sidebar.blade.php`, `header.blade.php`, `backdrop.blade.php`.
+- **File dihapus:** `resources/scss/` (app.scss, abstracts/, layout/, themes/).
+- **File diubah:** `package.json`, `package-lock.json`, `vite.config.js`, `resources/js/bootstrap.js`, `resources/js/app.js`, `resources/js/components/chat-assistant.js`, semua view di `resources/views/` (auth, mahasiswa, dosen, admin, components), `AGENTS.md`, `docs/AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/FRONTEND-GUIDE.md` (ditulis ulang jadi checklist TailAdmin), `docs/ROADMAP.md`, `docs/SETUP.md`, `docs/MEMORY.md`.
+- **Keputusan penting:** Dark mode pakai class `.dark` + `$store.theme` (localStorage `theme`), bukan `data-bs-theme`. Tidak ada `tailwind.config.js` — konfigurasi via CSS. Badge status tetap lewat `<x-status-badge>` + `status-pill` utility (single source of truth). `_reference/tailadmin-laravel/` + `_reference/tailadmin-react/` sebagai sumber porting (gitignored).
+- **Catatan sesi berikutnya:** Verifikasi manual di browser (login, dark toggle, notif bell, sidebar collapse, charts, asisten). `npm run build` masih ada warning chunk >500kB (vendor-charts ApexCharts) — non-blocking. 105 test lulus, lint/pint/build bersih. Belum di-commit.
 
 ### 2026-08-11 — Theme Color: Kuning → Indigo (Metis Default)
 - **Ringkasan:** Aksen warna diubah dari kuning (`$primary: #F5B400`) ke indigo (`$primary: #6366f1`) sesuai default Metis template. `$warning` diubah ke amber `#f59e0b`, `$info` ke cyan `#06b6d4`, `$dark` ke slate 800 `#1e293b`. `$primary-text-emphasis` diubah dari dark ke white. `btn-primary` text color diubah ke white. Dokumentasi diupdate.
@@ -101,10 +109,10 @@
 - Base `app/Http/Controllers/Controller.php` Laravel 13 kosong — wajib `use AuthorizesRequests, ValidatesRequests;`.
 - `Fortify::authenticateUsing()` callback harus **return User**; pakai `Auth::attempt` sendiri gagal (Fortify panggil `guard->login($user)`).
 - ESLint v9 butuh flat config `eslint.config.js` (sudah dibuat).
-- Sass modern tidak resolve `~bootstrap`/`~bootstrap-icons` — wajib `resolve.alias` di `vite.config.js`.
-- Template Metis standalone Vite project — **jangan** `npm install` di root reference; porting ke `resources/` per `FRONTEND-GUIDE.md`.
-- Vite warning: `bootstrap-icons.woff/woff2` tidak ter-resolve — ikon font mungkin tak tampil (belum diverifikasi).
-- `.git` dihapus saat scaffold — init ulang bila perlu; `_reference/metis-template/` tetap gitignored.
+- Template TailAdmin standalone Vite project — **jangan** `npm install` di root reference; porting ke `resources/` per `FRONTEND-GUIDE.md`.
+- Tailwind v4 tidak pakai `tailwind.config.js` — styling via `@theme`/`@utility` di `resources/css/app.css`. Dark mode via class `.dark` (Alpine store `theme`), semua warna butuh varian `dark:`.
+- Ikon pakai SVG Heroicons inline — **jangan** pasang `bootstrap-icons` lagi.
+- `.git` dihapus saat scaffold — init ulang bila perlu; `_reference/tailadmin-*/` tetap gitignored.
 - `storage/app` harus writable (`chmod -R 775 storage`) karena file submission/attachment di `FILESYSTEM_DISK=local`.
 - `maatwebsite/excel` import CSV butuh heading row pertama = kolom (`nama_grup_sidang, ruangan, tanggal_sidang, jam_mulai, jam_selesai, dosen_ids`); tanggal format `Y-m-d`, jam `H:i`.
 
@@ -113,5 +121,5 @@
 ## Pertanyaan Terbuka untuk User
 
 - ~~Provider LLM untuk Asisten Virtual (FR-05, Tahap 3)?~~ **Dijawab:** OpenAI-compatible via `Illuminate\Support\Facades\Http`, dikonfigurasi di `.env`.
-- Verifikasi manual ikon bootstrap-icons (warning woff di build) — perlu ditindaklanjuti.
+- ~~Verifikasi manual ikon bootstrap-icons (warning woff di build)~~ — **Resolved:** bootstrap-icons dihapus (migrasi TailAdmin), ikon kini SVG Heroicons.
 - Git init ulang diinginkan?

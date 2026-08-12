@@ -1,6 +1,6 @@
 # AGENTS.md — SIMSIDANG
 
-Sistem Manajemen Sidang Akademik. Laravel 13 / PHP 8.4 / MySQL 8 / Vite (Bootstrap 5.3 + Alpine.js). Auth via Fortify, login by `username` (NIM/NIDN). RBAC via Gate (`mahasiswa`, `dosen`, `admin`). Frontend = ported Metis template (not static assets).
+Sistem Manajemen Sidang Akademik. Laravel 13 / PHP 8.4 / MySQL 8 / Vite (Tailwind CSS v4 + Alpine.js + ApexCharts). Auth via Fortify, login by `username` (NIM/NIDN). RBAC via Gate (`mahasiswa`, `dosen`, `admin`). Frontend = ported TailAdmin template (Tailwind, not static assets).
 
 > All project docs live in `docs/`. Full detail: see individual files.
 
@@ -14,7 +14,7 @@ php artisan migrate --seed
 
 # Dev — run both, in parallel
 php artisan serve        # terminal 1
-npm run dev             # terminal 2 — Vite HMR for resources/scss + resources/js
+npm run dev             # terminal 2 — Vite HMR for resources/css + resources/js
 
 # Before marking task done (MANDATORY)
 php artisan test         # → ./vendor/bin/pest also works
@@ -28,17 +28,17 @@ npm run lint
 - **Assistant is read-only** (FR-05, Tahap 3) — never give DB write access. LLM gets aggregated query results only, not raw rows.
 - **All form input** → Form Request (validation centralized). File uploads: submission PDF ≤10MB; attachments (.pdf/.docx/.jpeg/.png) ≤5MB each. Error messages in Bahasa Indonesia.
 - **No email-based auth** — Fortify must be configured for `username` login. Default Laravel scaffolding uses email — override it.
-- **Porting Metis** — clone to `_reference/metis-template/` (gitignored, read-only). Don't copy-paste `.html` directly. Follow `docs/FRONTEND-GUIDE.md` checklist: extract common layout → Blade components, wire Vite directives, replace dummy data with Blade vars.
-- **Theme** — indigo accent `$primary: #6366f1` in `resources/scss/abstracts/_variables.scss`. Only file you may freely change for theming.
+- **Porting TailAdmin** — clone to `_reference/tailadmin-laravel/` and `_reference/tailadmin-react/` (gitignored, read-only). Don't copy-paste `.html` directly. Follow `docs/FRONTEND-GUIDE.md` checklist: extract common layout → Blade components, wire Vite directives, replace dummy data with Blade vars.
+- **Theme** — indigo accent `#6366f1` mapped to `brand-500` in `resources/css/app.css` (`@theme` block). Only that file's theme tokens may be freely changed for theming.
 - **Naming** — `GLOSSARY.md` is the single source of truth. DB columns = Bahasa Indonesia snake_case (`catatan_revisi`, `status_poin`). PHP classes/routes = English (`RevisionNote`). Add new domain terms to glossary before coding.
 - **Roadmap order** — `docs/ROADMAP.md` Tahap 1 first (core submission→revisi loop). Don't skip to Tahap 2/3 features unless asked.
-- **Folder layout** — controllers grouped by role (`app/Http/Controllers/Mahasiswa/`, `Dosen/`, `Admin/`). `resources/scss/` and `resources/js/components/` are ported from Metis — change cautiously and log in MEMORY.md.
+- **Folder layout** — controllers grouped by role (`app/Http/Controllers/Mahasiswa/`, `Dosen/`, `Admin/`). `resources/css/app.css` and `resources/js/components/` are ported from TailAdmin — change cautiously and log in MEMORY.md.
 
 ## Gotchas
 
 - `PRD-SIMSIDANG-v2.md` is referenced by AGENTS.md, ARCHITECTURE.md, FRONTEND-GUIDE.md, and ROADMAP.md but **does not exist yet**. Treat ROADMAP.md + SCHEMA.md + GLOSSARY.md as the spec until it's written.
 - Currently docs-only — no Laravel project scaffolded yet. First task: scaffold Laravel 13 + Fortify per `docs/ROADMAP.md` Tahap 1, item 1.
-- Metis is a standalone Vite project. Do **not** `npm install` it directly at repo root — port assets into Laravel's `resources/` per FRONTEND-GUIDE.md.
+- TailAdmin is a standalone Vite project. Do **not** `npm install` it directly at repo root — port assets into Laravel's `resources/` per FRONTEND-GUIDE.md.
 - Submission files stored on `FILESYSTEM_DISK=local` (not public). Ensure `storage/app` writable (`chmod -R 775 storage`).
 - Eager-load relations when listing submissions: `Submission::with(['user', 'revisionNotes'])`.
 
@@ -49,7 +49,7 @@ npm run lint
 | `docs/ROADMAP.md` | Feature priority order (Tahap 1 → 3) |
 | `docs/SCHEMA.md` | DB schema, migration order |
 | `docs/ARCHITECTURE.md` | Folder structure, request flow |
-| `docs/FRONTEND-GUIDE.md` | Metis→Blade porting checklist |
+| `docs/FRONTEND-GUIDE.md` | TailAdmin→Blade porting checklist |
 | `docs/CODING-STANDARDS.md` | PSR-12, test structure, commit format |
 | `docs/GLOSSARY.md` | Domain term → code naming |
 | `docs/SETUP.md` | Environment setup, .env vars |

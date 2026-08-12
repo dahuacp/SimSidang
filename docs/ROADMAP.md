@@ -9,8 +9,8 @@ Tujuan: satu alur utuh mahasiswa upload → dosen kasih revisi → mahasiswa bal
 
 - [x] Scaffold project Laravel 13 + install Fortify
 - [x] Migration: `users` (extend), `schedules`, `schedule_dosen`, `submissions`, `revision_notes`, `revision_attachments` (lihat `SCHEMA.md`)
-- [x] Porting layout dasar Metis: `layouts/app.blade.php`, `layouts/auth.blade.php` (lihat `FRONTEND-GUIDE.md`)
-- [x] Override tema warna kuning di `_variables.scss`
+- [x] Porting layout dasar TailAdmin: `layouts/app.blade.php`, `layouts/auth.blade.php`, `sidebar/header/backdrop` (lihat `FRONTEND-GUIDE.md`)
+- [x] Override tema warna indigo di `resources/css/app.css` (`@theme` → `brand-500`)
 - [x] **FR-01:** Login NIM/NIDN via Fortify, RBAC via Gate (skip 2FA & passkey)
 - [x] **FR-02:** Upload submission PDF mahasiswa (validasi 10MB, `Storage::disk('local')`)
 - [x] **FR-03:** Dashboard dosen terfilter ruang & tanggal hari ini (eager loading)
@@ -26,7 +26,7 @@ Tujuan: memudahkan admin & mengurangi kerja manual, setelah alur inti stabil dip
 - [x] **Import jadwal massal dari Excel**
 - [x] **Notifikasi in-app** (Alpine polling) saat ada revisi baru / poin resolved
 - [x] **Log riwayat perubahan status submission**
-- [x] **Search & filter tabel** (pakai komponen search bawaan Metis)
+- [x] **Search & filter tabel** (pakai komponen search bawaan TailAdmin)
 - [x] **Export rekap status sidang ke PDF/Excel**
 
 ## Tahap 3 — Fitur Lanjutan (Nice-to-have)
@@ -34,7 +34,7 @@ Tujuan: fitur pembeda, aman ditunda ke rilis berikutnya.
 
 - [x] **FR-05:** Asisten Virtual Admin — migration `assistant_conversations`, `assistant_messages`
 - [x] **FR-05:** Tool read-only: `getStudentProgress`, `getDosenWorkload`, `getStalledRevisions`, `getScheduleSummary`
-- [x] **FR-05:** UI chat panel (adaptasi halaman Messages Metis)
+- [x] **FR-05:** UI chat panel (adaptasi halaman Messages TailAdmin)
 - [x] **FR-05:** Guardrail read-only + rate limiting percakapan
 - [ ] Passkey authentication (Fortify)
 - [x] Dark mode toggle

@@ -3,81 +3,104 @@
 @section('title', 'Jadwal Sidang')
 
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Jadwal Sidang</h4>
-        <div class="d-flex gap-2">
-            <form method="POST" action="{{ route('admin.schedules.import') }}" enctype="multipart/form-data" class="d-flex gap-2">
+    <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <h1 class="text-xl font-bold text-gray-800 dark:text-white/90 sm:text-2xl">Jadwal Sidang</h1>
+        <div class="flex flex-wrap gap-2">
+            <form method="POST" action="{{ route('admin.schedules.import') }}" enctype="multipart/form-data" id="importForm">
                 @csrf
-                <input type="file" name="file" accept=".csv,.xlsx" class="form-control d-none" id="importFile">
-                <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('importFile').click()">
-                    <i class="bi bi-upload"></i> Import
+                <input type="file" name="file" accept=".csv,.xlsx" class="hidden" id="importFile">
+                <button type="button" onclick="document.getElementById('importFile').click()"
+                        class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 9l5 5 5-5M12 14V4"></path>
+                    </svg>
+                    Import
                 </button>
             </form>
-            <a href="{{ route('admin.schedules.template') }}" class="btn btn-outline-secondary">Template CSV</a>
-            <a href="{{ route('admin.schedules.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> Tambah
+            <a href="{{ route('admin.schedules.template') }}"
+               class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                Template CSV
+            </a>
+            <a href="{{ route('admin.schedules.create') }}"
+               class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-600">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Tambah
             </a>
         </div>
     </div>
 
-    <form method="GET" class="mb-3" role="search">
-        <div class="input-group">
-            <input type="search" name="search" class="form-control" placeholder="Cari grup atau ruangan..." value="{{ $search }}" aria-label="Cari">
-            <button class="btn btn-outline-secondary">Cari</button>
-        </div>
+    <form method="GET" class="mb-4 flex max-w-md gap-2" role="search">
+        <input type="search" name="search" placeholder="Cari grup atau ruangan..." value="{{ $search }}" aria-label="Cari"
+               class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+        <button type="submit"
+                class="rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+            Cari
+        </button>
     </form>
 
-    @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
-    @if(session('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
-
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>#</th>
-                    <th>Grup Sidang</th>
-                    <th>Ruangan</th>
-                    <th>Tanggal</th>
-                    <th>Jam</th>
-                    <th>Dosen</th>
-                    <th>Jml Mahasiswa</th>
-                    <th class="text-end">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($schedules as $schedule)
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
                     <tr>
-                        <td>{{ $loop->iteration + ($schedules->currentPage() - 1) * $schedules->perPage() }}</td>
-                        <td>{{ $schedule->nama_grup_sidang }}</td>
-                        <td>{{ $schedule->ruangan }}</td>
-                        <td>{{ $schedule->tanggal_sidang->format('d M Y') }}</td>
-                        <td>{{ $schedule->jam_mulai->format('H:i') }} - {{ $schedule->jam_selesai->format('H:i') }}</td>
-                        <td>{{ $schedule->dosens->pluck('name')->join(', ') ?: '-' }}</td>
-                        <td>
-                            @if($schedule->mahasiswas_count > 0)
-                                <a href="{{ route('admin.schedules.edit', $schedule) }}#plotting">{{ $schedule->mahasiswas_count }}</a>
-                            @else
-                                <span class="text-muted">-</span>
-                            @endif
-                        </td>
-                        <td class="text-end">
-                            <a href="{{ route('admin.schedules.edit', $schedule) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <form method="POST" action="{{ route('admin.schedules.destroy', $schedule) }}" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus jadwal ini?')">Hapus</button>
-                            </form>
-                        </td>
+                        <th class="px-4 py-3 font-medium">#</th>
+                        <th class="px-4 py-3 font-medium">Grup Sidang</th>
+                        <th class="px-4 py-3 font-medium">Ruangan</th>
+                        <th class="px-4 py-3 font-medium">Tanggal</th>
+                        <th class="px-4 py-3 font-medium">Jam</th>
+                        <th class="px-4 py-3 font-medium">Dosen</th>
+                        <th class="px-4 py-3 font-medium">Jml Mahasiswa</th>
+                        <th class="px-4 py-3 font-medium text-right">Aksi</th>
                     </tr>
-                @empty
-                    <tr><td colspan="8" class="text-center text-muted">Tidak ada jadwal.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                    @forelse($schedules as $schedule)
+                        <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $loop->iteration + ($schedules->currentPage() - 1) * $schedules->perPage() }}</td>
+                            <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">{{ $schedule->nama_grup_sidang }}</td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $schedule->ruangan }}</td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $schedule->tanggal_sidang->format('d M Y') }}</td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $schedule->jam_mulai->format('H:i') }} - {{ $schedule->jam_selesai->format('H:i') }}</td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $schedule->dosens->pluck('name')->join(', ') ?: '-' }}</td>
+                            <td class="px-4 py-3">
+                                @if($schedule->mahasiswas_count > 0)
+                                    <a href="{{ route('admin.schedules.edit', $schedule) }}#plotting" class="font-medium text-brand-500 hover:underline dark:text-brand-400">{{ $schedule->mahasiswas_count }}</a>
+                                @else
+                                    <span class="text-gray-500 dark:text-gray-500">-</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <div class="inline-flex gap-2">
+                                    <a href="{{ route('admin.schedules.edit', $schedule) }}"
+                                       class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-brand-500 px-3 py-1.5 text-sm font-medium text-brand-500 transition hover:bg-brand-50 dark:border-brand-500 dark:text-brand-400 dark:hover:bg-brand-500/10">
+                                        Edit
+                                    </a>
+                                    <form method="POST" action="{{ route('admin.schedules.destroy', $schedule) }}">
+                                        @csrf @method('DELETE')
+                                        <button type="submit"
+                                                class="inline-flex items-center justify-center rounded-lg border border-error-500 px-3 py-1.5 text-sm font-medium text-error-600 transition hover:bg-error-50 dark:border-error-500 dark:text-error-500 dark:hover:bg-error-500/10"
+                                                onclick="return confirm('Hapus jadwal ini?')">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada jadwal.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    {{ $schedules->appends(['search' => $search])->links() }}
-</div>
+    <div class="mt-4">
+        {{ $schedules->appends(['search' => $search])->links() }}
+    </div>
 @endsection
 
 @push('scripts')

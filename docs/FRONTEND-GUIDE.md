@@ -1,81 +1,94 @@
-# FRONTEND-GUIDE.md — Porting Template Metis ke Laravel Blade
+# FRONTEND-GUIDE.md — Porting Template TailAdmin ke Laravel Blade (Tailwind CSS v4)
 
-Template sumber: [Metis — Bootstrap Admin Template](https://github.com/puikinsh/Bootstrap-Admin-Template) (Bootstrap 5.3.8, Alpine.js, Vite, SCSS). Template ini adalah project Vite **standalone** (HTML statis per halaman), bukan Blade — dokumen ini adalah checklist supaya porting-nya konsisten dan tidak "copy-paste asal jalan".
+Template sumber: [TailAdmin](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard) (gratis, open-source, Tailwind CSS). Template ini adalah project Vite **standalone** (HTML/JSX statis per halaman), bukan Blade — dokumen ini adalah checklist supaya porting-nya konsisten dan tidak "copy-paste asal jalan".
+
+> Migrasi Mei 2026: frontend diganti dari Metis (Bootstrap 5.3 + SCSS) → TailAdmin (Tailwind CSS v4). Semua `resources/scss/` sudah dihapus, diganti `resources/css/app.css`. Referensi lama Metis di AGENTS.md/docs sudah usang — ikuti dokumen ini.
 
 ## 1. Setup Awal
-1. Clone/download template Metis ke `_reference/metis-template/` (lihat `ARCHITECTURE.md` §5 — folder ini gitignored, read-only, hanya untuk dibaca saat porting).
-2. Install `laravel-vite-plugin` di project Laravel (biasanya sudah bawaan Laravel 13 starter kit).
-3. Salin isi:
-   - `_reference/metis-template/src-modern/styles/scss/*` → `resources/scss/`
-   - `_reference/metis-template/src-modern/scripts/*` → `resources/js/`
-4. Buat `resources/scss/app.scss` dan `resources/js/app.js` sebagai entry point, daftarkan di `vite.config.js` Laravel:
+1. Clone/download template TailAdmin ke folder referensi (gitignored, read-only):
+   - `_reference/tailadmin-laravel/` — versi Blade Laravel (TailAdmin/tailadmin-laravel)
+   - `_reference/tailadmin-react/` — versi React (TailAdmin/free-react-tailwind-admin-dashboard)
+2. Install dependency Tailwind di project Laravel (sudah terpasang):
+   - `@tailwindcss/vite`, `tailwindcss`, `heroicons` (heroicons dipakai sebagai SVG inline, bukan dependency JS)
+3. Entry point Vite: `resources/css/app.css` (Tailwind) + `resources/js/app.js`:
    ```js
    laravel({
-       input: ['resources/scss/app.scss', 'resources/js/app.js'],
+       input: ['resources/css/app.css', 'resources/js/app.js'],
        refresh: true,
    }),
+   tailwindcss(),
    ```
+   **Tidak ada `tailwind.config.js`** — Tailwind v4 dikonfigurasi via CSS (`@theme`, `@custom-variant`) di `resources/css/app.css`.
 
-## 2. Konversi Halaman `.html` → Blade
-Untuk setiap halaman `src-modern/*.html` yang relevan (lihat daftar prioritas di §4), lakukan:
-1. Identifikasi bagian yang **sama di semua halaman**: `<head>`, sidebar nav, topbar, footer → pindahkan ke:
-   - `resources/views/layouts/app.blade.php` (halaman dashboard, ada sidebar)
-   - `resources/views/layouts/auth.blade.php` (halaman login/register, tanpa sidebar)
-2. Bagian unik per halaman → jadi `@yield('content')` / `@section('content')` di view spesifik, mis. `resources/views/dosen/dashboard.blade.php`.
-3. Ganti semua path aset statis (`<link href="css/...">`, `<script src="js/...">`) dengan Vite directive Laravel: `@vite(['resources/scss/app.scss', 'resources/js/app.js'])`.
-4. Ganti data dummy/hardcoded di HTML asli dengan variabel Blade (`{{ $submission->judul_laporan }}`, `@foreach`, dsb).
-5. Alpine.js component (`x-data="searchComponent()"`, dsb) tetap dipakai apa adanya — hanya perlu dipastikan file JS-nya ter-import di `resources/js/app.js` atau di-load sesuai halaman.
+## 2. Struktur Styling — `resources/css/app.css`
+Satu-satunya file styling. Bagian penting:
+- `@import 'tailwindcss'` — entry Tailwind v4.
+- `@custom-variant dark (&:is(.dark *));` — dark mode berbasis class `.dark` (di toggle lewat `$store.theme` Alpine di `layouts/app.blade.php`).
+- `@theme { ... }` — token warna & shadow. Aksen brand indigo `#6366f1` = `--color-brand-500`. Palet: `brand` (indigo), `gray` (slate), `success`, `warning`, `error`. Token status (`--status-*`) & chart (`--chart-*`) dipakai ApexCharts via `cssVar()`.
+- `@utility` kustom: `menu-item`, `menu-item-active`, `badge-status`, `badge-open`, `badge-pending`, `badge-resolved`, `badge-selesai`, `badge-sidang`, `status-pill`, `stats-card`, `stats-icon`, `main-wrapper`, `main-content`, `app-header`.
+- **Aturan theming:** hanya token di `@theme` yang boleh diubah bebas. Jangan ganti class di view satu-per-satu untuk theming.
 
-## 3. Role-based Sidebar
-Sidebar di template asli hard-coded satu set menu untuk semua halaman. Di SIMSIDANG, sidebar **harus** dinamis berdasarkan `auth()->user()->role`:
+### Badge status
+Gunakan komponen `<x-status-badge :status="$submission->status" />` — jangan hardcode warna di Blade. Mapping:
+- `pending` → `badge-pending` (kuning)
+- `sidang_berjalan` / `revisi` → `badge-open` (kuning)
+- `selesai` → `badge-resolved` (hijau)
+
+## 3. Layout
+- `resources/views/layouts/app.blade.php` — layout halaman ber-auth (sidebar + header + content). Mendefinisikan Alpine stores `theme` & `sidebar` (toggle expand/collapse, mobile open). Termasuk IIFE anti-flash dark mode di `<head>`.
+- `resources/views/layouts/sidebar.blade.php` — sidebar role-based (lihat §4), class `sidebar` dari `@utility`.
+- `resources/views/layouts/header.blade.php` — header sticky: toggle sidebar, theme toggle (`$store.theme.toggle()`), notification bell (`notificationBell()` di `resources/js/app.js`), user dropdown + logout.
+- `resources/views/layouts/backdrop.blade.php` — overlay mobile saat sidebar terbuka (`x-show="$store.sidebar.isMobileOpen"`).
+- `resources/views/layouts/auth.blade.php` — layout halaman login (tanpa sidebar, card centered).
+
+## 4. Role-based Sidebar
+Sidebar dinamis berdasarkan `auth()->user()->role`:
 ```blade
-{{-- resources/views/layouts/partials/sidebar.blade.php --}}
+{{-- resources/views/layouts/sidebar.blade.php --}}
+@if(auth()->user()->isMahasiswa())
+    {{-- menu mahasiswa --}}
+@endif
 @can('viewDosenMenu')
-    {{-- menu khusus dosen --}}
+    {{-- menu dosen --}}
 @endcan
 @can('viewAdminMenu')
-    {{-- menu khusus admin, termasuk Asisten Virtual --}}
+    {{-- menu admin, termasuk Asisten Virtual --}}
 @endcan
 ```
-Definisikan ability ini di `AppServiceProvider::configureGates()` (lihat `AGENTS.md` §2, `PRD-SIMSIDANG-v2.md` FR-01).
+Item aktif pakai `request()->routeIs(...)` + class `menu-item-active`. Ikon = Heroicons SVG inline, class `w-5 h-5`.
 
-## 4. Prioritas Halaman yang Perlu Di-porting
-Ambil dari `PRD-SIMSIDANG-v2.md` §5 (Catatan Implementasi Frontend):
+## 5. Ikon
+- **Bootstrap Icons (`bi bi-*`) sudah dihapus.** Ganti semua ikon lama dengan SVG Heroicons inline (`<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">`).
+- Ikon contoh (path standar Heroicons outline):
+  - Plus: `M12 4v16m8-8H4`
+  - Upload: `M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 9l5 5 5-5M12 14V4`
+  - Back arrow: `M10 19l-7-7m0 0l7-7m-7 7h18`
+  - Download: `M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 9l5 5 5-5M12 14V4`
+  - Check: `M5 13l4 4L19 7`
+  - Eye: `M15 12a3 3 0 11-6 0 3 3 0 016 0z` + `M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z`
 
-| Modul Metis Asli | Dipakai Untuk | Prioritas |
-|---|---|---|
-| Auth (blank layout) | Login/Register (FR-01) | Tahap 1 |
-| Analytics Dashboard | Dashboard dosen (FR-03) | Tahap 1 |
-| File Manager | Upload laporan mahasiswa (FR-02) | Tahap 1 |
-| Data Tables | Daftar submission, daftar mahasiswa | Tahap 1 |
-| Forms | Form input revision notes, form balasan mahasiswa | Tahap 1 |
-| Messages | Timeline/chat revisi (FR-04) & panel Asisten Virtual (FR-05) | Tahap 1 (FR-04) / Tahap 3 (FR-05) |
-| Reports | Export rekap (Tahap 2) | Tahap 2 |
-| Calendar, Kanban/Order Management | **Tidak dipakai** — di luar cakupan SIMSIDANG | — |
+## 6. Pola Komponen yang Sering Dipakai
+- **Kartu:** `rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900`
+- **Kartu dengan header:** tambah `<div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800">` di atas body.
+- **Tabel:** wrapper `overflow-hidden rounded-2xl border ... bg-white` + `overflow-x-auto`; `thead` pakai `bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-800`; `tbody` pakai `divide-y divide-gray-100 dark:divide-gray-800`.
+- **Button primary:** `inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-600`
+- **Button outline:** `inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800`
+- **Input:** `h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800`
+- **Error block (`$errors`):** `rounded-lg border border-error-500/20 bg-error-50 p-3 text-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400`
+- **Flash success/error** di `app.blade.php` pakai `success-*`/`error-*`.
 
-Jangan porting modul yang tidak ada di tabel ini kecuali diminta eksplisit oleh user — ini untuk mencegah scope creep dari fitur template yang tidak relevan.
+## 7. ApexCharts
+- `resources/js/apex.js` meng-import ApexCharts dan set `window.ApexCharts` — sudah di-import di `resources/js/app.js`.
+- Di view dashboard (`admin/dashboard.blade.php`), chart diinisialisasi di `@push('scripts')` dengan `const ApexCharts = window.ApexCharts;` (jangan `import` inline — tidak aman di production).
+- Warna chart ambil dari CSS var theme-aware: `cssVar('--chart-pending')`, `--chart-sidang-berjalan`, `--chart-revisi`, `--chart-selesai`, `--chart-open`, `--chart-resolved`.
 
-## 5. Theming — Aksen Indigo
-Satu-satunya file yang boleh diubah bebas untuk theming: `resources/scss/abstracts/_variables.scss`.
+## 8. Dark Mode
+- Toggle: header → `$store.theme.toggle()` (store didefinisikan di `layouts/app.blade.php`, simpan di `localStorage['theme']`).
+- Semua warna harus punya varian `dark:` di view. Jangan hardcode warna terang saja.
+- ApexCharts: styling dark ditangani `@layer utilities` di `app.css` (`.apexcharts-*`).
 
-```scss
-$primary:   #6366f1;   // Indigo — tombol, active state, sidebar highlight
-$secondary: #64748b;
-$success:   #10b981;   // status "Resolved"
-$warning:   #f59e0b;   // Amber
-$info:      #06b6d4;   // Cyan
-
-$font-family-sans-serif: "Inter", system-ui, sans-serif;
-$font-size-base: 0.9rem;
-$border-radius: 0.75rem;
-$box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-```
-
-Aturan tambahan:
-- Badge status: `open`/`pending` = kuning (`--status-pending-bg`), `resolved`/`selesai` = hijau (`--status-resolved-bg`). Gunakan `<x-status-badge>` komponen, jangan hardcode warna di Blade.
-- Dark mode: gunakan CSS custom properties (`--status-pending-bg`, `--status-resolved-bg`) yang di-override di `_dark.scss`. Jangan hardcode warna badge di view.
-
-## 6. Yang TIDAK Boleh Dilakukan Saat Porting
-- Jangan mengubah struktur SCSS bawaan template (folder `abstracts/`, `components/`, `layout/`, dst.) kecuali `_variables.scss` — kalau butuh style baru, tambah file baru di folder yang sesuai, jangan modifikasi file asli template secara langsung (memudahkan tracking drift dari upstream).
-- Jangan hardcode teks Bahasa Inggris bawaan template (mis. "Dashboard", "Settings") — ganti ke Bahasa Indonesia sesuai `GLOSSARY.md`.
-- Jangan bawa dependency JS yang tidak dipakai (mis. kalau Calendar/Kanban tidak di-porting, jangan ikutkan library JS-nya di `resources/js/`).
+## 9. Yang TIDAK Boleh Dilakukan
+- Jangan copy-paste class dari `.html`/`.jsx` TailAdmin mentah — selalu terjemahkan ke Blade + variabel Laravel (`route()`, `@auth`, `@foreach`).
+- Jangan bawa ikon/dependency JS yang tidak dipakai (Bootstrap, bootstrap-icons, @popperjs/core, sass sudah dihapus — jangan dipasang lagi).
+- Jangan hardcode teks Bahasa Inggris bawaan template — ganti ke Bahasa Indonesia sesuai `GLOSSARY.md`.
+- Jangan membuat `tailwind.config.js` untuk Tailwind v4 — konfigurasi lewat CSS saja.

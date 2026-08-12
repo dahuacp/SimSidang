@@ -32,7 +32,7 @@ Alpine.data('chatAssistant', ({ conversationId, initialMessages = [] }) => ({
 
             const data = await res.json();
             this.messages = data.messages || [];
-        } catch {
+        } catch (e) {
             this.error = e.message || 'Gagal memuat percakapan.';
         }
         this.loading = false;
