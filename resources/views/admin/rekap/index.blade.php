@@ -40,7 +40,7 @@
                         <td>{{ $s->user->name }}<br><small class="text-muted">{{ $s->user->username }}</small></td>
                         <td>{{ $s->schedule->nama_grup_sidang ?? '-' }}</td>
                         <td>{{ $s->judul_laporan ?? '-' }}</td>
-                        <td><span class="badge bg-{{ $s->status === 'selesai' ? 'success' : ($s->status === 'revisi' ? 'warning' : 'secondary') }}">{{ ucfirst($s->status) }}</span></td>
+                        <td><x-status-badge :status="$s->status" /></td>
                         <td>{{ $s->revisionNotes ? \App\Models\RevisionNote::where('submission_id',$s->id)->where('status_poin','open')->count() : '-' }}</td>
                     </tr>
                 @empty

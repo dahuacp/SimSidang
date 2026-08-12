@@ -41,7 +41,7 @@
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->username }}</td>
                         <td>{{ $user->email ?: '-' }}</td>
-                        <td><span class="badge bg-secondary">{{ ucfirst($user->role) }}</span></td>
+                        <td><span class="badge bg-secondary text-capitalize">{{ $user->role }}</span></td>
                         <td class="text-end">
                             <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-outline-primary">Edit</a>
                             <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="d-inline">

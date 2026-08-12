@@ -71,6 +71,8 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/schedules/{schedule}', [ScheduleController::class, 'destroy'])->name('schedules.destroy');
             Route::post('/schedules/import', [ScheduleController::class, 'import'])->name('schedules.import');
             Route::get('/schedules/template', [ScheduleController::class, 'template'])->name('schedules.template');
+            Route::post('/schedules/{schedule}/mahasiswa', [ScheduleController::class, 'storeMahasiswa'])->name('schedules.mahasiswa.store');
+            Route::delete('/schedules/{schedule}/mahasiswa/{user}', [ScheduleController::class, 'destroyMahasiswa'])->name('schedules.mahasiswa.destroy');
 
             Route::get('/submissions', [AdminSubmissionController::class, 'index'])->name('submissions.index');
             Route::get('/submissions/{submission}', [AdminSubmissionController::class, 'show'])->name('submissions.show');

@@ -34,9 +34,9 @@
                     <div class="d-flex justify-content-between">
                         <strong>{{ $note->dosen->name ?? '-' }}</strong>
                         @if($note->status_poin === 'open')
-                            <span class="badge bg-warning text-dark">Open</span>
+                            <span class="status-pill badge-open">Open</span>
                         @else
-                            <span class="badge bg-success">Resolved</span>
+                            <span class="status-pill badge-resolved">Resolved</span>
                         @endif
                     </div>
                     <p class="mb-1 mt-1">{{ $note->catatan_revisi }}</p>

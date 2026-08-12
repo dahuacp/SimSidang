@@ -24,7 +24,7 @@ SIMSIDANG mendigitalisasi proses revisi pasca-sidang (Tugas Akhir/Kerja Praktek)
 - **Database:** MySQL 8.x
 - **Frontend:** Template Metis (Bootstrap 5.3.8 + Alpine.js + SCSS + ApexCharts), diintegrasikan via `laravel-vite-plugin` — BUKAN dipakai sebagai aset statis terpisah
 - **Realtime/polling:** Livewire polling (bukan websocket) untuk notifikasi & chat asisten
-- **Warna aksen:** Kuning (`$primary: #F5B400`), lihat `FRONTEND-GUIDE.md`
+- **Warna aksen:** Indigo (`$primary: #6366f1`), lihat `FRONTEND-GUIDE.md`
 
 ## 3. Command Penting
 ```bash

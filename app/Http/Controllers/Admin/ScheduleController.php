@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreScheduleMahasiswaRequest;
 use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Imports\ScheduleImport;
@@ -20,7 +21,9 @@ class ScheduleController extends Controller
 
         $search = $request->input('search');
 
-        $schedules = Schedule::when($search, fn ($q, $s) => $q->where('nama_grup_sidang', 'like', "%$s%")->orWhere('ruangan', 'like', "%$s%"))
+        $schedules = Schedule::withCount('mahasiswas')
+            ->with('dosens')
+            ->when($search, fn ($q, $s) => $q->where('nama_grup_sidang', 'like', "%$s%")->orWhere('ruangan', 'like', "%$s%"))
             ->orderBy('tanggal_sidang', 'desc')
             ->paginate(15)
             ->withQueryString();
@@ -50,9 +53,15 @@ class ScheduleController extends Controller
     {
         $this->authorize('viewAdminMenu', User::class);
 
+        $schedule->load(['mahasiswas', 'submissions.user']);
+
         return view('admin.schedules.edit', [
             'schedule' => $schedule,
             'dosens' => User::where('role', 'dosen')->orderBy('name')->get(),
+            'availableMahasiswas' => User::where('role', 'mahasiswa')
+                ->whereNotIn('id', $schedule->mahasiswas->pluck('id'))
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -110,5 +119,23 @@ class ScheduleController extends Controller
         $response->headers->set('Content-Disposition', 'attachment; filename="template_jadwal.csv"');
 
         return $response;
+    }
+
+    public function storeMahasiswa(StoreScheduleMahasiswaRequest $request, Schedule $schedule)
+    {
+        $this->authorize('viewAdminMenu', User::class);
+
+        $schedule->mahasiswas()->attach($request->input('user_id'));
+
+        return back()->with('success', 'Mahasiswa berhasil di-plot ke jadwal.');
+    }
+
+    public function destroyMahasiswa(Schedule $schedule, User $user)
+    {
+        $this->authorize('viewAdminMenu', User::class);
+
+        $schedule->mahasiswas()->detach($user->id);
+
+        return back()->with('success', 'Mahasiswa berhasil dihapus dari jadwal.');
     }
 }

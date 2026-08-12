@@ -4,9 +4,18 @@
 
 @section('content')
     <div class="mb-4">
-        <h1 class="h4 mb-1">Jadwal Sidang Hari Ini</h1>
+        <h1 class="h4 mb-1">Jadwal Sidang</h1>
         <p class="text-muted small mb-0">{{ now()->translatedFormat('l, d F Y') }}</p>
     </div>
+
+    <ul class="nav nav-pills mb-3">
+        <li class="nav-item">
+            <a class="nav-link {{ $filter === 'semua' ? 'active' : '' }}" href="{{ route('dosen.submissions.index') }}">Semua Jadwal</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ $filter === 'hari_ini' ? 'active' : '' }}" href="{{ route('dosen.submissions.index', ['filter' => 'hari_ini']) }}">Hari Ini</a>
+        </li>
+    </ul>
 
     @if($schedules->isEmpty())
         <div class="card">
@@ -23,6 +32,7 @@
                         <div>
                             <span class="fw-semibold">{{ $schedule->nama_grup_sidang }}</span>
                             <span class="text-muted ms-2"><i class="bi bi-geo-alt"></i> {{ $schedule->ruangan }}</span>
+                            <span class="text-muted ms-2"><i class="bi bi-calendar3"></i> {{ \Carbon\Carbon::parse($schedule->tanggal_sidang)->format('d M Y') }}</span>
                         </div>
                         <span class="small text-muted">{{ \Carbon\Carbon::parse($schedule->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->jam_selesai)->format('H:i') }}</span>
                     </div>
@@ -38,22 +48,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($schedule->submissions as $submission)
+                                        @forelse($schedule->submissions as $submission)
                                     <tr>
                                         <td class="fw-semibold">{{ $submission->user?->name ?? '-' }}</td>
                                         <td>{{ $submission->user?->username ?? '-' }}</td>
                                         <td>{{ $submission->judul_laporan ?? '-' }}</td>
                                         <td>
-                                            @php
-                                                $label = match($submission->status) {
-                                                    'pending' => ['Pending', 'badge-pending'],
-                                                    'sidang_berjalan' => ['Sidang Berjalan', 'badge-open'],
-                                                    'revisi' => ['Revisi', 'badge-open'],
-                                                    'selesai' => ['Selesai', 'badge-resolved'],
-                                                    default => [$submission->status, 'bg-secondary'],
-                                                };
-                                            @endphp
-                                            <span class="status-pill {{ $label[1] }}">{{ $label[0] }}</span>
+                                            <x-status-badge :status="$submission->status" />
                                         </td>
                                         <td class="text-end">
                                             <a href="{{ route('dosen.submissions.show', $submission) }}" class="btn btn-sm btn-outline-primary">
@@ -64,10 +65,26 @@
                                 @empty
                                     <tr>
                                         <td colspan="5" class="text-center text-muted py-4">
-                                            Belum ada mahasiswa terdaftar di grup ini.
+                                            Belum ada submission di grup ini.
                                         </td>
                                     </tr>
                                 @endforelse
+
+                                @php
+                                    $submittedIds = $schedule->submissions->pluck('user_id')->toArray();
+                                @endphp
+                                @foreach($schedule->mahasiswas as $mhs)
+                                    @if(in_array($mhs->id, $submittedIds))
+                                        @continue
+                                    @endif
+                                    <tr>
+                                        <td class="fw-semibold">{{ $mhs->name }}</td>
+                                        <td>{{ $mhs->username }}</td>
+                                        <td class="text-muted">-</td>
+                                        <td><span class="status-pill badge-pending">Belum upload</span></td>
+                                        <td class="text-end"><span class="text-muted">-</span></td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>

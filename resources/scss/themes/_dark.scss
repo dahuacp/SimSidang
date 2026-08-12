@@ -138,19 +138,54 @@
       background-color: rgba($primary, 0.2) !important;
       color: lighten($primary, 15%) !important;
     }
+    &.bg-warning {
+      background-color: rgba($warning, 0.2) !important;
+      color: lighten($warning, 20%) !important;
+    }
+    &.bg-success {
+      background-color: rgba($success, 0.2) !important;
+      color: lighten($success, 20%) !important;
+    }
+    &.bg-secondary {
+      background-color: rgba($gray-500, 0.25) !important;
+      color: $gray-300 !important;
+    }
+    &.bg-light {
+      background-color: rgba($gray-500, 0.15) !important;
+      color: $gray-300 !important;
+      border-color: $gray-700 !important;
+    }
   }
 
   // Badges custom status
   .badge-open,
   .badge-pending {
-    background-color: rgba($warning, 0.2);
-    color: lighten($warning, 15%);
+    --status-pending-bg: #{rgba($warning, 0.2)};
+    --status-pending-fg: #{lighten($warning, 20%)};
+    background-color: var(--status-pending-bg);
+    color: var(--status-pending-fg);
   }
 
   .badge-resolved,
   .badge-selesai {
-    background-color: rgba($success, 0.2);
-    color: lighten($success, 20%);
+    --status-resolved-bg: #{rgba($success, 0.2)};
+    --status-resolved-fg: #{lighten($success, 20%)};
+    background-color: var(--status-resolved-bg);
+    color: var(--status-resolved-fg);
+  }
+
+  // Theme-aware status pill overrides
+  .status-pill {
+    &.badge-open,
+    &.badge-pending {
+      background-color: rgba($warning, 0.2);
+      color: lighten($warning, 20%);
+    }
+    &.badge-resolved,
+    &.badge-selesai {
+      background-color: rgba($success, 0.2);
+      color: lighten($success, 20%);
+    }
   }
 
   // Links
@@ -237,5 +272,25 @@
   // Page title
   h1, h2, h3, h4, h5, h6 {
     color: #{$gray-50};
+  }
+
+  // Theme-agnostic class overrides
+  thead.table-light,
+  thead.table-light th {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #{$gray-300};
+    border-bottom-color: #{$gray-700};
+  }
+
+  .table-light {
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+
+  .bg-light {
+    background-color: #{$gray-800} !important;
+  }
+
+  .btn-link {
+    color: lighten($primary, 15%);
   }
 }

@@ -6,6 +6,4 @@ namespace App\Services\VirtualAssistant;
 
 use RuntimeException;
 
-class ReadOnlyViolationException extends RuntimeException
-{
-}
+class ReadOnlyViolationException extends RuntimeException {}

@@ -41,6 +41,7 @@
                     <th>Tanggal</th>
                     <th>Jam</th>
                     <th>Dosen</th>
+                    <th>Jml Mahasiswa</th>
                     <th class="text-end">Aksi</th>
                 </tr>
             </thead>
@@ -53,6 +54,13 @@
                         <td>{{ $schedule->tanggal_sidang->format('d M Y') }}</td>
                         <td>{{ $schedule->jam_mulai->format('H:i') }} - {{ $schedule->jam_selesai->format('H:i') }}</td>
                         <td>{{ $schedule->dosens->pluck('name')->join(', ') ?: '-' }}</td>
+                        <td>
+                            @if($schedule->mahasiswas_count > 0)
+                                <a href="{{ route('admin.schedules.edit', $schedule) }}#plotting">{{ $schedule->mahasiswas_count }}</a>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
                         <td class="text-end">
                             <a href="{{ route('admin.schedules.edit', $schedule) }}" class="btn btn-sm btn-outline-primary">Edit</a>
                             <form method="POST" action="{{ route('admin.schedules.destroy', $schedule) }}" class="d-inline">
@@ -62,7 +70,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="text-center text-muted">Tidak ada jadwal.</td></tr>
+                    <tr><td colspan="8" class="text-center text-muted">Tidak ada jadwal.</td></tr>
                 @endforelse
             </tbody>
         </table>

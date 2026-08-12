@@ -15,13 +15,16 @@ class SubmissionController extends Controller
 
         $scheduleIds = $user->schedulesAsDosen()->pluck('schedules.id');
 
-        $schedules = Schedule::with(['submissions.user', 'dosens'])
+        $filter = $request->input('filter', 'semua');
+
+        $schedules = Schedule::with(['submissions.user', 'mahasiswas', 'dosens'])
             ->whereIn('id', $scheduleIds)
-            ->where('tanggal_sidang', now()->toDateString())
+            ->when($filter === 'hari_ini', fn ($q) => $q->whereDate('tanggal_sidang', now()->toDateString()))
+            ->orderBy('tanggal_sidang')
             ->orderBy('jam_mulai')
             ->get();
 
-        return view('dosen.submissions.index', compact('schedules'));
+        return view('dosen.submissions.index', compact('schedules', 'filter'));
     }
 
     public function show(Request $request, Submission $submission)

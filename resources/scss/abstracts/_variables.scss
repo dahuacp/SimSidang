@@ -1,17 +1,17 @@
 // ==========================================================================
 // SIMSIDANG — Custom Variables (Bootstrap 5 Overrides)
-// Tema: aksen kuning. Hanya file ini yang boleh diubah bebas untuk theming.
+// Tema: Metis default (indigo). Hanya file ini yang boleh diubah bebas untuk theming.
 // ==========================================================================
 
-// Brand Colors
-$primary:       #F5B400;   // Kuning utama — tombol, active state, sidebar highlight
+// Brand Colors — Metis default palette
+$primary:       #6366f1;   // Indigo — tombol, active state, sidebar highlight
 $secondary:     #64748b;   // Slate
 $success:       #10b981;   // Emerald — status "Resolved"
-$info:          #0ea5e9;
-$warning:       #F5B400;
+$info:          #06b6d4;   // Cyan
+$warning:       #f59e0b;   // Amber
 $danger:        #ef4444;
 $light:         #f8fafc;
-$dark:          #1e2327;
+$dark:          #1e293b;   // Slate 800
 
 // Grayscale
 $gray-50:  #f8fafc;
@@ -36,8 +36,26 @@ $border-radius-sm: 0.5rem;
 $border-radius-lg: 1rem;
 $box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 
-// Text over $primary (yellow) uses dark color, not white, for contrast
-$primary-text-emphasis: #1e2327;
+// Text over $primary (indigo) — white for contrast on dark background
+$primary-text-emphasis: #ffffff;
+
+// Status colors (used by badge classes and status pills)
+:root {
+  --status-pending-bg: #fef3c7;
+  --status-pending-fg: #92400e;
+  --status-open-bg: #fef3c7;
+  --status-open-fg: #92400e;
+  --status-resolved-bg: #d1fae5;
+  --status-resolved-fg: #065f46;
+  --status-selesai-bg: #d1fae5;
+  --status-selesai-fg: #065f46;
+  --chart-pending: #{$warning};
+  --chart-sidang-berjalan: #{$info};
+  --chart-revisi: #0d6efd;
+  --chart-selesai: #{$success};
+  --chart-open: #{$danger};
+  --chart-resolved: #{$success};
+}
 
 // Dark theme link color overrides
 [data-bs-theme="dark"] {

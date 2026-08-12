@@ -2,7 +2,6 @@
 
 use App\Models\Schedule;
 use App\Models\Submission;
-use App\Models\User;
 use App\Services\VirtualAssistant\ReadOnlyGuard;
 use App\Services\VirtualAssistant\ReadOnlyViolationException;
 use Illuminate\Support\Facades\DB;

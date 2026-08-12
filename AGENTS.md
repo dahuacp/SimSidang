@@ -29,7 +29,7 @@ npm run lint
 - **All form input** → Form Request (validation centralized). File uploads: submission PDF ≤10MB; attachments (.pdf/.docx/.jpeg/.png) ≤5MB each. Error messages in Bahasa Indonesia.
 - **No email-based auth** — Fortify must be configured for `username` login. Default Laravel scaffolding uses email — override it.
 - **Porting Metis** — clone to `_reference/metis-template/` (gitignored, read-only). Don't copy-paste `.html` directly. Follow `docs/FRONTEND-GUIDE.md` checklist: extract common layout → Blade components, wire Vite directives, replace dummy data with Blade vars.
-- **Theme** — yellow accent `$primary: #F5B400` in `resources/scss/abstracts/_variables.scss`. Only file you may freely change for theming. Text over yellow uses dark `#1e2327` (not white) for contrast.
+- **Theme** — indigo accent `$primary: #6366f1` in `resources/scss/abstracts/_variables.scss`. Only file you may freely change for theming.
 - **Naming** — `GLOSSARY.md` is the single source of truth. DB columns = Bahasa Indonesia snake_case (`catatan_revisi`, `status_poin`). PHP classes/routes = English (`RevisionNote`). Add new domain terms to glossary before coding.
 - **Roadmap order** — `docs/ROADMAP.md` Tahap 1 first (core submission→revisi loop). Don't skip to Tahap 2/3 features unless asked.
 - **Folder layout** — controllers grouped by role (`app/Http/Controllers/Mahasiswa/`, `Dosen/`, `Admin/`). `resources/scss/` and `resources/js/components/` are ported from Metis — change cautiously and log in MEMORY.md.

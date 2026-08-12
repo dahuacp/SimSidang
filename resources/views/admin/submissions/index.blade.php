@@ -27,7 +27,7 @@
                         <td>{{ $s->user->name }}</td>
                         <td>{{ $s->schedule->nama_grup_sidang ?? '-' }}</td>
                         <td>{{ $s->judul_laporan ?? '-' }}</td>
-                        <td><span class="badge bg-{{ $s->status === 'selesai' ? 'success' : ($s->status === 'revisi' ? 'warning' : 'secondary') }}">{{ ucfirst($s->status) }}</span></td>
+                        <td><x-status-badge :status="$s->status" /></td>
                         <td><small class="text-muted">{{ $s->created_at->format('d M Y') }}</small></td>
                     </tr>
                 @empty

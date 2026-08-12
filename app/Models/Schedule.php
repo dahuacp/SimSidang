@@ -34,4 +34,9 @@ class Schedule extends Model
     {
         return $this->belongsToMany(User::class, 'schedule_dosen', 'schedule_id', 'user_id');
     }
+
+    public function mahasiswas(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'schedule_mahasiswa', 'schedule_id', 'user_id');
+    }
 }

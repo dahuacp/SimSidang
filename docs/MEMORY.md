@@ -9,19 +9,19 @@
 *(Bagian ini di-overwrite/update tiap sesi — bukan log historis, tapi snapshot kondisi terkini project.)*
 
 - **Tahap MVP aktif:** Tahap 1 (MVP inti) SELESAI + Tahap 2 (Peningkatan Operasional) SELESAI + Tahap 3 FR-05 SELESAI + Dark Mode + Dashboard Analitik SELESAI. ROADMAP.md: semua item Tahap 1, 2 & FR-05 Tahap 3 + Dark Mode + Dashboard Analitik dicentang. Sisa: Passkey auth.
-- **Fitur terakhir dikerjakan:** Fix kontras chat Asisten Virtual — bubble balasan pakai `bg-body-tertiary`, kotak tool `bg-body-secondary`, footer `bg-body`, label role `text-body-secondary` (bukan `text-primary` kuning). Mengganti kelas hardcoded `bg-light`/`bg-white`/`text-primary` yang tidak ikut theme dengan Bootstrap 5.3 theme-aware utilities.
-- **Sebelumnya:** Tahap 3 — Dark mode toggle (port Metis SCSS themes + Alpine.js themeSwitch + localStorage persistence) + Dashboard Analitik (4 chart ApexCharts: Status Submission donut, Submission per Jadwal bar, Revisi Open/Resolved donut, Tren Status per Hari area). Subagent-driven development dengan 6 task, semua approved.
+- **Fitur terakhir dikerjakan:** Theme color diubah dari kuning ke indigo (`$primary: #6366f1`) sesuai default Metis template. `$warning: #f59e0b` (amber), `$info: #06b6d4` (cyan), `$dark: #1e293b` (slate 800). `$primary-text-emphasis` diubah ke `#ffffff`. `btn-primary` text color diubah ke white. Dokumentasi (AGENTS.md, FRONTEND-GUIDE.md) diupdate.
+- **Sebelumnya:** Plotting Mahasiswa ke grup sidang (admin) + view dosen semua jadwal. Pivot table `schedule_mahasiswa`, relasi `Schedule::mahasiswas()`, section "Plotting Mahasiswa" di edit jadwal, kolom "Jml Mahasiswa" di index. Dosen kini lihat SEMUA jadwal (bukan hanya hari ini) + filter tab Semua/Hari Ini + mahasiswa ter-plot tanpa submission ditampilkan berstatus "Belum upload". Fix bug laten: filter tanggal pakai `whereDate()` (cast `date` menyimpan `2026-08-10 00:00:00` → `where(..., 'Y-m-d')` gagal di SQLite).
 - **Blocker/isu terbuka:** (1) Warning build Vite: font `bootstrap-icons.woff/woff2` tidak ter-resolve. (2) Git initialized dengan initial commit + feature commits. (3) `laravel boost:mcp` belum dikonfigurasi. (4) Vite/Sass deprecation warnings (Bootstrap 5 legacy, Dart Sass 3.0) — non-blocking.
 - **Environment:** Laravel 13.8.0, PHP 8.4.23, MariaDB 11.8.6 (MySQL-compatible), DB `sidangapp2`/user `sidang`/pass `sidang` @ 127.0.0.1:3306. `APP_NAME=SISIDANG`, `APP_LOCALE=id`, `FILESYSTEM_DISK=local`. Packages: `maatwebsite/excel` ^3.1, `barryvdh/laravel-dompdf` ^3.1, `apexcharts` ^6.7.0 (npm).
 - **Seed:** admin `telo`/`kaspe`, 4 dosen, 6 mahasiswa, 4 schedules, 6 submissions, 2 revision notes. `migrate:fresh` sukses; semua migration termasuk Tahap 3 (`assistant_conversations`, `assistant_messages`).
-- **Migration terakhir:** semua 10 migration (6 Tahap1 + 2 Tahap2 + 2 Tahap3) terakhir dijalankan via `migrate:fresh --seed` pada DB nyata.
-- **Test:** 57 test Pest (SQLite :memory: + RefreshDatabase), **semua lulus** (148 assertion). `pint`, `npm run lint`, `npm run build` semua bersih/sukses.
+- **Migration terakhir:** semua 11 migration (6 Tahap1 + 2 Tahap2 + 2 Tahap3 + `schedule_mahasiswa`) terakhir dijalankan via `php artisan migrate` pada DB nyata.
+- **Test:** 105 test Pest (SQLite :memory: + RefreshDatabase), **semua lulus** (254 assertion). `pint`, `npm run lint` bersih/sukses.
 
 ---
 
 ## Keputusan Teknis Penting (Decision Log)
 
-- **2026-08-09** — Frontend memakai template Metis (Bootstrap Admin Template, puikinsh/Colorlib), diintegrasikan via `laravel-vite-plugin`, bukan dipakai sebagai aset statis terpisah. Aksen warna kuning (`$primary: #F5B400`).
+- **2026-08-09** — Frontend memakai template Metis (Bootstrap Admin Template, puikinsh/Colorlib), diintegrasikan via `laravel-vite-plugin`, bukan dipakai sebagai aset statis terpisah. Aksen warna indigo (`$primary: #6366f1`), sesuai default Metis template.
 - **2026-08-09** — Auth memakai Laravel Fortify dengan login `username` (NIM/NIDN), bukan email. RBAC via Laravel Gate.
 - **2026-08-09** — Fitur "Analisa Dokumen dengan AI" **dihapus** dari scope, diganti "Asisten Virtual Admin" (FR-05) — chatbot read-only berbasis tool-calling pada data agregat. Asisten tidak pernah dapat akses tulis ke database.
 - **2026-08-09** — Prioritas MVP dibagi 3 tahap (ROADMAP.md): Tahap 1 = alur inti; Tahap 2 = operasional; Tahap 3 = fitur lanjutan.
@@ -38,6 +38,26 @@
 
 ## Log Sesi
 *(Append-only. Entri terbaru di paling atas. Format: tanggal — ringkasan — file yang diubah — catatan untuk sesi berikutnya.)*
+
+### 2026-08-11 — Theme Color: Kuning → Indigo (Metis Default)
+- **Ringkasan:** Aksen warna diubah dari kuning (`$primary: #F5B400`) ke indigo (`$primary: #6366f1`) sesuai default Metis template. `$warning` diubah ke amber `#f59e0b`, `$info` ke cyan `#06b6d4`, `$dark` ke slate 800 `#1e293b`. `$primary-text-emphasis` diubah dari dark ke white. `btn-primary` text color diubah ke white. Dokumentasi diupdate.
+- **File diubah:** `resources/scss/abstracts/_variables.scss`, `resources/scss/app.scss`, `AGENTS.md`, `docs/AGENTS.md`, `docs/FRONTEND-GUIDE.md`, `docs/MEMORY.md`.
+- **Keputusan:** Ikuti default palette Metis template. Indigo `#6366f1` sebagai primary. Text on indigo pakai white (`$primary-text-emphasis: #ffffff`). Dark mode overrides otomatis update karena pakai `rgba($primary, ...)`.
+
+### 2026-08-11 — UI/UX Unifikasi Warna Status Badges & Dark Mode Fix
+- **Ringkasan:** Unifikasi warna status badges di seluruh view agar konsisten pakai CSS custom properties (`--status-pending-bg/fg`, `--status-resolved-bg/fg`). Chart ApexCharts pakai CSS vars supaya theme-aware. Dark mode badge contrast diperbaiki. `<x-status-badge>` Blade component dibuat untuk single source of truth.
+- **File baru:** `resources/views/components/status-badge.blade.php`.
+- **File diubah:** `resources/scss/abstracts/_variables.scss` (+CSS vars `:root`), `resources/scss/app.scss` (badge pakai CSS vars), `resources/scss/themes/_dark.scss` (+badge/table/thead overrides), `resources/views/admin/submissions/index.blade.php`, `resources/views/admin/submissions/show.blade.php`, `resources/views/admin/rekap/index.blade.php`, `resources/views/admin/schedules/edit.blade.php`, `resources/views/dosen/submissions/index.blade.php`, `resources/views/dosen/submissions/show.blade.php`, `resources/views/mahasiswa/submissions/show.blade.php`, `resources/views/components/status-history.blade.php`, `resources/views/admin/users/index.blade.php`, `resources/views/auth/login.blade.php`, `resources/views/admin/dashboard.blade.php`.
+- **Keputusan:** Badge status pakai CSS vars (`var(--status-pending-bg)`) supaya bisa di-override di dark mode via `[data-bs-theme="dark"]`. Inline hex di login page diganti `bg-primary` class. Chart colors dibaca dari CSS vars via `getComputedStyle()`.
+- **Catatan sesi berikutnya:** Semua 105 test lulus (254 assertions), pint lint bersih, build Vite sukses. Dark mode badge sekarang pakai `rgba($warning, 0.2)` background dengan `lighten($warning, 20%)` text. `thead.table-light` di-override di dark mode pakai transparan white.
+
+### 2026-08-10 — Plotting Mahasiswa ke grup sidang + view dosen semua jadwal
+- **Ringkasan:** Admin kini bisa plot mahasiswa ke grup sidang (pre-assign, bukan via submission). Pivot table `schedule_mahasiswa` (unique `schedule_id`+`user_id`, cascade delete). Relasi `Schedule::mahasiswas()` (BelongsToMany). FormRequest `StoreScheduleMahasiswaRequest` (validasi role=mahasiswa + unique per jadwal, pesan Bahasa Indonesia). Routes `POST/DELETE /admin/schedules/{schedule}/mahasiswa[/{user}]`. UI: section "Plotting Mahasiswa" di edit jadwal (daftar nama/NIM/judul/status + dropdown tambah + hapus), kolom "Jml Mahasiswa" di index (eager load `withCount`).
+- **Dosen side:** `Dosen/SubmissionController@index` hapus filter `where('tanggal_sidang', today())` → tampilkan SEMUA jadwal dosen (sort tanggal ASC). Tab filter Semua/Hari Ini. Mahasiswa ter-plot tanpa submission ditampilkan berstatus "Belum upload" (dari pivot, di-merge dengan submissions tanpa duplikat via `user_id`).
+- **Bug laten diperbaiki:** filter tanggal pakai `where('tanggal_sidang', 'Y-m-d')` gagal di SQLite karena cast `date` menyimpan `2026-08-10 00:00:00` — diganti `whereDate()`. Bug ini ada di kode lama (view dosen hanya tampilkan jadwal hari ini), baru ketahuan saat test baru dibuat.
+- **File baru:** migration `create_schedule_mahasiswa_table`, `app/Http/Requests/StoreScheduleMahasiswaRequest.php`, `tests/Feature/DosenSubmissionTest.php`.
+- **File diubah:** `app/Models/Schedule.php`, `app/Http/Controllers/Admin/ScheduleController.php`, `app/Http/Controllers/Dosen/SubmissionController.php`, `routes/web.php`, `resources/views/admin/schedules/edit.blade.php`, `resources/views/admin/schedules/index.blade.php`, `resources/views/dosen/submissions/index.blade.php`, `tests/Feature/AdminScheduleTest.php`.
+- **Catatan:** Route cache sempat bikin route baru tak terlihat — `php artisan route:clear` diperlukan (ada `bootstrap/cache/routes-v7.php`). 105 test lulus, pint + lint bersih. Belum di-commit. Data dev DB dibersihkan dari junk tinker.
 
 ### 2026-08-09 — Asisten bebas query semua data (read-only) — queryData + runSqlQuery
 - **Ringkasan:** Asisten Virtual kini bisa query SEMUA tabel domain (raw rows) via 2 tool baru: `queryData` (structured JSON → Query Builder, bind params) & `runSqlQuery` (raw SQL SELECT, divalidasi `ReadOnlyGuard`). 4 tool agregat lama dipertahankan. Kolom sensitif & tabel non-domain di-blocklist. System prompt kini memuat deskripsi skema (`SchemaCatalog::schemaDescription()`).

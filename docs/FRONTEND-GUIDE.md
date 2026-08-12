@@ -55,15 +55,15 @@ Ambil dari `PRD-SIMSIDANG-v2.md` §5 (Catatan Implementasi Frontend):
 
 Jangan porting modul yang tidak ada di tabel ini kecuali diminta eksplisit oleh user — ini untuk mencegah scope creep dari fitur template yang tidak relevan.
 
-## 5. Theming — Aksen Kuning
+## 5. Theming — Aksen Indigo
 Satu-satunya file yang boleh diubah bebas untuk theming: `resources/scss/abstracts/_variables.scss`.
 
 ```scss
-$primary:   #F5B400;   // Kuning utama — tombol, active state, sidebar highlight
+$primary:   #6366f1;   // Indigo — tombol, active state, sidebar highlight
 $secondary: #64748b;
 $success:   #10b981;   // status "Resolved"
-$warning:   #F5B400;
-$info:      #0ea5e9;
+$warning:   #f59e0b;   // Amber
+$info:      #06b6d4;   // Cyan
 
 $font-family-sans-serif: "Inter", system-ui, sans-serif;
 $font-size-base: 0.9rem;
@@ -72,9 +72,8 @@ $box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 ```
 
 Aturan tambahan:
-- Teks di atas elemen `$primary` (tombol/badge kuning) pakai warna gelap `#1e2327`, **bukan** putih — demi kontras/aksesibilitas.
-- Badge status: `open`/`pending` = kuning, `resolved`/`selesai` = hijau (`$success`).
-- Dark mode template tetap opsional; jika diaktifkan, gunakan `$primary-dark: #FFC93C` supaya tetap kontras di background gelap.
+- Badge status: `open`/`pending` = kuning (`--status-pending-bg`), `resolved`/`selesai` = hijau (`--status-resolved-bg`). Gunakan `<x-status-badge>` komponen, jangan hardcode warna di Blade.
+- Dark mode: gunakan CSS custom properties (`--status-pending-bg`, `--status-resolved-bg`) yang di-override di `_dark.scss`. Jangan hardcode warna badge di view.
 
 ## 6. Yang TIDAK Boleh Dilakukan Saat Porting
 - Jangan mengubah struktur SCSS bawaan template (folder `abstracts/`, `components/`, `layout/`, dst.) kecuali `_variables.scss` — kalau butuh style baru, tambah file baru di folder yang sesuai, jangan modifikasi file asli template secara langsung (memudahkan tracking drift dari upstream).

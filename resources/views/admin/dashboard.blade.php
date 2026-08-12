@@ -136,6 +136,10 @@
 <script type="module">
 import ApexCharts from '../apex.js';
 
+function cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
 // Chart 1: Status Submission (Donut)
 const statusData = @json($submissionStatus);
 const statusLabels = Object.keys(statusData);
@@ -144,7 +148,7 @@ new ApexCharts(document.querySelector('#chart-status-submission'), {
     chart: { type: 'donut', height: 300 },
     labels: statusLabels,
     series: statusValues,
-    colors: ['#ffc107', '#17a2b8', '#0d6efd', '#28a745', '#dc3545', '#6f42c1'],
+    colors: [cssVar('--chart-pending'), cssVar('--chart-sidang-berjalan'), cssVar('--chart-revisi'), cssVar('--chart-selesai'), cssVar('--chart-open'), '#6f42c1'],
     legend: { position: 'bottom' },
     dataLabels: { enabled: true, formatter: (val) => val + '%' }
 }).render();
@@ -157,7 +161,7 @@ new ApexCharts(document.querySelector('#chart-schedule-submissions'), {
     chart: { type: 'bar', height: 300 },
     series: [{ name: 'Submission', data: scheduleCounts }],
     xaxis: { categories: scheduleNames },
-    colors: ['#F5B400'],
+    colors: [cssVar('--chart-pending')],
     legend: { show: false },
     plotOptions: {
         bar: { borderRadius: 4, distributed: true }
@@ -170,7 +174,7 @@ new ApexCharts(document.querySelector('#chart-revision-stats'), {
     chart: { type: 'donut', height: 300 },
     labels: ['Open', 'Resolved'],
     series: [revisionData['open'] ?? 0, revisionData['resolved'] ?? 0],
-    colors: ['#dc3545', '#28a745'],
+    colors: [cssVar('--chart-open'), cssVar('--chart-resolved')],
     legend: { position: 'bottom' }
 }).render();
 
@@ -178,10 +182,10 @@ new ApexCharts(document.querySelector('#chart-revision-stats'), {
 const trendData = @json($statusTrend);
 const dates = Object.keys(trendData);
 const statusMap = {
-    pending: { label: 'Pending', color: '#ffc107' },
-    sidang_berjalan: { label: 'Sidang Berjalan', color: '#17a2b8' },
-    revisi: { label: 'Revisi', color: '#0d6efd' },
-    selesai: { label: 'Selesai', color: '#28a745' }
+    pending: { label: 'Pending', color: cssVar('--chart-pending') },
+    sidang_berjalan: { label: 'Sidang Berjalan', color: cssVar('--chart-sidang-berjalan') },
+    revisi: { label: 'Revisi', color: cssVar('--chart-revisi') },
+    selesai: { label: 'Selesai', color: cssVar('--chart-selesai') }
 };
 const series = Object.entries(statusMap).map(([key, cfg]) => ({
     name: cfg.label,

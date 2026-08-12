@@ -6,8 +6,8 @@
     <div class="card shadow-sm mx-auto" style="max-width: 420px;">
         <div class="card-body p-4 p-md-5">
             <div class="text-center mb-4">
-                <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px; border-radius: 14px; background: #F5B400;">
-                    <span class="fs-4 fw-bold" style="color: #1e2327;">S</span>
+                <div class="d-inline-flex align-items-center justify-content-center mb-3 bg-primary" style="width: 56px; height: 56px; border-radius: 14px;">
+                    <span class="fs-4 fw-bold text-primary-strong">S</span>
                 </div>
                 <h1 class="h4 fw-bold mb-1">Masuk SISIDANG</h1>
                 <p class="text-muted small mb-0">Sistem Manajemen Sidang Akademik</p>
