@@ -35,7 +35,7 @@ class ScheduleController extends Controller
     {
         $this->authorize('viewAdminMenu', User::class);
 
-        return view('admin.schedules.create', ['dosens' => User::where('role', 'dosen')->orderBy('name')->get()]);
+        return view('admin.schedules.create');
     }
 
     public function store(StoreScheduleRequest $request)
@@ -57,11 +57,6 @@ class ScheduleController extends Controller
 
         return view('admin.schedules.edit', [
             'schedule' => $schedule,
-            'dosens' => User::where('role', 'dosen')->orderBy('name')->get(),
-            'availableMahasiswas' => User::where('role', 'mahasiswa')
-                ->whereNotIn('id', $schedule->mahasiswas->pluck('id'))
-                ->orderBy('name')
-                ->get(),
         ]);
     }
 
@@ -137,5 +132,47 @@ class ScheduleController extends Controller
         $schedule->mahasiswas()->detach($user->id);
 
         return back()->with('success', 'Mahasiswa berhasil dihapus dari jadwal.');
+    }
+
+    public function searchUsers(Request $request, ?Schedule $schedule = null)
+    {
+        $this->authorize('viewAdminMenu', User::class);
+
+        $type = $request->query('type', 'dosen');
+        $term = $request->query('term', '');
+
+        if (! in_array($type, ['dosen', 'mahasiswa'])) {
+            return response()->json(['error' => 'Tipe pengguna tidak valid.'], 422);
+        }
+
+        $query = User::where('role', $type)
+            ->when($term, fn ($q, $t) => $q->where(function ($sub) use ($t) {
+                $sub->where('name', 'like', "%{$t}%")
+                    ->orWhere('username', 'like', "%{$t}%");
+            }))
+            ->orderBy('name')
+            ->limit(21);
+
+        $users = $query->get();
+
+        if ($schedule) {
+            $excludeIds = $type === 'dosen'
+                ? $schedule->dosens->pluck('id')
+                : $schedule->mahasiswas->pluck('id');
+            $users = $users->filter(fn ($u) => ! $excludeIds->contains($u->id));
+        }
+
+        $hasMore = $users->count() > 20;
+        $users = $users->slice(0, 20);
+
+        return response()->json([
+            'data' => $users->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'username' => $u->username,
+                'label' => "{$u->name} ({$u->username})",
+            ]),
+            'has_more' => $hasMore,
+        ]);
     }
 }

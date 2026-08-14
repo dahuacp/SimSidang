@@ -2,6 +2,7 @@ import './bootstrap';
 import Alpine from 'alpinejs';
 import './apex';
 import './components/chat-assistant';
+import './components/searchable-select';
 
 window.Alpine = Alpine;
 

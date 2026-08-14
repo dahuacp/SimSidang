@@ -69,3 +69,13 @@ test('filter hari ini hanya menampilkan jadwal hari ini', function () {
         ->assertSee($hariIni->nama_grup_sidang)
         ->assertDontSee($besok->nama_grup_sidang);
 });
+
+test('halaman jadwal dosen menampilkan input pencarian mahasiswa', function () {
+    $dosen = User::factory()->dosen()->create();
+    $schedule = Schedule::factory()->create();
+    $schedule->dosens()->attach($dosen->id);
+
+    $this->actingAs($dosen)->get(route('dosen.submissions.index'))
+        ->assertOk()
+        ->assertSee('Cari Mahasiswa');
+});

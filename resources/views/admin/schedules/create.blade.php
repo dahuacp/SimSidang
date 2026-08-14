@@ -44,12 +44,56 @@
 
         <div class="mt-4">
             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Dosen (assign ke jadwal ini)</label>
-            <select name="dosens[]" multiple class="min-h-30 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-                @foreach($dosens as $dosen)
-                    <option value="{{ $dosen->id }}" {{ in_array($dosen->id, old('dosens', [])) ? 'selected' : '' }}>{{ $dosen->name }} ({{ $dosen->username }})</option>
-                @endforeach
-            </select>
-            <div class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Ctrl+klik untuk pilih banyak.</div>
+            <div x-data="searchableSelect({
+                endpoint: '{{ route('admin.schedules.search-users', ['type' => 'dosen']) }}',
+                multiple: true,
+                initialSelected: []
+            })" class="relative">
+                <div x-show="selected.length" class="mb-2 flex flex-wrap gap-1.5">
+                    <template x-for="item in selected" :key="item.id">
+                        <span class="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 py-1 text-sm text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                            <span x-text="item.name"></span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400" x-text="item.username"></span>
+                            <button type="button" @click="remove(item)"
+                                    class="text-gray-500 hover:text-error-600 dark:text-gray-400">
+                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </span>
+                    </template>
+                </div>
+
+                <input type="text"
+                       x-model="search"
+                       @input="debouncedFetch()"
+                       @focus="open = true"
+                       @keydown.escape="open = false; search = ''"
+                       placeholder="Ketik nama atau NIDN..."
+                       class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+
+                <template x-for="item in selected" :key="item.id">
+                    <input type="hidden" name="dosens[]" :value="item.id">
+                </template>
+
+                <div x-show="open" x-cloak @click.away="open = false"
+                     class="absolute top-full left-0 right-0 z-[100] mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+                    <div x-show="loading" class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">Mencari...</div>
+                    <template x-for="item in filteredResults()" :key="item.id">
+                        <button @click="select(item)"
+                                class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <span x-text="item.name"></span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400" x-text="'(' + item.username + ')'"></span>
+                        </button>
+                    </template>
+                    <div x-show="!loading && !filteredResults().length"
+                         class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+                        Tidak ada hasil.
+                    </div>
+                </div>
+            </div>
+            <div class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Klik hasil untuk menambahkan. Klik × pada tag untuk menghapus.</div>
         </div>
 
         <div class="mt-6 flex gap-3">
