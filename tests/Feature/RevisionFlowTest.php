@@ -129,3 +129,44 @@ test('dosen hanya bisa resolve poin revisi miliknya', function () {
         'status_poin' => 'open',
     ]);
 });
+
+test('dosen melihat tombol resolve hanya untuk poin revisi miliknya', function () {
+    $dosen = User::factory()->dosen()->create();
+    $schedule = Schedule::factory()->create();
+    $schedule->dosens()->attach($dosen->id);
+    $submission = Submission::factory()->create(['schedule_id' => $schedule->id]);
+    $note = RevisionNote::factory()->create([
+        'submission_id' => $submission->id,
+        'dosen_id' => $dosen->id,
+        'catatan_revisi' => 'Poin milik saya.',
+        'status_poin' => 'open',
+    ]);
+
+    $response = $this->actingAs($dosen)->get(route('dosen.submissions.show', $submission));
+
+    $response->assertOk();
+    $response->assertSee('Tandai Resolved');
+    $response->assertSee('Poin Anda');
+});
+
+test('dosen tidak melihat tombol resolve untuk poin revisi dosen lain, tapi tetap bisa lihat statusnya', function () {
+    $dosen = User::factory()->dosen()->create();
+    $dosenLain = User::factory()->dosen()->create();
+    $schedule = Schedule::factory()->create();
+    $schedule->dosens()->attach($dosen->id);
+    $submission = Submission::factory()->create(['schedule_id' => $schedule->id]);
+    $note = RevisionNote::factory()->create([
+        'submission_id' => $submission->id,
+        'dosen_id' => $dosenLain->id,
+        'catatan_revisi' => 'Poin dari dosen lain.',
+        'status_poin' => 'open',
+    ]);
+
+    $response = $this->actingAs($dosen)->get(route('dosen.submissions.show', $submission));
+
+    $response->assertOk();
+    $response->assertSee('Poin dari dosen lain.');
+    $response->assertSee('Open');
+    $response->assertSee('Menunggu konfirmasi '.$dosenLain->name);
+    $response->assertDontSee('Tandai Resolved');
+});

@@ -9,13 +9,13 @@
 *(Bagian ini di-overwrite/update tiap sesi — bukan log historis, tapi snapshot kondisi terkini project.)*
 
 - **Tahap MVP aktif:** Tahap 1 (MVP inti) SELESAI + Tahap 2 (Peningkatan Operasional) SELESAI + Tahap 3 FR-05 SELESAI + Dark Mode + Dashboard Analitik SELESAI. ROADMAP.md: semua item Tahap 1, 2 & FR-05 Tahap 3 + Dark Mode + Dashboard Analitik dicentang. Sisa: Passkey auth.
- - **Fitur terakhir dikerjakan:** Searchable assignment selection — Alpine.js searchable dropdown untuk dosen/mahasiswa assign di schedule create/edit + client-side search di dosen submission index. Endpoint API `GET /admin/schedules/search-users` + `GET /admin/schedules/{schedule}/search-users`. 118 test lulus (288 assertions), lint/pint/build bersih. **Bug terkuantiti & diperbaiki:** `x-for` jangan dipasang pada `<button>` — harus `<template x-for>` karena Alpine 3 clone template via `template.content` (bukan elemen biasa). Error `debouncedFetch/select is not defined` munin karena `x-for` pada `<button>` gagal cloning, menyebabkan scope Alpine tidak terbentuk penuh.
+ - **Fitur terakhir dikerjakan:** Approval revisi dosen — tombol "Tandai Resolved" di halaman detail submission dosen kini hanya tampil untuk poin revisi milik dosen yang login (via `@can('resolve', $note)`), ditambah label "Poin Anda" dan hint "Menunggu konfirmasi {nama}" untuk poin dosen lain. Backend sudah membatasi resolve ke pemilik (`RevisionNotePolicy::resolve`); perubahan murni UI agar tidak 403 saat non-owner klik. 120 test lulus (296 assertions), lint/pint bersih.
 - **Sebelumnya:** Theme color diubah dari kuning ke indigo (`$primary: #6366f1`) di SCSS Metis (sekarang sudah jadi Tailwind `brand-500` di `resources/css/app.css`).
 - **Blocker/isu terbuka:** (1) ~~Warning build Vite bootstrap-icons.woff~~ — RESOLVED: bootstrap-icons dihapus, diganti Heroicons SVG. (2) Git initialized dengan initial commit + feature commits. (3) `laravel boost:mcp` belum dikonfigurasi. (4) ~Vite/Sass deprecation warnings (Bootstrap legacy, Dart Sass)~ — RESOLVED: Sass & Bootstrap dihapus.
 - **Environment:** Laravel 13.8.0, PHP 8.4.23, MariaDB 11.8.6 (MySQL-compatible), DB `sidangapp2`/user `sidang`/pass `sidang` @ 127.0.0.1:3306. `APP_NAME=SISIDANG`, `APP_LOCALE=id`, `FILESYSTEM_DISK=local`. Packages: `maatwebsite/excel` ^3.1, `barryvdh/laravel-dompdf` ^3.1, `apexcharts` ^6.7.0 (npm), `tailwindcss`/`@tailwindcss/vite` ^4.1.12 (npm). Frontend: TailAdmin (Tailwind v4), tanpa `tailwind.config.js`.
 - **Seed:** admin `telo`/`kaspe`, 4 dosen, 6 mahasiswa, 4 schedules, 6 submissions, 2 revision notes. `migrate:fresh` sukses; semua migration termasuk Tahap 3 (`assistant_conversations`, `assistant_messages`).
 - **Migration terakhir:** semua 11 migration (6 Tahap1 + 2 Tahap2 + 2 Tahap3 + `schedule_mahasiswa`) terakhir dijalankan via `php artisan migrate` pada DB nyata.
- - **Test:** 118 test Pest (SQLite :memory: + RefreshDatabase), **semua lulus** (288 assertions). `pint`, `npm run lint`, `npm run build` bersih/sukses.
+ - **Test:** 120 test Pest (SQLite :memory: + RefreshDatabase), **semua lulus** (296 assertions). `pint`, `npm run lint`, `npm run build` bersih/sukses.
 
 ---
 
@@ -38,6 +38,12 @@
 
 ## Log Sesi
 *(Append-only. Entri terbaru di paling atas. Format: tanggal — ringkasan — file yang diubah — catatan untuk sesi berikutnya.)*
+
+### 2026-08-15 — Approval revisi dosen: tombol resolve hanya untuk pemilik poin
+- **Ringkasan:** Backend sudah membatasi resolve ke pemilik poin (`RevisionNotePolicy::resolve` → `$note->dosen_id === $user->id`), tapi UI di halaman detail submission dosen menampilkan tombol "Tandai Resolved" untuk SEMUA poin open — non-owner yang klik mendapat 403. Perbaikan murni UI: tombol hanya dirender saat `$note->status_poin === 'open' && auth()->user()->can('resolve', $note)`. Tambah label kepemilikan: badge "Poin Anda" untuk poin sendiri; hint "Menunggu konfirmasi {nama dosen}" untuk poin dosen lain yang masih open. Dosen tetap bisa melihat status Open/Resolved + isi poin dari dosen lain.
+- **File diubah:** `resources/views/dosen/submissions/show.blade.php` (guard tombol + label kepemilikan), `tests/Feature/RevisionFlowTest.php` (+2 test view), `docs/MEMORY.md`.
+- **Keputusan penting:** Pakai `@can('resolve', $note)` (bukan perbandingan `dosen_id === auth()->id()` di view) supaya UI sinkron dengan policy — single source of truth. Status pill untuk semua poin tetap dipertahankan (kebutuhan "lihat status revisi dosen lain").
+- **Catatan sesi berikutnya:** 120 test lulus (296 assertions), lint/pint bersih. Belum di-commit.
 
 ### 2026-08-15 — Searchable Assignment Schedule Selection (UI/UX Improvement)
 - **Ringkasan:** Ganti plain `<select>` dropdown untuk assign dosen & plot mahasiswa di halaman create/edit jadwal admin dengan Alpine.js searchable dropdown yang mendukung pencarian berdasarkan nama atau NIDN/NIM. Tambahkan client-side search filter di halaman jadwal dosen untuk filter tabel mahasiswa. Endpoint API baru `GET /admin/schedules/search-users` (dan `/admin/schedules/{schedule}/search-users` untuk edit context dengan exclusions). Komponen Alpine `searchableSelect` di `resources/js/components/searchable-select.js` mendukung mode multiple (dosen, `dosens[]`) dan single (mahasiswa, `user_id`). Debounced fetch 300ms, keyboard navigation (arrow/Enter/Escape), ARIA aksesibilitas, dark mode. Controller `ScheduleController::create()` dan `edit()` disederhanakan — tidak lagi mem-load semua user ke memori (100+ dosen/mahasiswa tidak lagi di-render ke DOM sekaligus).

@@ -58,7 +58,12 @@
             @foreach($submission->revisionNotes as $note)
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
                     <div class="flex items-center justify-between gap-2">
-                        <strong class="text-sm text-gray-800 dark:text-gray-200">{{ $note->dosen->name ?? '-' }}</strong>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <strong class="text-sm text-gray-800 dark:text-gray-200">{{ $note->dosen->name ?? '-' }}</strong>
+                            @if($note->dosen_id === auth()->id())
+                                <span class="rounded-full bg-brand-500/10 px-2 py-0.5 text-xs font-medium text-brand-600 dark:bg-brand-500/20 dark:text-brand-400">Poin Anda</span>
+                            @endif
+                        </div>
                         @if($note->status_poin === 'open')
                             <span class="status-pill badge-open">Open</span>
                         @else
@@ -88,7 +93,7 @@
                         </div>
                     @endif
 
-                    @if($note->status_poin === 'open')
+                    @if($note->status_poin === 'open' && auth()->user()->can('resolve', $note))
                         <form method="POST" action="{{ route('dosen.revision-notes.resolve', $note) }}" class="mt-3 inline-block">
                             @csrf
                             @method('PATCH')
@@ -102,6 +107,10 @@
                                 Tandai Resolved
                             </button>
                         </form>
+                    @elseif($note->status_poin === 'open')
+                        <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                            Menunggu konfirmasi {{ $note->dosen->name ?? 'dosen terkait' }}.
+                        </p>
                     @endif
                 </div>
             @endforeach
