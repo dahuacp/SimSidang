@@ -43,6 +43,11 @@ class Submission extends Model
         return $this->hasMany(SubmissionStatusLog::class, 'submission_id')->latest();
     }
 
+    public function assessmentForms(): HasMany
+    {
+        return $this->hasMany(AssessmentForm::class, 'submission_id');
+    }
+
     public function hasOpenRevisions(): bool
     {
         return $this->revisionNotes()->where('status_poin', 'open')->exists();

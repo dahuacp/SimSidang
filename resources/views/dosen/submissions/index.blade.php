@@ -8,16 +8,44 @@
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ now()->translatedFormat('l, d F Y') }}</p>
     </div>
 
-    <div class="mb-4 flex gap-2">
-        <a href="{{ route('dosen.submissions.index') }}"
-           class="rounded-lg px-4 py-2 text-sm font-medium transition {{ $filter === 'semua' ? 'bg-brand-500 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}">
+@php
+    $hasDateRange = $startDate || $endDate;
+    $semuaActive = !$hasDateRange && $filter === 'semua';
+    $hariIniActive = !$hasDateRange && $filter === 'hari_ini';
+@endphp
+
+<form method="GET" action="{{ route('dosen.submissions.index') }}" class="mb-4 flex flex-wrap items-end gap-3">
+    <div class="flex gap-2">
+        <a href="{{ $hasDateRange ? route('dosen.submissions.index', ['filter' => $filter]) : route('dosen.submissions.index') }}"
+           class="rounded-lg px-4 py-2 text-sm font-medium transition {{ $semuaActive ? 'bg-brand-500 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}">
             Semua Jadwal
         </a>
         <a href="{{ route('dosen.submissions.index', ['filter' => 'hari_ini']) }}"
-           class="rounded-lg px-4 py-2 text-sm font-medium transition {{ $filter === 'hari_ini' ? 'bg-brand-500 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}">
+           class="rounded-lg px-4 py-2 text-sm font-medium transition {{ $hariIniActive ? 'bg-brand-500 text-white' : 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800' }}">
             Hari Ini
         </a>
     </div>
+    <div class="flex flex-col gap-1.5">
+        <label class="text-xs text-gray-600 dark:text-gray-400">Dari</label>
+        <input type="date" name="start_date" value="{{ $startDate ?? '' }}"
+               class="h-10 w-44 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-2 focus:ring-brand-500/10 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+    </div>
+    <div class="flex flex-col gap-1.5">
+        <label class="text-xs text-gray-600 dark:text-gray-400">Sampai</label>
+        <input type="date" name="end_date" value="{{ $endDate ?? '' }}"
+               class="h-10 w-44 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-2 focus:ring-brand-500/10 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+    </div>
+    <button type="submit"
+            class="h-10 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-600">
+        Terapkan
+    </button>
+    @if($hasDateRange)
+        <a href="{{ route('dosen.submissions.index', ['filter' => $filter]) }}"
+           class="h-10 self-end rounded-lg border border-gray-300 px-3 text-sm text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+            Reset
+        </a>
+    @endif
+</form>
 
     @if($schedules->isEmpty())
         <div class="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center dark:border-gray-700 dark:bg-gray-900">

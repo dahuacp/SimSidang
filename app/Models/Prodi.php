@@ -19,4 +19,9 @@ class Prodi extends Model
     {
         return $this->hasMany(User::class, 'prodi_id');
     }
+
+    public function assessmentTemplates(): HasMany
+    {
+        return $this->hasMany(AssessmentTemplate::class, 'prodi_id');
+    }
 }

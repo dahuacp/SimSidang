@@ -41,6 +41,18 @@
                 </svg>
                 <span>Unggah Laporan</span>
             </a>
+            @php
+                $mahasiswaLatest = auth()->user()->latestSubmission;
+            @endphp
+            @if($mahasiswaLatest)
+                <a href="{{ route('mahasiswa.penilaian.show', $mahasiswaLatest) }}"
+                   class="menu-item {{ request()->routeIs('mahasiswa.penilaian.show') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                    <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>Penilaian</span>
+                </a>
+            @endif
         @endif
 
         @can('viewDosenMenu')
@@ -50,6 +62,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4h-2M8 7l-4 4h16l-4-4M8 7L4 11v10a2 2 0 002 2h12a2 2 0 002-2V11l-4-4z"></path>
                 </svg>
                 <span>Jadwal Sidang</span>
+            </a>
+            <a href="{{ route('dosen.penilaian.index') }}"
+               class="menu-item {{ request()->routeIs('dosen.penilaian.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Penilaian</span>
             </a>
         @endcan
 
@@ -75,6 +94,20 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.045V3m-3 3l3-3 3 3m-3 3v6m-6-6h12"></path>
                 </svg>
                 <span>Program Studi</span>
+            </a>
+            <a href="{{ route('admin.jenis-sidangs.index') }}"
+               class="menu-item {{ request()->routeIs('admin.jenis-sidangs.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4h-2M8 7l-4 4h16l-4-4M8 7L4 11v10a2 2 0 002 2h12a2 2 0 002-2V11l-4-4z"></path>
+                </svg>
+                <span>Jenis Sidang</span>
+            </a>
+            <a href="{{ route('admin.assessment-templates.index') }}"
+               class="menu-item {{ request()->routeIs('admin.assessment-templates.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <span>Template Penilaian</span>
             </a>
             <a href="{{ route('admin.schedules.index') }}"
                class="menu-item {{ request()->routeIs('admin.schedules.*') ? 'menu-item-active' : 'menu-item-inactive' }}">

@@ -15,6 +15,17 @@
                 @error('nama_grup_sidang') <div class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</div> @enderror
             </div>
             <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Jenis Sidang</label>
+                <select name="jenis_sidang_id" required
+                        class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                    <option value="">Pilih jenis sidang...</option>
+                    @foreach($jenisSidangs as $jenis)
+                        <option value="{{ $jenis->id }}" @selected(old('jenis_sidang_id') == $jenis->id)>{{ $jenis->nama }}</option>
+                    @endforeach
+                </select>
+                @error('jenis_sidang_id') <div class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</div> @enderror
+            </div>
+            <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Ruangan</label>
                 <input type="text" name="ruangan" value="{{ old('ruangan') }}" required
                        class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">

@@ -19,6 +19,7 @@ class StoreScheduleRequest extends FormRequest
             'tanggal_sidang' => ['required', 'date'],
             'jam_mulai' => ['required', 'date_format:H:i'],
             'jam_selesai' => ['required', 'date_format:H:i', 'after:jam_mulai'],
+            'jenis_sidang_id' => ['required', 'exists:jenis_sidangs,id'],
             'dosens' => ['nullable', 'array'],
             'dosens.*' => ['exists:users,id'],
         ];
@@ -36,6 +37,8 @@ class StoreScheduleRequest extends FormRequest
             'jam_selesai.required' => 'Jam selesai wajib diisi.',
             'jam_selesai.date_format' => 'Format jam selesai harus HH:MM.',
             'jam_selesai.after' => 'Jam selesai harus setelah jam mulai.',
+            'jenis_sidang_id.required' => 'Jenis sidang wajib dipilih.',
+            'jenis_sidang_id.exists' => 'Jenis sidang tidak valid.',
         ];
     }
 }

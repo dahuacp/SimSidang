@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\JenisSidang;
 use App\Models\Schedule;
 use App\Models\User;
 use Illuminate\Support\Carbon;
@@ -23,12 +24,22 @@ class ScheduleImport implements ToCollection, WithHeadingRow, WithValidation
             try {
                 DB::beginTransaction();
 
+                $jenisSidang = null;
+                $jenisName = trim((string) ($row['jenis_sidang'] ?? ''));
+                if ($jenisName !== '') {
+                    $jenisSidang = JenisSidang::where('nama', $jenisName)->first();
+                    if (! $jenisSidang) {
+                        throw new \Exception("Jenis sidang \"{$jenisName}\" tidak ditemukan.");
+                    }
+                }
+
                 $schedule = Schedule::create([
                     'nama_grup_sidang' => $row['nama_grup_sidang'],
                     'ruangan' => $row['ruangan'],
                     'tanggal_sidang' => Carbon::parse($row['tanggal_sidang'])->toDateString(),
                     'jam_mulai' => Carbon::parse($row['jam_mulai'])->format('H:i'),
                     'jam_selesai' => Carbon::parse($row['jam_selesai'])->format('H:i'),
+                    'jenis_sidang_id' => $jenisSidang?->id,
                 ]);
 
                 $dosenCol = $row['dosen_ids'] ?? null;
@@ -61,6 +72,6 @@ class ScheduleImport implements ToCollection, WithHeadingRow, WithValidation
 
     public function headings(): array
     {
-        return ['nama_grup_sidang', 'ruangan', 'tanggal_sidang', 'jam_mulai', 'jam_selesai', 'dosen_ids'];
+        return ['nama_grup_sidang', 'ruangan', 'tanggal_sidang', 'jam_mulai', 'jam_selesai', 'jenis_sidang', 'dosen_ids'];
     }
 }

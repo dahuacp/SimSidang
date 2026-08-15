@@ -47,6 +47,7 @@
                     <tr>
                         <th class="px-4 py-3 font-medium">#</th>
                         <th class="px-4 py-3 font-medium">Grup Sidang</th>
+                        <th class="px-4 py-3 font-medium">Jenis</th>
                         <th class="px-4 py-3 font-medium">Ruangan</th>
                         <th class="px-4 py-3 font-medium">Tanggal</th>
                         <th class="px-4 py-3 font-medium">Jam</th>
@@ -60,6 +61,13 @@
                         <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                             <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $loop->iteration + ($schedules->currentPage() - 1) * $schedules->perPage() }}</td>
                             <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">{{ $schedule->nama_grup_sidang }}</td>
+                            <td class="px-4 py-3">
+                                @if($schedule->jenisSidang)
+                                    <span class="status-pill badge-open">{{ $schedule->jenisSidang->nama }}</span>
+                                @else
+                                    <span class="text-gray-400 dark:text-gray-500">-</span>
+                                @endif
+                            </td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $schedule->ruangan }}</td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $schedule->tanggal_sidang->format('d M Y') }}</td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $schedule->jam_mulai->format('H:i') }} - {{ $schedule->jam_selesai->format('H:i') }}</td>
@@ -90,7 +98,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada jadwal.</td>
+                            <td colspan="9" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada jadwal.</td>
                         </tr>
                     @endforelse
                 </tbody>

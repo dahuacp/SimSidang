@@ -41,6 +41,36 @@ Tujuan: fitur pembeda, aman ditunda ke rilis berikutnya.
 - [x] Dark mode toggle
 - [x] Dashboard analitik agregat lintas ruang/jadwal (ApexCharts)
 
+## Tahap 4 — Penilaian Sidang (Fitur Baru, luar PRD asli)
+Tujuan: dospem + dosen penguji isi form penilaian (rule per prodi × jenis sidang), skor total rumus Σskor / A × B.
+
+### Step 1 — Master data & relasi penilaian
+- [x] Migration: `jenis_sidangs`, `pembimbingan` (pivot dospem↔mahasiswa), `add_jenis_sidang_id_to_schedules`
+- [x] Model `JenisSidang`, relasi `mahasiswa.hasDosenPembimbing` / `dosen.pembimbingan`
+- [x] Factory + Seeder (3 jenis default: TA, KP, Milestone Design; assign jenis ke schedule seed; assign ≥1 dospem per mahasiswa)
+- [x] Test: migration seed, relasi dospem–mahasiswa, unicitet pivot
+
+### Step 2 — Template penilaian (admin)
+- [x] Migration: `assessment_templates` (prodi_id, jenis_sidang_id, nama, nilai_penyebut A, nilai_pengali B, items JSON), `assessment_forms` (submission_id, dosen_id, tipe_penilai, template_id, skor_per_item, skor_total)
+- [x] Model `AssessmentTemplate` + `AssessmentForm` (casts json, accessor `skorTotal`)
+- [x] FormRequest (`nilai_penyebut` min:1, `nilai_pengali` min:0, items.*.maksimal integer >0)
+- [x] `AssessmentTemplatePolicy` + `AssessmentFormPolicy` (admin full; dosen pakai via relasi) — register di `AppServiceProvider`
+- [x] Route admin resource `/admin/jenis-sidangs`, `/admin/assessment-templates`
+- [x] Test: skor total rumus, policy admin-only CRUD, validasi A/B & items
+
+### Step 3 — Form isi (dosen) + view (mahasiswa)
+- [x] Controller `Dosen/PenilaianController` (index tab Penguji/Pembimbing, create/store/{form}/edit, policy-bound)
+- [x] Route dosen `/dosen/penilaian`, `/dosen/submissions/{submission}/penilaian`, `/dosen/penilaian/{form}/edit`
+- [x] Controller `Mahasiswa/PenilaianController` (show ringkasan read-only)
+- [x] Route mahasiswa `/mahasiswa/submissions/{submission}/penilaian`
+- [x] View Blade: builder template admin, form isi dosen (Alpine live-hitung Σskor/A×B), ringkasan mahasiswa
+- [x] Test: policy dospem→advisee only, examiner→jadwal only, mahasiswa read-only, satu form per (submission,dosen,tipe), dosen ganda dapat 2 form
+
+### Step 4 — Wire-up & verifikasi penuh
+- [x] Sidebar nav (dosen & mahasiswa), notifikasi "ada penilaian baru" untuk mahasiswa, eager-load di daftar
+- [x] Seeder lengkap + `migrate:fresh --seed`
+- [x] `php artisan test` lulus, `npm run lint`, `vendor/bin/pint`
+
 ---
 
 ## Catatan

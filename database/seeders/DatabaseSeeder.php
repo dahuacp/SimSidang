@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\AssessmentTemplate;
+use App\Models\JenisSidang;
 use App\Models\Prodi;
 use App\Models\RevisionNote;
 use App\Models\Schedule;
@@ -30,6 +32,28 @@ class DatabaseSeeder extends Seeder
             ]));
         }
 
+        $jenisSidangs = [];
+        foreach (['TA' => 'Tugas Akhir', 'KP' => 'Kerja Praktek', 'Milestone Design' => 'Fase perencanaan dan desain'] as $nama => $deskripsi) {
+            $jenisSidangs[$nama] = JenisSidang::create(['nama' => $nama, 'deskripsi' => $deskripsi]);
+        }
+
+        foreach ($prodis as $prodi) {
+            foreach ($jenisSidangs as $jenis) {
+                AssessmentTemplate::create([
+                    'prodi_id' => $prodi->id,
+                    'jenis_sidang_id' => $jenis->id,
+                    'nama' => 'Template '.$prodi->nama_prodi.' — '.$jenis->nama,
+                    'nilai_penyebut' => 15,
+                    'nilai_pengali' => 100,
+                    'items' => [
+                        ['name' => 'Kualitas Laporan', 'maksimal' => 5, 'urutan' => 1],
+                        ['name' => 'Penguasaan Materi', 'maksimal' => 5, 'urutan' => 2],
+                        ['name' => 'Presentasi dan Komunikasi', 'maksimal' => 5, 'urutan' => 3],
+                    ],
+                ]);
+            }
+        }
+
         $admin = User::create([
             'name' => 'Admin SISIDANG',
             'username' => 'telo',
@@ -47,14 +71,16 @@ class DatabaseSeeder extends Seeder
             'Dr. Dewi Lestari, S.Kom., M.Kom.' => 'SI',
         ];
 
-        foreach ($dosenNames as $i => $name) {
+        $dosenNo = 0;
+        foreach ($dosenNames as $name => $prodiKode) {
+            $dosenNo++;
             $dosens->push(User::create([
                 'name' => $name,
-                'username' => '001102'.str_pad((string) ($i + 1), 5, '0', STR_PAD_LEFT),
-                'email' => 'dosen'.($i + 1).'@simsidang.local',
+                'username' => '001102'.str_pad((string) $dosenNo, 5, '0', STR_PAD_LEFT),
+                'email' => 'dosen'.$dosenNo.'@simsidang.local',
                 'password' => Hash::make('password'),
                 'role' => 'dosen',
-                'prodi_id' => $prodis->firstWhere('kode_prodi', array_values($dosenNames)[$i])->id,
+                'prodi_id' => $prodis->firstWhere('kode_prodi', $prodiKode)->id,
             ]));
         }
 
@@ -104,6 +130,20 @@ class DatabaseSeeder extends Seeder
         $schedules[1]->dosens()->attach([$dosens[2]->id, $dosens[3]->id]);
         $schedules[2]->dosens()->attach([$dosens[0]->id, $dosens[2]->id]);
         $schedules[3]->dosens()->attach([$dosens[1]->id, $dosens[3]->id]);
+
+        $scheduleJenis = [0 => 'TA', 1 => 'TA', 2 => 'KP', 3 => 'TA'];
+        foreach ($scheduleJenis as $idx => $jn) {
+            $schedules[$idx]->update(['jenis_sidang_id' => $jenisSidangs[$jn]->id]);
+        }
+
+        $dospemByProdi = [
+            'TI' => [$dosens[0]->id, $dosens[2]->id],
+            'SI' => [$dosens[1]->id, $dosens[3]->id],
+            'DKV' => [$dosens[0]->id],
+        ];
+        foreach ($mahasiswa as $idx => $mhs) {
+            $mhs->dosenPembimbing()->attach($dospemByProdi[$mahasiswaData[$idx]['prodi_kode']]);
+        }
 
         $submissions = collect();
         foreach ($mahasiswa as $idx => $mhs) {

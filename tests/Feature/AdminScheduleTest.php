@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\JenisSidang;
 use App\Models\Schedule;
 use App\Models\User;
 
@@ -7,6 +8,7 @@ test('admin dapat membuat jadwal dengan assign dosen', function () {
     $admin = User::factory()->admin()->create();
     $dosen1 = User::factory()->dosen()->create();
     $dosen2 = User::factory()->dosen()->create();
+    $jenis = JenisSidang::factory()->create();
 
     $response = $this->actingAs($admin)->post(route('admin.schedules.store'), [
         'nama_grup_sidang' => 'Sidang A',
@@ -14,6 +16,7 @@ test('admin dapat membuat jadwal dengan assign dosen', function () {
         'tanggal_sidang' => '2026-08-15',
         'jam_mulai' => '09:00',
         'jam_selesai' => '11:00',
+        'jenis_sidang_id' => $jenis->id,
         'dosens' => [$dosen1->id, $dosen2->id],
     ]);
 
@@ -33,6 +36,7 @@ test('admin dapat membuat jadwal dengan assign dosen', function () {
 test('admin dapat mengedit jadwal dan mengganti dosen', function () {
     $admin = User::factory()->admin()->create();
     $schedule = Schedule::factory()->create();
+    $jenis = JenisSidang::factory()->create();
     $d1 = User::factory()->dosen()->create();
     $d2 = User::factory()->dosen()->create();
 
@@ -42,6 +46,7 @@ test('admin dapat mengedit jadwal dan mengganti dosen', function () {
         'tanggal_sidang' => $schedule->tanggal_sidang->format('Y-m-d'),
         'jam_mulai' => '10:00',
         'jam_selesai' => '12:00',
+        'jenis_sidang_id' => $jenis->id,
         'dosens' => [$d2->id],
     ]);
 
@@ -157,6 +162,27 @@ test('halaman index jadwal menampilkan jumlah mahasiswa', function () {
         ->assertSee('1');
 });
 
+test('halaman index jadwal menampilkan jenis sidang', function () {
+    $admin = User::factory()->admin()->create();
+    $jenis = JenisSidang::factory()->create(['nama' => 'TA']);
+    $schedule = Schedule::factory()->create(['jenis_sidang_id' => $jenis->id]);
+
+    $this->actingAs($admin)->get(route('admin.schedules.index'))
+        ->assertOk()
+        ->assertSee($schedule->nama_grup_sidang)
+        ->assertSee('TA');
+});
+
+test('halaman edit jadwal menampilkan jenis sidang terpilih', function () {
+    $admin = User::factory()->admin()->create();
+    $jenis = JenisSidang::factory()->create(['nama' => 'KP']);
+    $schedule = Schedule::factory()->create(['jenis_sidang_id' => $jenis->id]);
+
+    $this->actingAs($admin)->get(route('admin.schedules.edit', $schedule))
+        ->assertOk()
+        ->assertSee('KP');
+});
+
 test('halaman create jadwal menampilkan searchable dosen component', function () {
     $admin = User::factory()->admin()->create();
 
@@ -182,6 +208,7 @@ test('halaman edit jadwal menampilkan searchable dosen dan mahasiswa component',
 test('create jadwal dengan searchable component masih menyimpan dosen', function () {
     $admin = User::factory()->admin()->create();
     $dosen = User::factory()->dosen()->create();
+    $jenis = JenisSidang::factory()->create();
 
     $this->actingAs($admin)->post(route('admin.schedules.store'), [
         'nama_grup_sidang' => 'Test Group',
@@ -189,6 +216,7 @@ test('create jadwal dengan searchable component masih menyimpan dosen', function
         'tanggal_sidang' => '2026-08-15',
         'jam_mulai' => '09:00',
         'jam_selesai' => '11:00',
+        'jenis_sidang_id' => $jenis->id,
         'dosens' => [$dosen->id],
     ])->assertRedirect(route('admin.schedules.index'));
 
@@ -202,6 +230,7 @@ test('create jadwal dengan searchable component masih menyimpan dosen', function
 test('update jadwal dengan searchable component mengganti dosen', function () {
     $admin = User::factory()->admin()->create();
     $schedule = Schedule::factory()->create();
+    $jenis = JenisSidang::factory()->create();
     $oldDosen = User::factory()->dosen()->create(['name' => 'Old Dosen']);
     $newDosen = User::factory()->dosen()->create(['name' => 'New Dosen']);
     $schedule->dosens()->attach($oldDosen->id);
@@ -212,6 +241,7 @@ test('update jadwal dengan searchable component mengganti dosen', function () {
         'tanggal_sidang' => $schedule->tanggal_sidang->format('Y-m-d'),
         'jam_mulai' => '09:00',
         'jam_selesai' => '11:00',
+        'jenis_sidang_id' => $jenis->id,
         'dosens' => [$newDosen->id],
     ])->assertRedirect(route('admin.schedules.index'));
 

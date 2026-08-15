@@ -1,16 +1,20 @@
 <?php
 
+use App\Http\Controllers\Admin\AssessmentTemplateController;
 use App\Http\Controllers\Admin\AssistantController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExportController;
+use App\Http\Controllers\Admin\JenisSidangController;
 use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SubmissionController as AdminSubmissionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Dosen\PenilaianController as DosenPenilaianController;
 use App\Http\Controllers\Dosen\RevisionNoteController as DosenRevisionNoteController;
 use App\Http\Controllers\Dosen\SubmissionController as DosenSubmissionController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\Mahasiswa\PenilaianController as MahasiswaPenilaianController;
 use App\Http\Controllers\Mahasiswa\RevisionAttachmentController;
 use App\Http\Controllers\Mahasiswa\SubmissionController as MahasiswaSubmissionController;
 use App\Http\Controllers\NotificationController;
@@ -37,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/submissions/create', [MahasiswaSubmissionController::class, 'create'])->name('submissions.create');
             Route::post('/submissions', [MahasiswaSubmissionController::class, 'store'])->name('submissions.store');
             Route::get('/submissions/{submission}', [MahasiswaSubmissionController::class, 'show'])->name('submissions.show');
+            Route::get('/submissions/{submission}/penilaian', [MahasiswaPenilaianController::class, 'show'])->name('penilaian.show');
             Route::post('/revision-notes/{revisionNote}/attachments', [RevisionAttachmentController::class, 'store'])->name('revision-attachments.store');
         });
 
@@ -49,6 +54,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/submissions/{submission}/revision-notes/create', [DosenRevisionNoteController::class, 'create'])->name('revision-notes.create');
             Route::post('/submissions/{submission}/revision-notes', [DosenRevisionNoteController::class, 'store'])->name('revision-notes.store');
             Route::patch('/revision-notes/{revisionNote}/resolve', [DosenRevisionNoteController::class, 'resolve'])->name('revision-notes.resolve');
+
+            Route::get('/penilaian', [DosenPenilaianController::class, 'index'])->name('penilaian.index');
+            Route::get('/submissions/{submission}/penilaian', [DosenPenilaianController::class, 'create'])->name('penilaian.create');
+            Route::post('/submissions/{submission}/penilaian', [DosenPenilaianController::class, 'store'])->name('penilaian.store');
+            Route::get('/penilaian/{assessmentForm}/edit', [DosenPenilaianController::class, 'edit'])->name('penilaian.edit');
+            Route::put('/penilaian/{assessmentForm}', [DosenPenilaianController::class, 'update'])->name('penilaian.update');
         });
 
     Route::middleware(['role:admin'])
@@ -98,5 +109,13 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/prodis/{prodi}/edit', [ProdiController::class, 'edit'])->name('prodis.edit');
             Route::put('/prodis/{prodi}', [ProdiController::class, 'update'])->name('prodis.update');
             Route::delete('/prodis/{prodi}', [ProdiController::class, 'destroy'])->name('prodis.destroy');
+
+            Route::resource('jenis-sidangs', JenisSidangController::class)->only([
+                'index', 'create', 'store', 'edit', 'update', 'destroy',
+            ]);
+
+            Route::resource('assessment-templates', AssessmentTemplateController::class)->only([
+                'index', 'create', 'store', 'edit', 'update', 'destroy',
+            ]);
         });
 });

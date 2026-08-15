@@ -79,3 +79,44 @@ test('halaman jadwal dosen menampilkan input pencarian mahasiswa', function () {
         ->assertOk()
         ->assertSee('Cari Mahasiswa');
 });
+
+test('filter date range hanya menampilkan jadwal dalam rentang', function () {
+    $dosen = User::factory()->dosen()->create();
+    $inRange = Schedule::factory()->create([
+        'nama_grup_sidang' => 'Jadwal Dalam Rentang',
+        'tanggal_sidang' => now()->toDateString(),
+    ]);
+    $outRange = Schedule::factory()->create([
+        'nama_grup_sidang' => 'Jadwal Di Luar Rentang',
+        'tanggal_sidang' => now()->addDays(5)->toDateString(),
+    ]);
+    $dosen->schedulesAsDosen()->attach([$inRange->id, $outRange->id]);
+
+    $this->actingAs($dosen)->get(route('dosen.submissions.index', [
+        'start_date' => now()->toDateString(),
+        'end_date' => now()->addDay()->toDateString(),
+    ]))->assertOk()
+        ->assertSee('Jadwal Dalam Rentang')
+        ->assertDontSee('Jadwal Di Luar Rentang');
+});
+
+test('filter date range mendominasi filter hari ini', function () {
+    $dosen = User::factory()->dosen()->create();
+    $hariIni = Schedule::factory()->create([
+        'nama_grup_sidang' => 'Jadwal Hari Ini',
+        'tanggal_sidang' => now()->toDateString(),
+    ]);
+    $besok = Schedule::factory()->create([
+        'nama_grup_sidang' => 'Jadwal Besok',
+        'tanggal_sidang' => now()->addDay()->toDateString(),
+    ]);
+    $dosen->schedulesAsDosen()->attach([$hariIni->id, $besok->id]);
+
+    $this->actingAs($dosen)->get(route('dosen.submissions.index', [
+        'filter' => 'hari_ini',
+        'start_date' => now()->addDay()->toDateString(),
+        'end_date' => now()->addDays(2)->toDateString(),
+    ]))->assertOk()
+        ->assertSee('Jadwal Besok')
+        ->assertDontSee('Jadwal Hari Ini');
+});

@@ -20,6 +20,13 @@ Domain project ini berbahasa Indonesia (akademik), tapi konvensi Laravel biasany
 | Keterangan Mahasiswa | Penjelasan teks yang menyertai bukti perbaikan | `revision_attachments.keterangan_mahasiswa` | — | |
 | Sidang | Sesi ujian/presentasi TA/KP | — | — | Konsep event, direpresentasikan lewat `Schedule` + `Submission.status` |
 | Asisten Virtual | Fitur chat AI read-only untuk admin (FR-05) | `assistant_conversations`, `assistant_messages` | `AssistantConversation`, `AssistantMessage` | Bukan menganalisa dokumen — hanya data agregat |
+| Jenis Sidang | Tipe sesi sidang, master dinamis (TA/KP/Milestone Design) | `jenis_sidangs` (`nama`, `deskripsi`), FK `schedules.jenis_sidang_id` | `JenisSidang` | Satu jenis per jadwal sidang |
+| Dosen Pembimbing (dospem) | Dosen pembimbing/akademik mahasiswa | pivot `pembimbingan` (`mahasiswa_id`, `dosen_id`) | (pivot, lewat relasi User) | Boleh beda dengan dosen penguji; boleh lebih dari satu per mahasiswa |
+| Dosen Penguji (dospeng) | Dosen yang ditugaskan ke sebuah jadwal/route sidang | `schedule_dosen` | (relasi `User.schedulesAsDosen`) | Penilai saat sidang; dapat juga jadi dospem |
+| Template Penilaian | Aturan item penilaian (per prodi × jenis sidang) | `assessment_templates` (`prodi_id`, `jenis_sidang_id`, `nama`, `nilai_penyebut` A, `nilai_pengali` B, `items` JSON) | `AssessmentTemplate` | Admin kelola; item punya `nama`, `maksimal`, `urutan` |
+| Form Penilaian | Isian penilaian yang diisi seorang dosen | `assessment_forms` (`submission_id`, `dosen_id`, `tipe_penilai`∈{dospem,penguji}, `template_id`, `skor_per_item` JSON, `skor_total`) | `AssessmentForm` | Skor total = Σskor / A × B; tidak ada pass/fail |
+| Nilai Penyebut (A) | Pembagi normalisasi skor total | `assessment_templates.nilai_penyebut` | — | integer, `min:1` |
+| Nilai Pengali (B) | Pengali/akar skala output skor total | `assessment_templates.nilai_pengali` | — | integer, `min:0` |
 
 ## Status Submission (`submissions.status`)
 | Nilai enum | Arti Indonesia |

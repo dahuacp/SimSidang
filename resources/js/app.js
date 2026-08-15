@@ -69,6 +69,7 @@ Alpine.data('notificationBell', () => ({
             'revision.note.created': 'Catatan revisi baru',
             'revision.note.resolved': 'Poin sudah resolved',
             'revision.attachment.replied': 'Balasan bukti perbaikan',
+            'penilaian.baru': 'Penilaian sidang baru tersedia',
         };
         return map[type] || type;
     }

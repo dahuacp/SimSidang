@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -17,6 +18,7 @@ class Schedule extends Model
         'tanggal_sidang',
         'jam_mulai',
         'jam_selesai',
+        'jenis_sidang_id',
     ];
 
     protected $casts = [
@@ -38,5 +40,10 @@ class Schedule extends Model
     public function mahasiswas(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'schedule_mahasiswa', 'schedule_id', 'user_id');
+    }
+
+    public function jenisSidang(): BelongsTo
+    {
+        return $this->belongsTo(JenisSidang::class, 'jenis_sidang_id');
     }
 }

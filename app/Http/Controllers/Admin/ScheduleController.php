@@ -7,6 +7,7 @@ use App\Http\Requests\StoreScheduleMahasiswaRequest;
 use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Imports\ScheduleImport;
+use App\Models\JenisSidang;
 use App\Models\Schedule;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class ScheduleController extends Controller
         $search = $request->input('search');
 
         $schedules = Schedule::withCount('mahasiswas')
-            ->with('dosens')
+            ->with(['dosens', 'jenisSidang'])
             ->when($search, fn ($q, $s) => $q->where('nama_grup_sidang', 'like', "%$s%")->orWhere('ruangan', 'like', "%$s%"))
             ->orderBy('tanggal_sidang', 'desc')
             ->paginate(15)
@@ -35,14 +36,16 @@ class ScheduleController extends Controller
     {
         $this->authorize('viewAdminMenu', User::class);
 
-        return view('admin.schedules.create');
+        $jenisSidangs = JenisSidang::orderBy('nama')->get();
+
+        return view('admin.schedules.create', compact('jenisSidangs'));
     }
 
     public function store(StoreScheduleRequest $request)
     {
         $this->authorize('viewAdminMenu', User::class);
 
-        $schedule = Schedule::create($request->only(['nama_grup_sidang', 'ruangan', 'tanggal_sidang', 'jam_mulai', 'jam_selesai']));
+        $schedule = Schedule::create($request->only(['nama_grup_sidang', 'ruangan', 'tanggal_sidang', 'jam_mulai', 'jam_selesai', 'jenis_sidang_id']));
 
         $schedule->dosens()->sync($request->input('dosens', []));
 
@@ -53,10 +56,12 @@ class ScheduleController extends Controller
     {
         $this->authorize('viewAdminMenu', User::class);
 
-        $schedule->load(['mahasiswas', 'submissions.user']);
+        $schedule->load(['mahasiswas', 'submissions.user', 'jenisSidang']);
+        $jenisSidangs = JenisSidang::orderBy('nama')->get();
 
         return view('admin.schedules.edit', [
             'schedule' => $schedule,
+            'jenisSidangs' => $jenisSidangs,
         ]);
     }
 
@@ -64,7 +69,7 @@ class ScheduleController extends Controller
     {
         $this->authorize('viewAdminMenu', User::class);
 
-        $schedule->update($request->only(['nama_grup_sidang', 'ruangan', 'tanggal_sidang', 'jam_mulai', 'jam_selesai']));
+        $schedule->update($request->only(['nama_grup_sidang', 'ruangan', 'tanggal_sidang', 'jam_mulai', 'jam_selesai', 'jenis_sidang_id']));
 
         $schedule->dosens()->sync($request->input('dosens', []));
 
@@ -105,8 +110,8 @@ class ScheduleController extends Controller
 
         $response = new StreamedResponse(function () {
             $handle = fopen('php://output', 'rb+');
-            fputcsv($handle, ['nama_grup_sidang', 'ruangan', 'tanggal_sidang', 'jam_mulai', 'jam_selesai', 'dosen_ids']);
-            fputcsv($handle, ['Sidang TA Gelombang 1', 'Ruang 3', '2026-08-15', '09:00', '11:00', '']);
+            fputcsv($handle, ['nama_grup_sidang', 'ruangan', 'tanggal_sidang', 'jam_mulai', 'jam_selesai', 'jenis_sidang', 'dosen_ids']);
+            fputcsv($handle, ['Sidang TA Gelombang 1', 'Ruang 3', '2026-08-15', '09:00', '11:00', 'TA', '']);
             fclose($handle);
         });
 

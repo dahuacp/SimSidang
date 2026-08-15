@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -54,9 +55,24 @@ class User extends Authenticatable
         return $this->hasMany(Submission::class, 'user_id');
     }
 
+    public function latestSubmission(): HasOne
+    {
+        return $this->hasOne(Submission::class, 'user_id')->latestOfMany();
+    }
+
     public function schedulesAsDosen(): BelongsToMany
     {
         return $this->belongsToMany(Schedule::class, 'schedule_dosen', 'user_id', 'schedule_id');
+    }
+
+    public function dosenPembimbing(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'pembimbingan', 'mahasiswa_id', 'dosen_id');
+    }
+
+    public function mahasiswaBimbingan(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'pembimbingan', 'dosen_id', 'mahasiswa_id');
     }
 
     public function prodi(): BelongsTo
