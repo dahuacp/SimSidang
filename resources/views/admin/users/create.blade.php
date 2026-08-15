@@ -28,7 +28,7 @@
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Peran</label>
-                <select name="role" required
+                <select name="role" id="role" required
                         class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
                     <option value="">Pilih...</option>
                     <option value="mahasiswa" {{ old('role') == 'mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
@@ -36,6 +36,17 @@
                     <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                 </select>
                 @error('role') <div class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</div> @enderror
+            </div>
+            <div id="prodi-field" class="hidden">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Program Studi</label>
+                <select name="prodi_id"
+                        class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                    <option value="">Pilih Program Studi...</option>
+                    @foreach(\App\Models\Prodi::orderBy('nama_prodi')->get() as $prodi)
+                        <option value="{{ $prodi->id }}" {{ old('prodi_id') == $prodi->id ? 'selected' : '' }}>{{ $prodi->kode_prodi }} - {{ $prodi->nama_prodi }}</option>
+                    @endforeach
+                </select>
+                @error('prodi_id') <div class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</div> @enderror
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Password</label>
@@ -61,4 +72,23 @@
             </a>
         </div>
     </form>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            // Fallback for non-Alpine contexts
+        });
+
+        function toggleProdiField() {
+            const role = document.getElementById('role').value;
+            const prodiField = document.getElementById('prodi-field');
+            if (role === 'mahasiswa' || role === 'dosen') {
+                prodiField.classList.remove('hidden');
+            } else {
+                prodiField.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('role').addEventListener('change', toggleProdiField);
+        document.addEventListener('DOMContentLoaded', toggleProdiField);
+    </script>
 @endsection

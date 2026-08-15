@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Prodi;
 use App\Models\RevisionNote;
 use App\Models\Schedule;
 use App\Models\Submission;
@@ -13,49 +14,69 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $prodis = collect();
+        $prodiData = [
+            ['kode_prodi' => 'TI', 'nama_prodi' => 'Teknik Informatika'],
+            ['kode_prodi' => 'SI', 'nama_prodi' => 'Sistem Informasi'],
+            ['kode_prodi' => 'DKV', 'nama_prodi' => 'Desain Komunikasi Visual'],
+            ['kode_prodi' => 'MBTI', 'nama_prodi' => 'Manajemen Bisnis dan Teknologi Informasi'],
+            ['kode_prodi' => 'ARS', 'nama_prodi' => 'Arsitektur'],
+        ];
+
+        foreach ($prodiData as $data) {
+            $prodis->push(Prodi::create([
+                'kode_prodi' => $data['kode_prodi'],
+                'nama_prodi' => $data['nama_prodi'],
+            ]));
+        }
+
         $admin = User::create([
             'name' => 'Admin SISIDANG',
             'username' => 'telo',
             'email' => 'admin@simsidang.local',
             'password' => Hash::make('kaspe'),
             'role' => 'admin',
+            'prodi_id' => null,
         ]);
 
         $dosens = collect();
         $dosenNames = [
-            'Dr. Budi Santoso, M.Kom.',
-            'Dra. Siti Rahayu, M.T.',
-            'Ir. Agus Wijaya, M.Sc.',
-            'Dr. Dewi Lestari, S.Kom., M.Kom.',
+            'Dr. Budi Santoso, M.Kom.' => 'TI',
+            'Dra. Siti Rahayu, M.T.' => 'SI',
+            'Ir. Agus Wijaya, M.Sc.' => 'TI',
+            'Dr. Dewi Lestari, S.Kom., M.Kom.' => 'SI',
         ];
 
         foreach ($dosenNames as $i => $name) {
             $dosens->push(User::create([
                 'name' => $name,
-                'username' => '001102'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+                'username' => '001102'.str_pad((string) ($i + 1), 5, '0', STR_PAD_LEFT),
                 'email' => 'dosen'.($i + 1).'@simsidang.local',
                 'password' => Hash::make('password'),
                 'role' => 'dosen',
+                'prodi_id' => $prodis->firstWhere('kode_prodi', array_values($dosenNames)[$i])->id,
             ]));
         }
 
         $mahasiswaData = [
-            ['name' => 'Andi Pratama', 'nim' => '20200101001', 'judul' => 'Sistem Informasi Manajemen Aset Berbasis Web'],
-            ['name' => 'Bella Anggraini', 'nim' => '20200101002', 'judul' => 'Aplikasi E-Learning dengan Fitur Gamifikasi'],
-            ['name' => 'Citra Dewi', 'nim' => '20200101003', 'judul' => 'Sistem Rekomendasi Pemilihan Jurusan Menggunakan Metode TOPSIS'],
-            ['name' => 'Dimas Saputra', 'nim' => '20200101004', 'judul' => 'Implementasi IoT untuk Monitoring Tanaman Hidroponik'],
-            ['name' => 'Eka Ramadhani', 'nim' => '20200101005', 'judul' => 'Sistem Pendukung Keputusan Seleksi Beasiswa'],
-            ['name' => 'Fajar Nugroho', 'nim' => '20200101006', 'judul' => 'Aplikasi Booking Lapangan Olahraga Berbasis Mobile'],
+            ['name' => 'Andi Pratama', 'nim' => '20200101001', 'judul' => 'Sistem Informasi Manajemen Aset Berbasis Web', 'prodi_kode' => 'TI'],
+            ['name' => 'Bella Anggraini', 'nim' => '20200101002', 'judul' => 'Aplikasi E-Learning dengan Fitur Gamifikasi', 'prodi_kode' => 'TI'],
+            ['name' => 'Citra Dewi', 'nim' => '20200101003', 'judul' => 'Sistem Rekomendasi Pemilihan Jurusan Menggunakan Metode TOPSIS', 'prodi_kode' => 'SI'],
+            ['name' => 'Dimas Saputra', 'nim' => '20200101004', 'judul' => 'Implementasi IoT untuk Monitoring Tanaman Hidroponik', 'prodi_kode' => 'SI'],
+            ['name' => 'Eka Ramadhani', 'nim' => '20200101005', 'judul' => 'Sistem Pendukung Keputusan Seleksi Beasiswa', 'prodi_kode' => 'DKV'],
+            ['name' => 'Fajar Nugroho', 'nim' => '20200101006', 'judul' => 'Aplikasi Booking Lapangan Olahraga Berbasis Mobile', 'prodi_kode' => 'TI'],
         ];
 
         $mahasiswa = collect();
         foreach ($mahasiswaData as $data) {
+            $prodi = $prodis->firstWhere('kode_prodi', $data['prodi_kode']);
             $mahasiswa->push(User::create([
                 'name' => $data['name'],
                 'username' => $data['nim'],
                 'email' => $data['nim'].'@mahasiswa.local',
                 'password' => Hash::make('password'),
                 'role' => 'mahasiswa',
+                'prodi_id' => $prodi->id,
             ]));
         }
 

@@ -17,7 +17,8 @@ class UserController extends Controller
 
         $search = $request->input('search');
 
-        $users = User::when($search, fn ($q, $s) => $q->where('name', 'like', "%$s%")->orWhere('username', 'like', "%$s%"))
+        $users = User::with('prodi')
+            ->when($search, fn ($q, $s) => $q->where('name', 'like', "%$s%")->orWhere('username', 'like', "%$s%"))
             ->orderBy('name')
             ->paginate(15)
             ->withQueryString();
@@ -42,6 +43,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
+            'prodi_id' => $request->prodi_id,
         ]);
 
         return redirect()->route('admin.users.index')->with('success', 'Pengguna berhasil ditambahkan.');
@@ -63,6 +65,7 @@ class UserController extends Controller
             'username' => $request->username,
             'email' => $request->email,
             'role' => $request->role,
+            'prodi_id' => $request->prodi_id,
         ]);
 
         if ($request->filled('password')) {

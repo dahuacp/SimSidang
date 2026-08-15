@@ -84,7 +84,7 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                                     @forelse($schedule->submissions as $submission)
-                                        <tr x-show="rowMatches(@json($submission->user?->name ?? '-'), @json($submission->user?->username ?? '-'))"
+                                        <tr x-show="rowMatches(@js($submission->user?->name ?? '-'), @js($submission->user?->username ?? '-'))"
                                             class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
                                             <td class="px-4 py-3 font-semibold text-gray-800 dark:text-gray-200">{{ $submission->user?->name ?? '-' }}</td>
                                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $submission->user?->username ?? '-' }}</td>
@@ -118,7 +118,7 @@
                                         @if(in_array($mhs->id, $submittedIds))
                                             @continue
                                         @endif
-                                        <tr x-show="rowMatches(@json($mhs->name), @json($mhs->username))"
+                                        <tr x-show="rowMatches(@js($mhs->name), @js($mhs->username))"
                                             class="bg-gray-50/50 dark:bg-gray-800/30">
                                             <td class="px-4 py-3 font-semibold text-gray-800 dark:text-gray-200">{{ $mhs->name }}</td>
                                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $mhs->username }}</td>

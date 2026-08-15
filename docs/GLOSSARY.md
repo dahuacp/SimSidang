@@ -4,6 +4,7 @@ Domain project ini berbahasa Indonesia (akademik), tapi konvensi Laravel biasany
 
 | Istilah Domain (Indonesia) | Arti | Nama Tabel/Kolom | Nama Model/Class | Catatan |
 |---|---|---|---|---|
+| Prodi / Program Studi | Study program (major) | `prodis` table (`kode_prodi`, `nama_prodi`)<br>`users.prodi_id` (FK) | `Prodi` | Mahasiswa & dosen wajib punya prodi; admin tidak perlu |
 | Mahasiswa | User dengan role peserta sidang | `users.role = 'mahasiswa'` | `User` (bukan model terpisah) | Login pakai NIM |
 | Dosen Penguji | User dengan role penguji | `users.role = 'dosen'` | `User` | Login pakai NIDN |
 | Admin | User pengelola sistem | `users.role = 'admin'` | `User` | Akses Asisten Virtual |

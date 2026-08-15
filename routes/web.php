@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AssistantController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExportController;
+use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SubmissionController as AdminSubmissionController;
 use App\Http\Controllers\Admin\UserController;
@@ -89,5 +90,13 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/asisten/conversations', [AssistantController::class, 'conversations'])->name('assistant.conversations');
             Route::get('/asisten/{conversation}', [AssistantController::class, 'show'])->name('assistant.show');
             Route::post('/asisten/{conversation}/chat', [AssistantController::class, 'chat'])->name('assistant.chat')->middleware('throttle:assistant');
+
+            // Prodi
+            Route::get('/prodis', [ProdiController::class, 'index'])->name('prodis.index');
+            Route::get('/prodis/create', [ProdiController::class, 'create'])->name('prodis.create');
+            Route::post('/prodis', [ProdiController::class, 'store'])->name('prodis.store');
+            Route::get('/prodis/{prodi}/edit', [ProdiController::class, 'edit'])->name('prodis.edit');
+            Route::put('/prodis/{prodi}', [ProdiController::class, 'update'])->name('prodis.update');
+            Route::delete('/prodis/{prodi}', [ProdiController::class, 'destroy'])->name('prodis.destroy');
         });
 });

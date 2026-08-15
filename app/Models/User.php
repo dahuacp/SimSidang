@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -20,6 +21,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'prodi_id',
     ];
 
     protected $hidden = [
@@ -55,5 +57,10 @@ class User extends Authenticatable
     public function schedulesAsDosen(): BelongsToMany
     {
         return $this->belongsToMany(Schedule::class, 'schedule_dosen', 'user_id', 'schedule_id');
+    }
+
+    public function prodi(): BelongsTo
+    {
+        return $this->belongsTo(Prodi::class, 'prodi_id');
     }
 }

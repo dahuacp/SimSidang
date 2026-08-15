@@ -11,7 +11,7 @@ class SchemaCatalog
     public function allowedTables(): array
     {
         return [
-            'users', 'schedules', 'schedule_dosen', 'submissions', 'revision_notes',
+            'users', 'prodis', 'schedules', 'schedule_dosen', 'submissions', 'revision_notes',
             'revision_attachments', 'submission_status_logs', 'notifications',
             'assistant_conversations', 'assistant_messages',
         ];

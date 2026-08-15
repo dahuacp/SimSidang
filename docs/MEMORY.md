@@ -15,7 +15,7 @@
 - **Environment:** Laravel 13.8.0, PHP 8.4.23, MariaDB 11.8.6 (MySQL-compatible), DB `sidangapp2`/user `sidang`/pass `sidang` @ 127.0.0.1:3306. `APP_NAME=SISIDANG`, `APP_LOCALE=id`, `FILESYSTEM_DISK=local`. Packages: `maatwebsite/excel` ^3.1, `barryvdh/laravel-dompdf` ^3.1, `apexcharts` ^6.7.0 (npm), `tailwindcss`/`@tailwindcss/vite` ^4.1.12 (npm). Frontend: TailAdmin (Tailwind v4), tanpa `tailwind.config.js`.
 - **Seed:** admin `telo`/`kaspe`, 4 dosen, 6 mahasiswa, 4 schedules, 6 submissions, 2 revision notes. `migrate:fresh` sukses; semua migration termasuk Tahap 3 (`assistant_conversations`, `assistant_messages`).
 - **Migration terakhir:** semua 11 migration (6 Tahap1 + 2 Tahap2 + 2 Tahap3 + `schedule_mahasiswa`) terakhir dijalankan via `php artisan migrate` pada DB nyata.
- - **Test:** 120 test Pest (SQLite :memory: + RefreshDatabase), **semua lulus** (296 assertions). `pint`, `npm run lint`, `npm run build` bersih/sukses.
+ - **Test:** 130 test Pest (SQLite :memory: + RefreshDatabase), **semua lulus** (324 assertions). `pint`, `npm run lint`, `npm run build` bersih/sukses.
 
 ---
 
@@ -39,7 +39,28 @@
 ## Log Sesi
 *(Append-only. Entri terbaru di paling atas. Format: tanggal — ringkasan — file yang diubah — catatan untuk sesi berikutnya.)*
 
-### 2026-08-15 — Approval revisi dosen: tombol resolve hanya untuk pemilik poin
+### 2026-08-15 — Fix filter mahasiswa di halaman dosen/submissions
+- **Ringkasan:** Filter pencarian mahasiswa (client-side via Alpine.js `x-show="rowMatches(...)"`) pada halaman `dosen/submissions/index` tidak berfunensi. Akar masalah sama seperti bug schedule edit: `@json()` pada atribut `x-show` menghasilkan output JSON dengan karakter `"` yang merusak parsing atribut HTML. Browser error: `ReferenceError: selected is not defined` dll (dari build lama), `Alpine Expression Error: Unexpected token '}'`.
+- **Perbaikan:** Ganti `@json()` → `@js()` di `dosen/submissions/index.blade.php` line 87 (submission rows) dan line 121 (mahasiswa rows yang belum upload). `@js` menggunakan `Js::from()` dengan flag `JSON_HEX_QUOT` — meng-encode `"` sebagai `\u0022`, aman di atribut HTML sekaligus valid JS.
+- **File diubah:** `resources/views/dosen/submissions/index.blade.php` (2 perubahan @json→@js).
+- **Catatan teknis:** Bug ini sama polanya dengan `@json()` di `admin/schedules/edit.blade.php` yang sudah diperbaiki sesi sebelumnya. Pattern: `@json()` di dalam HTML attribute (x-data, x-show) = selalu rusak bila value mengandung `"`. `@js()` = the fix. 6 usage `@json` di `admin/dashboard.blade.php` di dalam `<script>` tag aman (bukan HTML attribute).
+- **Verifikasi:** npm run build ✓, 130 test lulus ✓, pint ✓, lint ✓.
+
+### 2026-08-15 — Fix schedule plotting dosen (searchable select bug + keyboard nav)
+- **Ringkasan:** Dosen searchable select pada halaman edit jadwal tidak berfungsi karena `@json()` pada `initialSelected` menghasilkan output JSON dengan karakter `"` yang merusak parsing atribut HTML `x-data`. Browser log menunjukkan error `SyntaxError: Unexpected token ';'`, `ReferenceError: selected/search/loading/filteredResults is not defined`. Dosen assignment hanya bisa dilakukan via form utama, berbeda dengan mahasiswa yang punya section "Plotting Mahasiswa" terpisah.
+- **Perbaikan:** (1) Ganti `@json()` → `@js(...->toArray())` di `edit.blade.php` — `@js` menggunakan `Js::from()` dengan flag `JSON_HEX_QUOT` yang meng-encode `"` sebagai `\u0022`, aman untuk atribut HTML. (2) Tambahkan keyboard navigation (arrow up/down, Enter) pada searchable input dosen dan mahasiswa di halaman edit. (3) Rebuild Vite, semua 130 test lulus, pint + lint bersih.
+- **File diubah:** `resources/views/admin/schedules/edit.blade.php` (3 perubahan: @json→@js, keyboard nav dosen, keyboard nav mahasiswa).
+- **Catatan teknis:** `@json` Blade directive output JSON `"` chars directly inside double-quoted HTML attribute → browser parses attribute termination early → Alpine expression compilation fails → cascading ReferenceErrors. `@js`/`Js::from()` with `JSON_HEX_QUOT` flag produces `\u0022` which is valid JS escape inside HTML attr.
+- **Catatan sesi berikutnya:** Frontend JS sudah ada method `moveHighlight()`/`selectHighlighted()` di `searchable-select.js`, hanya belum di-bind ke event keyboard di template. Semua error di browser log resolved setelah fix build yang baru.
+
+### 2026-08-15 — Implementasi Prodi (Program Studi) untuk Dosen & Mahasiswa
+- **Ringkasan:** Tambahkan entitas Prodi (program studi) sebagai master data yang dapat di-CRUD oleh admin. Users (mahasiswa/dosen) wajib punya prodi; admin tidak perlu. Prodi disimpan di tabel `prodis` (kode_prodi unique, nama_prodi) dengan FK `prodi_id` di tabel `users`. Validasi di FormRequest pakai `Rule::requiredIf` — prodi_id required hanya saat role = mahasiswa/dosen. UI: dropdown dinamis di form create/edit user (show/hide via JS), kolom Prodi di tabel user index, menu sidebar baru "Program Studi". SchemaCatalog di-update (tambahkan `prodis` ke allowedTables). Factory Prodi (10 preset, counter-based untuk uniqueness). Seeder dibuat 5 prodi + assign ke dosen/mahasiswa.
+- **File baru:** migration `create_prodis_table`, `add_prodi_id_to_users_table`; model `Prodi.php`; controller `Admin/ProdiController.php`; FormRequest `StoreProdiRequest`, `UpdateProdiRequest`; views `admin/prodis/{index,create,edit}.blade.php`; factory `ProdiFactory`; `AdminProdiTest.php`.
+- **File diubah:** `User.php` (prodi_id fillable, belonsTo), `StoreUserRequest`, `UpdateUserRequest` (validasi prodi), `UserController` (prodi_id di store/update + eager load), `admin/users/create.blade.php` + `edit.blade.php` (dropdown prodi show/hide), `admin/users/index.blade.php` (kolom Prodi), `DatabaseSeeder` (seed prodi + assign), `SchemaCatalog` (allowedTables), `sidebar.blade.php` (menu Prodi), `routes/web.php` (resource route), `GLOSSARY.md`, `SCHEMA.md`.
+- **Catatan teknis:** `nullable` di rules array Laravel melewatkan validator lain saat nilai null — pakai `Rule::requiredIf` untuk conditional requirement. Factory Prodi pakai static counter untuk unique kode/nama. `php artisan migrate` sukses; semua 130 test lulus (324 assertions), pint + lint bersih.
+- **Catatan sesi berikutnya:** Belum di-commit. User import (Excel) di masa depan bisa pakai kode_prodi untuk lookup prodi.
+
+
 - **Ringkasan:** Backend sudah membatasi resolve ke pemilik poin (`RevisionNotePolicy::resolve` → `$note->dosen_id === $user->id`), tapi UI di halaman detail submission dosen menampilkan tombol "Tandai Resolved" untuk SEMUA poin open — non-owner yang klik mendapat 403. Perbaikan murni UI: tombol hanya dirender saat `$note->status_poin === 'open' && auth()->user()->can('resolve', $note)`. Tambah label kepemilikan: badge "Poin Anda" untuk poin sendiri; hint "Menunggu konfirmasi {nama dosen}" untuk poin dosen lain yang masih open. Dosen tetap bisa melihat status Open/Resolved + isi poin dari dosen lain.
 - **File diubah:** `resources/views/dosen/submissions/show.blade.php` (guard tombol + label kepemilikan), `tests/Feature/RevisionFlowTest.php` (+2 test view), `docs/MEMORY.md`.
 - **Keputusan penting:** Pakai `@can('resolve', $note)` (bukan perbandingan `dosen_id === auth()->id()` di view) supaya UI sinkron dengan policy — single source of truth. Status pill untuk semua poin tetap dipertahankan (kebutuhan "lihat status revisi dosen lain").

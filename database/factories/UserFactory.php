@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Prodi;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -23,6 +24,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'role' => 'mahasiswa',
+            'prodi_id' => Prodi::inRandomOrder()->first()?->id,
             'remember_token' => Str::random(10),
         ];
     }
@@ -33,6 +35,7 @@ class UserFactory extends Factory
             'role' => 'admin',
             'username' => 'telo',
             'name' => 'Admin SISIDANG',
+            'prodi_id' => null,
         ]);
     }
 
@@ -41,6 +44,7 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'role' => 'dosen',
             'username' => fake()->unique()->numerify('###########'),
+            'prodi_id' => Prodi::inRandomOrder()->first()?->id,
         ]);
     }
 
@@ -48,6 +52,7 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'role' => 'mahasiswa',
+            'prodi_id' => Prodi::inRandomOrder()->first()?->id,
         ]);
     }
 

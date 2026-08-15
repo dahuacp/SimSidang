@@ -18,6 +18,7 @@ Tujuan: satu alur utuh mahasiswa upload → dosen kasih revisi → mahasiswa bal
 - [x] **FR-04 (mahasiswa):** Balas teks + upload attachment per poin (validasi format & 5MB)
 - [x] **FR-04 (dosen):** Ubah status poin `open` → `resolved`
 - [x] Test dasar (Pest/PHPUnit) untuk auth, upload, dan alur revisi
+- [x] **Prodi (Program Studi):** master CRUD admin, kolom prodi_id di users, validasi required untuk mahasiswa/dosen
 
 ## Tahap 2 — Peningkatan Operasional
 Tujuan: memudahkan admin & mengurangi kerja manual, setelah alur inti stabil dipakai.

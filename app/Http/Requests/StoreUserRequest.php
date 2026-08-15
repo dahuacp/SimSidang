@@ -20,6 +20,10 @@ class StoreUserRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'role' => ['required', Rule::in(['mahasiswa', 'dosen', 'admin'])],
+            'prodi_id' => [
+                Rule::requiredIf(in_array($this->input('role'), ['mahasiswa', 'dosen'])),
+                'exists:prodis,id',
+            ],
         ];
     }
 
@@ -34,6 +38,8 @@ class StoreUserRequest extends FormRequest
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
             'role.required' => 'Peran wajib dipilih.',
             'role.in' => 'Peran tidak valid.',
+            'prodi_id.required' => 'Program studi wajib dipilih untuk mahasiswa dan dosen.',
+            'prodi_id.exists' => 'Program studi tidak valid.',
         ];
     }
 }

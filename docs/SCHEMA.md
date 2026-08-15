@@ -5,7 +5,8 @@ Referensi cepat skema database, tanpa narasi produk (narasi lengkap ada di `PRD-
 ## Daftar Tabel
 | Tabel | Fungsi |
 |---|---|
-| `users` | Admin, Dosen, Mahasiswa (satu tabel, dibedakan kolom `role`) |
+| `users` | Admin, Dosen, Mahasiswa (satu tabel, dibedakan kolom `role`). Kolom `prodi_id` FK → `prodis` (nullable — admin tidak punya prodi) |
+| `prodis` | Daftar program studi (CRUD oleh admin) |
 | `schedules` | Ruang & grouping jadwal sidang |
 | `schedule_dosen` | Pivot: dosen mana ditugaskan ke jadwal mana |
 | `submissions` | Laporan utama yang diunggah mahasiswa |
@@ -27,6 +28,14 @@ assistant_conversations (1) ───< assistant_messages
 
 ## Definisi Tabel
 
+### `prodis`
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | bigint, PK | |
+| `kode_prodi` | string, unique | mis. "TI", "SI", "DKV" |
+| `nama_prodi` | string | mis. "Teknik Informatika" |
+| `timestamps` | | |
+
 ### `users` (extend tabel bawaan Fortify)
 | Kolom | Tipe | Keterangan |
 |---|---|---|
@@ -34,6 +43,7 @@ assistant_conversations (1) ───< assistant_messages
 | `username` | string, unique | NIM (mahasiswa) atau NIDN (dosen) |
 | `role` | enum(`mahasiswa`,`dosen`,`admin`) | default `mahasiswa` |
 | `email`, `password`, dll | bawaan Laravel | |
+| `prodi_id` | FK → `prodis.id`, nullable | required untuk role mahasiswa & dosen (divalidasi di app level), nullable untuk admin |
 | `two_factor_secret`, `two_factor_recovery_codes`, `two_factor_confirmed_at` | bawaan Fortify | untuk Tahap 3 (passkey), tidak dipakai di MVP inti |
 
 ### `schedules`
@@ -106,7 +116,9 @@ assistant_conversations (1) ───< assistant_messages
 
 ## Urutan Migration yang Disarankan
 1. `users` (extend — tambah `username`, `role`)
-2. `schedules`
+2. `prodis`
+3. `add_prodi_id_to_users` (foreign key → `prodis`)
+4. `schedules`
 3. `schedule_dosen`
 4. `submissions`
 5. `revision_notes`

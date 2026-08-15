@@ -47,7 +47,7 @@
             <div x-data="searchableSelect({
                 endpoint: '/admin/schedules/{{ $schedule->id }}/search-users?type=dosen',
                 multiple: true,
-                initialSelected: @json($schedule->dosens->map(fn($d) => ['id'=>$d->id, 'name'=>$d->name, 'username'=>$d->username]))
+                initialSelected: @js($schedule->dosens->map(fn($d) => ['id'=>$d->id, 'name'=>$d->name, 'username'=>$d->username])->toArray())
             })" class="relative">
                 <div x-show="selected.length" class="mb-2 flex flex-wrap gap-1.5">
                     <template x-for="item in selected" :key="item.id">
@@ -70,6 +70,9 @@
                        @input="debouncedFetch()"
                        @focus="open = true"
                        @keydown.escape="open = false; search = ''"
+                       @keydown.arrow-down="open = true; moveHighlight('down')"
+                       @keydown.arrow-up="open = true; moveHighlight('up')"
+                       @keydown.enter.prevent="selectHighlighted()"
                        placeholder="Ketik nama atau NIDN..."
                        class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
 
@@ -128,6 +131,9 @@
                    @input="debouncedFetch()"
                    @focus="open = true"
                    @keydown.escape="open = false; search = ''"
+                   @keydown.arrow-down="open = true; moveHighlight('down')"
+                   @keydown.arrow-up="open = true; moveHighlight('up')"
+                   @keydown.enter.prevent="selectHighlighted()"
                    placeholder="Ketik nama atau NIM..."
                    class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
 

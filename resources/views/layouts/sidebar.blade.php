@@ -65,9 +65,16 @@
                class="menu-item {{ request()->routeIs('admin.users.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                 <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 014.445 4.445L6.445 18.74A4 4 0 0111.314 12.89l5.13 5.13a4 4 0 01-.894.56z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 20a4 4 0 010-5.657L8.343 10.343A4 4 0 0111 9h2a4 4 0 013 1l4 4v5a2 2 0 01-2 2H6a2 2 0 01-2-2z"></path>
+                    <path fill="currentColor" d="M14 9a5 5 0 105 5 5 5 0 01-5-5z"></path>
                 </svg>
                 <span>Pengguna</span>
+            </a>
+            <a href="{{ route('admin.prodis.index') }}"
+               class="menu-item {{ request()->routeIs('admin.prodis.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.045V3m-3 3l3-3 3 3m-3 3v6m-6-6h12"></path>
+                </svg>
+                <span>Program Studi</span>
             </a>
             <a href="{{ route('admin.schedules.index') }}"
                class="menu-item {{ request()->routeIs('admin.schedules.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
