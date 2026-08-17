@@ -92,7 +92,7 @@
                      class="absolute top-full left-0 right-0 z-[100] mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-300 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
                     <div x-show="loading" class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">Mencari...</div>
                     <template x-for="item in filteredResults()" :key="item.id">
-                        <button @click="select(item)"
+                        <button type="button" @click="select(item)"
                                 class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800">
                             <span x-text="item.name"></span>
                             <span class="text-xs text-gray-500 dark:text-gray-400" x-text="'(' + item.username + ')'"></span>

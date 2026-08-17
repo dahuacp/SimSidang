@@ -205,6 +205,23 @@ test('halaman edit jadwal menampilkan searchable dosen dan mahasiswa component',
         ->assertSee($dosen->name);
 });
 
+test('tombol hasil searchable tidak memicu submit form (create)', function () {
+    $admin = User::factory()->admin()->create();
+
+    $html = $this->actingAs($admin)->get(route('admin.schedules.create'))->getContent();
+
+    expect(substr_count($html, 'type="button" @click="select(item)"'))->toBeGreaterThanOrEqual(1);
+});
+
+test('tombol hasil searchable tidak memicu submit form (edit)', function () {
+    $admin = User::factory()->admin()->create();
+    $schedule = Schedule::factory()->create();
+
+    $html = $this->actingAs($admin)->get(route('admin.schedules.edit', $schedule))->getContent();
+
+    expect(substr_count($html, 'type="button" @click="select(item)"'))->toBeGreaterThanOrEqual(2);
+});
+
 test('create jadwal dengan searchable component masih menyimpan dosen', function () {
     $admin = User::factory()->admin()->create();
     $dosen = User::factory()->dosen()->create();
