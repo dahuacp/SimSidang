@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SubmissionController as AdminSubmissionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Dosen\AiSubmissionController;
 use App\Http\Controllers\Dosen\PenilaianController as DosenPenilaianController;
 use App\Http\Controllers\Dosen\RevisionNoteController as DosenRevisionNoteController;
 use App\Http\Controllers\Dosen\SubmissionController as DosenSubmissionController;
@@ -51,6 +52,8 @@ Route::middleware(['auth'])->group(function () {
         ->group(function () {
             Route::get('/submissions', [DosenSubmissionController::class, 'index'])->name('submissions.index');
             Route::get('/submissions/{submission}', [DosenSubmissionController::class, 'show'])->name('submissions.show');
+            Route::post('/submissions/{submission}/ai-read', [AiSubmissionController::class, 'analyze'])->name('ai-read');
+            Route::post('/submissions/{submission}/ai-read/refresh', [AiSubmissionController::class, 'refresh'])->name('ai-read.refresh');
             Route::get('/submissions/{submission}/revision-notes/create', [DosenRevisionNoteController::class, 'create'])->name('revision-notes.create');
             Route::post('/submissions/{submission}/revision-notes', [DosenRevisionNoteController::class, 'store'])->name('revision-notes.store');
             Route::patch('/revision-notes/{revisionNote}/resolve', [DosenRevisionNoteController::class, 'resolve'])->name('revision-notes.resolve');
