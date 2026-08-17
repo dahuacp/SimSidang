@@ -2,6 +2,8 @@
     <div x-data="aiRead({
         submitUrl: @js(route('dosen.ai-read', $submission)),
         refreshUrl: @js(route('dosen.ai-read.refresh', $submission)),
+        draftUrl: @js(route('dosen.revision-notes.draft', $submission)),
+        createUrl: @js(route('dosen.revision-notes.create', $submission)),
         token: @js(csrf_token())
     })">
         <button type="button" @click="analyze()"
@@ -47,6 +49,15 @@
                                 </li>
                             </template>
                         </ul>
+
+                        <button type="button" @click="goToRevision()"
+                                :disabled="loading"
+                                class="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Buat Revisi dari Hasil AI
+                        </button>
 
                         <div class="mt-4 flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-800">
                             <span class="text-xs text-gray-400 dark:text-gray-500">

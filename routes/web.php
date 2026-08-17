@@ -56,6 +56,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/submissions/{submission}/ai-read/refresh', [AiSubmissionController::class, 'refresh'])->name('ai-read.refresh');
             Route::get('/submissions/{submission}/revision-notes/create', [DosenRevisionNoteController::class, 'create'])->name('revision-notes.create');
             Route::post('/submissions/{submission}/revision-notes', [DosenRevisionNoteController::class, 'store'])->name('revision-notes.store');
+            Route::post('/submissions/{submission}/revision-notes/draft', [DosenRevisionNoteController::class, 'draft'])->name('revision-notes.draft');
             Route::patch('/revision-notes/{revisionNote}/resolve', [DosenRevisionNoteController::class, 'resolve'])->name('revision-notes.resolve');
 
             Route::get('/penilaian', [DosenPenilaianController::class, 'index'])->name('penilaian.index');

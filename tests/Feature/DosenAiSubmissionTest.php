@@ -228,3 +228,83 @@ test('halaman detail menampilkan tombol Baca dengan AI', function () {
         ->assertOk()
         ->assertSee('Baca dengan AI');
 });
+
+test('draft revisi butuh auth (redirect login)', function () {
+    [$_, $submission] = makeAiAssignedSubmission();
+
+    $this->post(route('dosen.revision-notes.draft', $submission))
+        ->assertRedirect(route('login'));
+});
+
+test('dosen non-assign tidak bisa akses draft (403)', function () {
+    $dosenLain = User::factory()->dosen()->create();
+    [$_, $submission] = makeAiAssignedSubmission();
+
+    $this->actingAs($dosenLain)
+        ->post(route('dosen.revision-notes.draft', $submission), ['points' => ['Poin 1']])
+        ->assertForbidden();
+});
+
+test('draft revisi simpan ke session, halaman create render textarea terisi bernomor', function () {
+    [$dosen, $submission] = makeAiAssignedSubmission();
+    $points = ['Poin pertama AI', 'Poin kedua AI', 'Poin ketiga AI'];
+
+    $this->actingAs($dosen)
+        ->post(route('dosen.revision-notes.draft', $submission), ['points' => $points])
+        ->assertOk()
+        ->assertJson(['success' => true]);
+
+    $this->actingAs($dosen)
+        ->get(route('dosen.revision-notes.create', $submission))
+        ->assertOk()
+        ->assertSee('1. Poin pertama AI')
+        ->assertSee('2. Poin kedua AI')
+        ->assertSee('3. Poin ketiga AI');
+});
+
+test('halaman create tanpa draft textarea kosong', function () {
+    [$dosen, $submission] = makeAiAssignedSubmission();
+
+    $this->actingAs($dosen)
+        ->get(route('dosen.revision-notes.create', $submission))
+        ->assertOk()
+        ->assertSee('placeholder="Tuliskan poin revisi untuk mahasiswa..."', false);
+});
+
+test('tombol Buat Revisi dari Hasil AI tampil di halaman detail setelah analisa', function () {
+    Storage::fake('local');
+    Storage::disk('local')->put('submissions/laporan.pdf', 'fake');
+    [$dosen, $submission] = makeAiAssignedSubmission();
+    stubAiPdfParser();
+    stubAiLlm(defaultAiData());
+
+    $this->actingAs($dosen)
+        ->post(route('dosen.ai-read', $submission))
+        ->assertOk();
+
+    $this->actingAs($dosen)
+        ->get(route('dosen.submissions.show', $submission))
+        ->assertOk()
+        ->assertSee('Buat Revisi dari Hasil AI');
+});
+
+test('draft session dihapus setelah halaman create dibuka', function () {
+    [$dosen, $submission] = makeAiAssignedSubmission();
+    $points = ['Poin AI'];
+
+    $this->actingAs($dosen)
+        ->post(route('dosen.revision-notes.draft', $submission), ['points' => $points])
+        ->assertOk();
+
+    // First visit - should show draft
+    $this->actingAs($dosen)
+        ->get(route('dosen.revision-notes.create', $submission))
+        ->assertOk()
+        ->assertSee('1. Poin AI');
+
+    // Second visit - draft should be cleared (pulled)
+    $this->actingAs($dosen)
+        ->get(route('dosen.revision-notes.create', $submission))
+        ->assertOk()
+        ->assertSee('placeholder="Tuliskan poin revisi untuk mahasiswa..."', false);
+});

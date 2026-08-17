@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreAiDraftRevisionNoteRequest;
 use App\Http\Requests\StoreRevisionNoteRequest;
 use App\Http\Requests\UpdateRevisionNoteRequest;
 use App\Models\RevisionNote;
@@ -18,7 +19,19 @@ class RevisionNoteController extends Controller
 
         $submission->load('revisionNotes.dosen');
 
-        return view('dosen.revision-notes.create', compact('submission'));
+        $draft = $request->session()->pull('ai_revision_draft.'.$submission->id, []);
+        $defaultRevision = collect($draft)->map(fn ($p, $i) => ($i + 1).'. '.$p)->implode("\n");
+
+        return view('dosen.revision-notes.create', compact('submission', 'defaultRevision'));
+    }
+
+    public function draft(StoreAiDraftRevisionNoteRequest $request, Submission $submission)
+    {
+        $this->authorize('view', $submission);
+
+        $request->session()->put('ai_revision_draft.'.$submission->id, $request->validated('points'));
+
+        return response()->json(['success' => true]);
     }
 
     public function store(StoreRevisionNoteRequest $request, Submission $submission, NotificationService $notificationService)

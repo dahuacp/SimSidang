@@ -34,6 +34,34 @@ Alpine.data('aiRead', (config) => ({
         }
     },
 
+    async goToRevision() {
+        if (!this.points.length) {
+            return;
+        }
+        this.loading = true;
+        this.error = null;
+        try {
+            const res = await fetch(config.draftUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': config.token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ points: this.points }),
+            });
+            const json = await res.json();
+            if (!res.ok || !json.success) {
+                throw new Error(json.message || 'Gagal menyimpan draf revisi.');
+            }
+            window.location.href = config.createUrl;
+        } catch (e) {
+            this.error = e.message;
+        } finally {
+            this.loading = false;
+        }
+    },
+
     async run(url) {
         const res = await fetch(url, {
             method: 'POST',
