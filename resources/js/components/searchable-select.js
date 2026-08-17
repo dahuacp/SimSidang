@@ -81,7 +81,11 @@ Alpine.data('searchableSelect', (config) => ({
 
         if (config.submitOnSelect) {
             const form = this.$el.closest('form');
-            if (form) form.submit();
+            if (form) {
+                const input = form.querySelector('input[name="user_id"]');
+                if (input) input.value = item.id;
+                form.submit();
+            }
         }
     },
 
