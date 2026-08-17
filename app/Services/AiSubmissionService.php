@@ -29,7 +29,7 @@ class AiSubmissionService
         return [
             'summary' => $response['summary'],
             'suggestedPoints' => $response['suggestedPoints'],
-            'cached' => ! $forceRefresh,
+            'cached' => $response['cached'],
             'model' => config('assistant.llm.model'),
         ];
     }
@@ -76,7 +76,7 @@ class AiSubmissionService
                 $generated = Carbon::parse($cached['generated_at']);
 
                 if ($generated->diffInHours(now()) < 24) {
-                    return $cached;
+                    return array_merge($cached, ['cached' => true]);
                 }
             }
         }
@@ -84,6 +84,7 @@ class AiSubmissionService
         $response = $this->askLlm($markdown);
         $response['generated_at'] = now()->toISOString();
         $response['model'] = config('assistant.llm.model');
+        $response['cached'] = false;
 
         $disk->put($path, json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
 
