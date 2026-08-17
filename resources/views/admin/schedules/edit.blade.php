@@ -135,7 +135,8 @@
         <div x-data="searchableSelect({
             endpoint: '/admin/schedules/{{ $schedule->id }}/search-users?type=mahasiswa',
             multiple: false,
-            initialSelected: null
+            initialSelected: null,
+            submitOnSelect: true
         })" class="relative">
             <input type="text"
                    x-model="search"
@@ -175,6 +176,7 @@
             Plot Mahasiswa
         </button>
     </form>
+    <p class="mb-3 max-w-3xl text-xs text-gray-500 dark:text-gray-400">Tekan <kbd class="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold dark:bg-gray-800">Enter</kbd> atau klik hasil pencarian untuk langsung menambah mahasiswa ke jadwal.</p>
 
     <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
         <div class="overflow-x-auto">

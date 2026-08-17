@@ -6,3 +6,4 @@ Before planning or editing, find the row whose globs match the file's path and r
 | --- | --- |
 | app/Http/Controllers/Dosen/** | .ai/rules/dosen.md |
 | resources/views/dosen/penilaian/** | .ai/rules/penilaian.md |
+| resources/views/**/*.blade.php | .ai/rules/views.md |

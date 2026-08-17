@@ -78,6 +78,11 @@ Alpine.data('searchableSelect', (config) => ({
         this.open = false;
         this.results = [];
         this.highlighted = 0;
+
+        if (config.submitOnSelect) {
+            const form = this.$el.closest('form');
+            if (form) form.submit();
+        }
     },
 
     remove(item) {

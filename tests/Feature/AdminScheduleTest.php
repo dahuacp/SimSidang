@@ -222,6 +222,15 @@ test('tombol hasil searchable tidak memicu submit form (edit)', function () {
     expect(substr_count($html, 'type="button" @click="select(item)"'))->toBeGreaterThanOrEqual(2);
 });
 
+test('plotting mahasiswa auto-submit saat select (submitOnSelect)', function () {
+    $admin = User::factory()->admin()->create();
+    $schedule = Schedule::factory()->create();
+
+    $this->actingAs($admin)->get(route('admin.schedules.edit', $schedule))
+        ->assertOk()
+        ->assertSee('submitOnSelect: true', false);
+});
+
 test('create jadwal dengan searchable component masih menyimpan dosen', function () {
     $admin = User::factory()->admin()->create();
     $dosen = User::factory()->dosen()->create();

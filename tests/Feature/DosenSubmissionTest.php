@@ -59,8 +59,8 @@ test('dosen melihat submission mahasiswa di jadwalnya', function () {
 
 test('filter hari ini hanya menampilkan jadwal hari ini', function () {
     $dosen = User::factory()->dosen()->create();
-    $hariIni = Schedule::factory()->create(['tanggal_sidang' => now()->toDateString()]);
-    $besok = Schedule::factory()->create(['tanggal_sidang' => now()->addDay()->toDateString()]);
+    $hariIni = Schedule::factory()->create(['nama_grup_sidang' => 'Jadwal Hari Ini Filter', 'tanggal_sidang' => now()->toDateString()]);
+    $besok = Schedule::factory()->create(['nama_grup_sidang' => 'Jadwal Besok Filter', 'tanggal_sidang' => now()->addDay()->toDateString()]);
     $hariIni->dosens()->attach($dosen->id);
     $besok->dosens()->attach($dosen->id);
 
