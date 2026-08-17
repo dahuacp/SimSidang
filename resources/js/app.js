@@ -3,6 +3,7 @@ import Alpine from 'alpinejs';
 import './apex';
 import './components/chat-assistant';
 import './components/searchable-select';
+import './components/ai-read';
 
 window.Alpine = Alpine;
 

@@ -32,13 +32,16 @@
             </p>
         </div>
         @if($submission->file_path)
-            <a href="{{ route('files.submission', $submission) }}"
-               class="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border border-brand-500 px-4 py-2 text-sm font-medium text-brand-500 transition hover:bg-brand-50 dark:border-brand-500 dark:text-brand-400 dark:hover:bg-brand-500/10">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 9l5 5 5-5M12 14V4"></path>
-                </svg>
-                Unduh Laporan
-            </a>
+            <div class="mt-4 flex flex-wrap gap-3">
+                <a href="{{ route('files.submission', $submission) }}"
+                   class="inline-flex items-center justify-center gap-2 rounded-lg border border-brand-500 px-4 py-2 text-sm font-medium text-brand-500 transition hover:bg-brand-50 dark:border-brand-500 dark:text-brand-400 dark:hover:bg-brand-500/10">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 9l5 5 5-5M12 14V4"></path>
+                    </svg>
+                    Unduh Laporan
+                </a>
+                @include('dosen.submissions._ai-read-modal', ['submission' => $submission])
+            </div>
         @endif
     </div>
 
