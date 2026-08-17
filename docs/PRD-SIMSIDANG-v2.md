@@ -2,7 +2,7 @@
 
 ## Project Name: Sistem Manajemen Sidang Akademik (SIMSIDANG)
 **Author:** Senior Laravel Developer
-**Status:** Updated v3 (Laravel 13, MySQL, Metis Admin Template — Yellow Accent, Asisten Virtual Admin menggantikan Analisa AI Dokumen)
+**Status:** Updated v4 (Laravel 13, MySQL, Metis Admin Template — Yellow Accent, Asisten Virtual Admin menggantikan Analisa AI Dokumen di dashboard admin; Analisa AI Dokumen untuk Dosen hadir kembali sebagai fitur terpisah — lihat FR-07)
 **Target Release:** Q3 2026
 
 ---
@@ -215,7 +215,7 @@ Schema::create('assistant_messages', function (Blueprint $table) {
 *   **Spesifikasi UI:** Builder template admin (Alpine repeatable items). Form isian dosen (render dari template items, hitung skor total live). Ringkasan mahasiswa (tabel per-item + skor_total).
 
 ### FR-05: Asisten Virtual Analisa Kondisi (Admin)
-*   **Kebutuhan:** Admin membutuhkan cara cepat untuk memahami kondisi keseluruhan pelaksanaan sidang tanpa harus membaca tabel satu per satu — misalnya progres mahasiswa, beban/kecepatan review dosen, dan poin revisi yang menumpuk/mandek. Fitur analisa dokumen PDF dengan AI **dihapus** dari cakupan; digantikan asisten chat berbasis LLM yang menjawab pertanyaan admin memakai data agregat sistem (bukan menganalisa isi dokumen laporan).
+*   **Kebutuhan:** Admin membutuhkan cara cepat untuk memahami kondisi keseluruhan pelaksanaan sidang tanpa harus membaca tabel satu per satu — misalnya progres mahasiswa, beban/kecepatan review dosen, dan poin revisi yang menumpuk/mandek. Analisa isi dokumen laporan dengan AI **bukan bagian dari asisten ini** — asisten chat berbasis LLM menjawab pertanyaan admin memakai data agregat sistem, bukan menganalisa isi dokumen laporan. Analisa isi dokumen laporan untuk dosen ditangani fitur terpisah **FR-07 (Baca dengan AI)**.
 *   **Spesifikasi Teknik:**
     *   Antarmuka chat di halaman admin (adaptasi halaman *Messages* Metis menjadi satu panel "Asisten Virtual"), aksen kuning pada bubble pesan asisten & tombol kirim.
     *   Admin bertanya bebas dalam Bahasa Indonesia, contoh: *"Dosen mana yang paling lambat resolve revisi bulan ini?"*, *"Berapa mahasiswa yang masih ada poin revisi terbuka lebih dari 7 hari?"*, *"Ringkas kondisi ruang Lab Komputer 3 hari ini."*
@@ -230,6 +230,17 @@ Schema::create('assistant_messages', function (Blueprint $table) {
     *   Guardrail: asisten hanya bisa **membaca** data agregat, tidak pernah diberi tool untuk mengubah/menghapus data (create/update/delete) — mencegah asisten "melakukan aksi" di luar niat admin.
     *   Gate `use-virtual-assistant` — khusus role `admin`.
     *   Error handling: LLM timeout (tampilkan retry), tool call gagal (fallback ke pesan "data tidak tersedia" tanpa mengarang jawaban), rate limit percakapan per admin untuk mencegah penyalahgunaan biaya API.
+
+### FR-07: Baca dengan AI (Analisa Dokumen Laporan — Dosen)
+*   **Kebutuhan:** Dosen penguji yang ditugaskan pada jadwal sidang ingin memahami isi laporan mahasiswa dengan cepat sebelum/saat sidang. Fitur "Baca dengan AI" mengonversi PDF laporan ke Markdown lalu menganalisanya lewat LLM lokal untuk menghasilkan ringkasan dan rekomendasi revisi perbaikan.
+*   **Aturan rule:** Analisa memakai prompt terpisah dari Asisten Virtual admin (FR-05) dan fokus pada **Bab 1 (Pendahuluan), Bab 3 (Metodologi), Bab 4 (Hasil dan Pembahasan), Bab 5 (Penutup)**. Output berupa ringkasan singkat (topik, metode, temuan kunci) dan daftar poin rekomendasi revisi per bab. Bahasa Indonesia saja.
+*   **Spesifikasi Teknik:**
+    *   Konversi PDF → Markdown memakai `smalot/pdfparser` (parser lokal, tidak mengirim berkas laporan ke layanan eksternal).
+    *   LLM dipanggil memakai infrastruktur yang sama dengan FR-05: `LlmProviderInterface` + `OpenAiCompatibleProvider` (config `assistant.llm.*` via `.env`), **tanpa** tool-calling — konteksnya adalah isi dokumen yang sudah di-Markdown-kan. Tidak ada batasan ukuran input selain limit model.
+    *   Cache hasil di `storage/app/ai-cache/{submission_id}.md` dan `{submission_id}_response.json` (disk `local`), TTL 24 jam. Tombol **Refresh Analisa** memaksa analisa ulang (invalidasi manual, tanpa observer).
+    *   Otorisasi: hanya dosen yang ditugaskan ke `schedule` submission (`SubmissionPolicy::view`) yang bisa mengakses. Respons AI dikembalikan via JSON (AJAX) dan ditampilkan di modal.
+    *   Error handling: file laporan belum diunggah → 422; PDF gagal dibaca → 500; LLM tidak tersedia → 503; respons LLM tidak valid → 502. Pesan error Bahasa Indonesia.
+*   **Spesifikasi UI:** Tombol "Baca dengan AI" di halaman detail submission dosen membuka modal berisi ringkasan + poin rekomendasi revisi, tombol "Refresh Analisa", dan indikator model AI yang dipakai.
 
 ---
 

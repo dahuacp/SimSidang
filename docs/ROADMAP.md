@@ -40,6 +40,8 @@ Tujuan: fitur pembeda, aman ditunda ke rilis berikutnya.
 - [ ] Passkey authentication (Fortify)
 - [x] Dark mode toggle
 - [x] Dashboard analitik agregat lintas ruang/jadwal (ApexCharts)
+- [x] **FR-07:** Baca dengan AI (dosen) — PDF→Markdown (`smalot/pdfparser`) + analisa LLM lokal (reuse infra FR-05), cache 24 jam, tombol "Refresh Analisa", modal di detail submission
+- [x] **FR-07:** Test (11) — otorisasi dosen, error 422/500/503/502, cache markdown+respons, refresh paksa, expired >24 jam
 
 ## Tahap 4 — Penilaian Sidang (Fitur Baru, luar PRD asli)
 Tujuan: dospem + dosen penguji isi form penilaian (rule per prodi × jenis sidang), skor total rumus Σskor / A × B.

@@ -20,6 +20,8 @@ Domain project ini berbahasa Indonesia (akademik), tapi konvensi Laravel biasany
 | Keterangan Mahasiswa | Penjelasan teks yang menyertai bukti perbaikan | `revision_attachments.keterangan_mahasiswa` | — | |
 | Sidang | Sesi ujian/presentasi TA/KP | — | — | Konsep event, direpresentasikan lewat `Schedule` + `Submission.status` |
 | Asisten Virtual | Fitur chat AI read-only untuk admin (FR-05) | `assistant_conversations`, `assistant_messages` | `AssistantConversation`, `AssistantMessage` | Bukan menganalisa dokumen — hanya data agregat |
+| Baca dengan AI | Fitur dosen menganalisa laporan submission via LLM (FR-07) | cache di `ai-cache/{submission_id}.md` & `{submission_id}_response.json` | `AiSubmissionService` (controller `Dosen/AiSubmissionController`) | PDF→Markdown (`smalot/pdfparser`) + LLM lokal; output ringkasan + rekomendasi revisi Bab 1,3,4,5; cache 24 jam |
+| Analisa / Analisis | Hasil LLM atas isi dokumen laporan | — | — | Beda dari "Asisten Virtual": ini menganalisa isi dokumen, bukan data agregat |
 | Jenis Sidang | Tipe sesi sidang, master dinamis (TA/KP/Milestone Design) | `jenis_sidangs` (`nama`, `deskripsi`), FK `schedules.jenis_sidang_id` | `JenisSidang` | Satu jenis per jadwal sidang |
 | Dosen Pembimbing (dospem) | Dosen pembimbing/akademik mahasiswa | pivot `pembimbingan` (`mahasiswa_id`, `dosen_id`) | (pivot, lewat relasi User) | Boleh beda dengan dosen penguji; boleh lebih dari satu per mahasiswa |
 | Dosen Penguji (dospeng) | Dosen yang ditugaskan ke sebuah jadwal/route sidang | `schedule_dosen` | (relasi `User.schedulesAsDosen`) | Penilai saat sidang; dapat juga jadi dospem |
