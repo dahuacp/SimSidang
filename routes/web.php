@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\FakultasController;
 use App\Http\Controllers\Admin\JenisSidangController;
 use App\Http\Controllers\Admin\PenilaianController as AdminPenilaianController;
 use App\Http\Controllers\Admin\ProdiController;
+use App\Http\Controllers\Admin\RekapController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SubmissionController as AdminSubmissionController;
 use App\Http\Controllers\Admin\UserController;
@@ -106,6 +107,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/rekap/export-excel', [ExportController::class, 'excel'])->name('rekap.export-excel');
             Route::get('/rekap/export-pdf', [ExportController::class, 'pdf'])->name('rekap.export-pdf');
             Route::get('/rekap/cetak-penilaian', [AdminPenilaianController::class, 'cetakIndex'])->name('rekap.cetak-penilaian');
+            Route::get('/rekap/nilai', [RekapController::class, 'index'])->name('rekap.nilai');
+            Route::get('/rekap/nilai-excel', [RekapController::class, 'exportExcel'])->name('rekap.nilai-excel');
 
             // Asisten Virtual (FR-05)
             Route::get('/asisten', [AssistantController::class, 'index'])->name('assistant.index');
