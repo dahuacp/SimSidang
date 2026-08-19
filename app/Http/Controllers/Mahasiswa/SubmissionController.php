@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSubmissionRequest;
-use App\Models\Schedule;
 use App\Models\Submission;
 use Illuminate\Http\Request;
 
@@ -22,9 +21,9 @@ class SubmissionController extends Controller
         return view('mahasiswa.submissions.index', compact('submissions'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $schedules = Schedule::orderBy('tanggal_sidang')->get();
+        $schedules = $request->user()->schedulesAsPlot()->orderBy('tanggal_sidang')->get();
 
         return view('mahasiswa.submissions.create', compact('schedules'));
     }

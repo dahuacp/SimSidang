@@ -13,16 +13,30 @@ function scenarioPenilaian(string $role = 'penguji'): array
     $prodi = Prodi::factory()->create();
     $jenis = JenisSidang::factory()->create();
 
-    $template = AssessmentTemplate::create([
+    $templatePenguji = AssessmentTemplate::create([
         'prodi_id' => $prodi->id,
         'jenis_sidang_id' => $jenis->id,
-        'nama' => 'Template Sidang TA',
+        'tipe_penilai' => 'penguji',
+        'nama' => 'Template Penguji Sidang TA',
         'nilai_penyebut' => 15,
         'nilai_pengali' => 100,
         'items' => [
             ['name' => 'Kualitas Laporan', 'maksimal' => 5, 'urutan' => 1],
             ['name' => 'Penguasaan Materi', 'maksimal' => 5, 'urutan' => 2],
             ['name' => 'Presentasi', 'maksimal' => 5, 'urutan' => 3],
+        ],
+    ]);
+
+    $templateDospem = AssessmentTemplate::create([
+        'prodi_id' => $prodi->id,
+        'jenis_sidang_id' => $jenis->id,
+        'tipe_penilai' => 'dospem',
+        'nama' => 'Template Pembimbing Sidang TA',
+        'nilai_penyebut' => 15,
+        'nilai_pengali' => 100,
+        'items' => [
+            ['name' => 'Aktivitas Konsultasi', 'maksimal' => 5, 'urutan' => 1],
+            ['name' => 'Kualitas Bimbingan', 'maksimal' => 5, 'urutan' => 2],
         ],
     ]);
 
@@ -41,7 +55,7 @@ function scenarioPenilaian(string $role = 'penguji'): array
         $mahasiswa->dosenPembimbing()->attach($dosen->id);
     }
 
-    return compact('prodi', 'jenis', 'template', 'mahasiswa', 'dosen', 'schedule', 'submission');
+    return compact('prodi', 'jenis', 'templatePenguji', 'templateDospem', 'mahasiswa', 'dosen', 'schedule', 'submission');
 }
 
 function payloadPenilaian(array $overrides = []): array
@@ -53,6 +67,18 @@ function payloadPenilaian(array $overrides = []): array
             ['item' => 0, 'skor' => 4],
             ['item' => 1, 'skor' => 5],
             ['item' => 2, 'skor' => 3],
+        ],
+    ], $overrides);
+}
+
+function payloadPenilaianDospem(array $overrides = []): array
+{
+    return array_merge([
+        'tipe_penilai' => 'dospem',
+        'catatan' => 'Bimbingan baik, pertahankan.',
+        'skor_per_item' => [
+            ['item' => 0, 'skor' => 4],
+            ['item' => 1, 'skor' => 5],
         ],
     ], $overrides);
 }
@@ -107,7 +133,7 @@ test('dosen dospem dapat membuka form isi penilaian untuk bimbingannya', functio
     ]));
 
     $response->assertOk();
-    $response->assertSee('Penguasaan Materi');
+    $response->assertSee('Aktivitas Konsultasi');
 });
 
 test('dosen yang bukan penguji tidak dapat mengisi penilaian sebagai penguji', function () {
@@ -157,9 +183,7 @@ test('penilaian yang disimpan menghitung skor total', function () {
 test('dosen dospem dapat menyimpan penilaian untuk bimbingannya', function () {
     $s = scenarioPenilaian('dospem');
 
-    $response = $this->actingAs($s['dosen'])->post(route('dosen.penilaian.store', $s['submission']), payloadPenilaian([
-        'tipe_penilai' => 'dospem',
-    ]));
+    $response = $this->actingAs($s['dosen'])->post(route('dosen.penilaian.store', $s['submission']), payloadPenilaianDospem());
 
     $response->assertRedirect();
     $this->assertDatabaseHas('assessment_forms', [
@@ -186,9 +210,7 @@ test('dosen ganda (penguji dan pembimbing) dapat mengisi dua form terpisah', fun
     $s['mahasiswa']->dosenPembimbing()->attach($s['dosen']->id);
 
     $this->actingAs($s['dosen'])->post(route('dosen.penilaian.store', $s['submission']), payloadPenilaian());
-    $this->actingAs($s['dosen'])->post(route('dosen.penilaian.store', $s['submission']), payloadPenilaian([
-        'tipe_penilai' => 'dospem',
-    ]));
+    $this->actingAs($s['dosen'])->post(route('dosen.penilaian.store', $s['submission']), payloadPenilaianDospem());
 
     expect(AssessmentForm::where('submission_id', $s['submission']->id)
         ->where('dosen_id', $s['dosen']->id)->count())->toBe(2);
@@ -233,14 +255,17 @@ test('mahasiswa dapat melihat ringkasan penilaian read-only', function () {
         'submission_id' => $s['submission']->id,
         'dosen_id' => $s['dosen']->id,
         'tipe_penilai' => 'penguji',
-        'template_id' => $s['template']->id,
+        'template_id' => $s['templatePenguji']->id,
     ]);
 
     $response = $this->actingAs($s['mahasiswa'])->get(route('mahasiswa.penilaian.show', $s['submission']));
 
     $response->assertOk();
     $response->assertSee('Penilaian');
-    $response->assertSee('skor_total' !== '' ? number_format(AssessmentForm::where('submission_id', $s['submission']->id)->first()->skor_total, 1) : '');
+    $response->assertSee($s['dosen']->name);
+    $response->assertSee('Sudah Dinilai');
+    $response->assertDontSee('Skor');
+    $response->assertDontSee('Cetak');
 });
 
 test('mahasiswa tidak dapat melihat penilaian submission milik orang lain', function () {
@@ -258,7 +283,7 @@ test('dosen penguji dapat mengedit penilaian miliknya', function () {
         'submission_id' => $s['submission']->id,
         'dosen_id' => $s['dosen']->id,
         'tipe_penilai' => 'penguji',
-        'template_id' => $s['template']->id,
+        'template_id' => $s['templatePenguji']->id,
     ]);
 
     $response = $this->actingAs($s['dosen'])->get(route('dosen.penilaian.edit', $form));
@@ -274,7 +299,7 @@ test('dosen lain tidak dapat mengedit penilaian milik dosen lain', function () {
         'submission_id' => $s['submission']->id,
         'dosen_id' => $s['dosen']->id,
         'tipe_penilai' => 'penguji',
-        'template_id' => $s['template']->id,
+        'template_id' => $s['templatePenguji']->id,
     ]);
 
     $response = $this->actingAs($lain)->get(route('dosen.penilaian.edit', $form));

@@ -1,7 +1,13 @@
 <?php
 
+use App\Models\Fakultas;
 use App\Models\Prodi;
 use App\Models\User;
+
+function fakultasBaru(): Fakultas
+{
+    return Fakultas::factory()->create();
+}
 
 test('admin dapat melihat daftar program studi', function () {
     $admin = User::factory()->admin()->create();
@@ -15,10 +21,12 @@ test('admin dapat melihat daftar program studi', function () {
 
 test('admin dapat membuat program studi baru', function () {
     $admin = User::factory()->admin()->create();
+    $fakultas = fakultasBaru();
 
     $response = $this->actingAs($admin)->post(route('admin.prodis.store'), [
         'kode_prodi' => 'TI',
         'nama_prodi' => 'Teknik Informatika',
+        'fakultas_id' => $fakultas->id,
     ]);
 
     $response->assertRedirect(route('admin.prodis.index'));
@@ -26,29 +34,45 @@ test('admin dapat membuat program studi baru', function () {
     $this->assertDatabaseHas('prodis', [
         'kode_prodi' => 'TI',
         'nama_prodi' => 'Teknik Informatika',
+        'fakultas_id' => $fakultas->id,
     ]);
 });
 
 test('validasi menolak kode_prodi duplikat saat membuat', function () {
     $admin = User::factory()->admin()->create();
+    $fakultas = fakultasBaru();
     Prodi::factory()->create(['kode_prodi' => 'TI', 'nama_prodi' => 'Teknik Informatika']);
 
     $response = $this->actingAs($admin)->post(route('admin.prodis.store'), [
         'kode_prodi' => 'TI',
         'nama_prodi' => 'Sistem Informasi',
+        'fakultas_id' => $fakultas->id,
     ]);
 
     $response->assertSessionHasErrors('kode_prodi');
     $this->assertDatabaseMissing('prodis', ['nama_prodi' => 'Sistem Informasi']);
 });
 
+test('validasi menolak pembuatan prodi tanpa fakultas', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->post(route('admin.prodis.store'), [
+        'kode_prodi' => 'TI',
+        'nama_prodi' => 'Teknik Informatika',
+    ]);
+
+    $response->assertSessionHasErrors('fakultas_id');
+});
+
 test('admin dapat mengedit program studi', function () {
     $admin = User::factory()->admin()->create();
+    $fakultas = fakultasBaru();
     $prodi = Prodi::factory()->create();
 
     $response = $this->actingAs($admin)->put(route('admin.prodis.update', $prodi), [
         'kode_prodi' => 'TI',
         'nama_prodi' => 'Teknik Informatika',
+        'fakultas_id' => $fakultas->id,
     ]);
 
     $response->assertRedirect(route('admin.prodis.index'));
@@ -57,6 +81,7 @@ test('admin dapat mengedit program studi', function () {
         'id' => $prodi->id,
         'kode_prodi' => 'TI',
         'nama_prodi' => 'Teknik Informatika',
+        'fakultas_id' => $fakultas->id,
     ]);
 });
 

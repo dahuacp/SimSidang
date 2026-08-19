@@ -29,7 +29,7 @@ class UpdateAssessmentFormRequest extends FormRequest
         $validator->after(function (Validator $validator) {
             /** @var Submission|null $submission */
             $submission = $this->route('assessmentForm')?->submission;
-            $template = $submission ? $this->resolveTemplate($submission) : null;
+            $template = $submission ? $this->resolveTemplate($submission, $this->route('assessmentForm')->tipe_penilai) : null;
 
             if (! $template) {
                 $validator->errors()->add('template', 'Template penilaian untuk program studi dan jenis sidang ini belum tersedia.');
@@ -65,10 +65,11 @@ class UpdateAssessmentFormRequest extends FormRequest
         ];
     }
 
-    private function resolveTemplate(Submission $submission): ?AssessmentTemplate
+    private function resolveTemplate(Submission $submission, string $tipe): ?AssessmentTemplate
     {
         return AssessmentTemplate::where('prodi_id', $submission->user->prodi_id)
             ->where('jenis_sidang_id', $submission->schedule->jenis_sidang_id)
+            ->where('tipe_penilai', $tipe)
             ->first();
     }
 }

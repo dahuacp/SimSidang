@@ -11,6 +11,7 @@ test('mahasiswa dapat mengunggah laporan PDF', function () {
 
     $mahasiswa = User::factory()->mahasiswa()->create();
     $schedule = Schedule::factory()->create();
+    $mahasiswa->schedulesAsPlot()->attach($schedule->id);
     $file = UploadedFile::fake()->create('laporan.pdf', 100, 'application/pdf');
 
     $response = $this->actingAs($mahasiswa)->post('/mahasiswa/submissions', [
@@ -36,6 +37,7 @@ test('upload laporan menolak file non-PDF', function () {
 
     $mahasiswa = User::factory()->mahasiswa()->create();
     $schedule = Schedule::factory()->create();
+    $mahasiswa->schedulesAsPlot()->attach($schedule->id);
     $file = UploadedFile::fake()->create('laporan.docx', 100, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 
     $response = $this->actingAs($mahasiswa)->post('/mahasiswa/submissions', [
@@ -53,6 +55,7 @@ test('upload laporan menolak file lebih dari 10MB', function () {
 
     $mahasiswa = User::factory()->mahasiswa()->create();
     $schedule = Schedule::factory()->create();
+    $mahasiswa->schedulesAsPlot()->attach($schedule->id);
     $file = UploadedFile::fake()->create('laporan.pdf', 11000, 'application/pdf');
 
     $response = $this->actingAs($mahasiswa)->post('/mahasiswa/submissions', [
@@ -77,4 +80,59 @@ test('mahasiswa hanya melihat submission miliknya', function () {
     $response->assertOk();
     $response->assertSee(Submission::where('user_id', $mahasiswa->id)->first()->judul_laporan);
     $response->assertDontSee(Submission::where('user_id', $mahasiswaLain->id)->first()->judul_laporan);
+});
+
+test('mahasiswa hanya bisa upload ke jadwal yang sudah di-plot', function () {
+    Storage::fake('local');
+
+    $mahasiswa = User::factory()->mahasiswa()->create();
+    $schedule = Schedule::factory()->create();
+    $mahasiswa->schedulesAsPlot()->attach($schedule->id);
+    $file = UploadedFile::fake()->create('laporan.pdf', 100, 'application/pdf');
+
+    $response = $this->actingAs($mahasiswa)->post('/mahasiswa/submissions', [
+        'schedule_id' => $schedule->id,
+        'judul_laporan' => 'Laporan Tugas Akhir',
+        'file' => $file,
+    ]);
+
+    $response->assertRedirect(route('mahasiswa.submissions.index'));
+    $this->assertDatabaseHas('submissions', [
+        'user_id' => $mahasiswa->id,
+        'schedule_id' => $schedule->id,
+    ]);
+});
+
+test('mahasiswa tidak bisa upload ke jadwal yang tidak di-plot', function () {
+    Storage::fake('local');
+
+    $mahasiswa = User::factory()->mahasiswa()->create();
+    $schedule = Schedule::factory()->create();
+    $file = UploadedFile::fake()->create('laporan.pdf', 100, 'application/pdf');
+
+    $response = $this->actingAs($mahasiswa)->post('/mahasiswa/submissions', [
+        'schedule_id' => $schedule->id,
+        'judul_laporan' => 'Laporan Tugas Akhir',
+        'file' => $file,
+    ]);
+
+    $response->assertSessionHasErrors('schedule_id');
+    $this->assertDatabaseCount('submissions', 0);
+});
+
+test('dosen tidak bisa mengunggah laporan', function () {
+    Storage::fake('local');
+
+    $dosen = User::factory()->dosen()->create();
+    $schedule = Schedule::factory()->create();
+    $file = UploadedFile::fake()->create('laporan.pdf', 100, 'application/pdf');
+
+    $response = $this->actingAs($dosen)->post('/mahasiswa/submissions', [
+        'schedule_id' => $schedule->id,
+        'judul_laporan' => 'Laporan Tugas Akhir',
+        'file' => $file,
+    ]);
+
+    $response->assertForbidden();
+    $this->assertDatabaseCount('submissions', 0);
 });

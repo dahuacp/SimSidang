@@ -4,7 +4,9 @@ use App\Http\Controllers\Admin\AssessmentTemplateController;
 use App\Http\Controllers\Admin\AssistantController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExportController;
+use App\Http\Controllers\Admin\FakultasController;
 use App\Http\Controllers\Admin\JenisSidangController;
+use App\Http\Controllers\Admin\PenilaianController as AdminPenilaianController;
 use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\SubmissionController as AdminSubmissionController;
@@ -43,6 +45,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/submissions', [MahasiswaSubmissionController::class, 'store'])->name('submissions.store');
             Route::get('/submissions/{submission}', [MahasiswaSubmissionController::class, 'show'])->name('submissions.show');
             Route::get('/submissions/{submission}/penilaian', [MahasiswaPenilaianController::class, 'show'])->name('penilaian.show');
+            Route::get('/submissions/{submission}/penilaian/{assessmentForm}/cetak', [MahasiswaPenilaianController::class, 'cetak'])->name('penilaian.cetak');
             Route::post('/revision-notes/{revisionNote}/attachments', [RevisionAttachmentController::class, 'store'])->name('revision-attachments.store');
         });
 
@@ -64,6 +67,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/submissions/{submission}/penilaian', [DosenPenilaianController::class, 'store'])->name('penilaian.store');
             Route::get('/penilaian/{assessmentForm}/edit', [DosenPenilaianController::class, 'edit'])->name('penilaian.edit');
             Route::put('/penilaian/{assessmentForm}', [DosenPenilaianController::class, 'update'])->name('penilaian.update');
+            Route::get('/penilaian/{assessmentForm}/cetak', [DosenPenilaianController::class, 'cetak'])->name('penilaian.cetak');
         });
 
     Route::middleware(['role:admin'])
@@ -94,10 +98,14 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get('/submissions', [AdminSubmissionController::class, 'index'])->name('submissions.index');
             Route::get('/submissions/{submission}', [AdminSubmissionController::class, 'show'])->name('submissions.show');
+            Route::get('/submissions/{submission}/penilaian/{assessmentForm}/cetak', [AdminPenilaianController::class, 'cetak'])->name('penilaian.cetak');
+            Route::post('/submissions/{submission}/pembimbing', [AdminSubmissionController::class, 'storePembimbing'])->name('submissions.pembimbing.store');
+            Route::delete('/submissions/{submission}/pembimbing/{dosen}', [AdminSubmissionController::class, 'destroyPembimbing'])->name('submissions.pembimbing.destroy');
 
             Route::view('/rekap', 'admin.rekap.index')->name('rekap');
             Route::get('/rekap/export-excel', [ExportController::class, 'excel'])->name('rekap.export-excel');
             Route::get('/rekap/export-pdf', [ExportController::class, 'pdf'])->name('rekap.export-pdf');
+            Route::get('/rekap/cetak-penilaian', [AdminPenilaianController::class, 'cetakIndex'])->name('rekap.cetak-penilaian');
 
             // Asisten Virtual (FR-05)
             Route::get('/asisten', [AssistantController::class, 'index'])->name('assistant.index');
@@ -113,6 +121,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/prodis/{prodi}/edit', [ProdiController::class, 'edit'])->name('prodis.edit');
             Route::put('/prodis/{prodi}', [ProdiController::class, 'update'])->name('prodis.update');
             Route::delete('/prodis/{prodi}', [ProdiController::class, 'destroy'])->name('prodis.destroy');
+
+            // Fakultas
+            Route::get('/fakultas', [FakultasController::class, 'index'])->name('fakultas.index');
+            Route::get('/fakultas/create', [FakultasController::class, 'create'])->name('fakultas.create');
+            Route::post('/fakultas', [FakultasController::class, 'store'])->name('fakultas.store');
+            Route::get('/fakultas/{fakultas}/edit', [FakultasController::class, 'edit'])->name('fakultas.edit');
+            Route::put('/fakultas/{fakultas}', [FakultasController::class, 'update'])->name('fakultas.update');
+            Route::delete('/fakultas/{fakultas}', [FakultasController::class, 'destroy'])->name('fakultas.destroy');
 
             Route::resource('jenis-sidangs', JenisSidangController::class)->only([
                 'index', 'create', 'store', 'edit', 'update', 'destroy',

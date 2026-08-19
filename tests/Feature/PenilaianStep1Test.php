@@ -42,7 +42,10 @@ test('mahasiswa dapat memiliki beberapa dosen pembimbing', function () {
     $dosen1 = User::factory()->dosen()->create(['prodi_id' => $prodi->id]);
     $dosen2 = User::factory()->dosen()->create(['prodi_id' => $prodi->id]);
 
-    $mhs->dosenPembimbing()->attach([$dosen1->id, $dosen2->id]);
+    $mhs->dosenPembimbingByUrutan()->attach([
+        $dosen1->id => ['urutan' => 1],
+        $dosen2->id => ['urutan' => 2],
+    ]);
 
     expect($mhs->dosenPembimbing)->toHaveCount(2);
     expect($mhs->fresh()->dosenPembimbing->pluck('id')->sort()->values()->toArray())

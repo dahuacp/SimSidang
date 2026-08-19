@@ -101,6 +101,7 @@ test('admin dapat membuat template penilaian', function () {
     $response = $this->actingAs($admin)->post(route('admin.assessment-templates.store'), [
         'prodi_id' => $prodi->id,
         'jenis_sidang_id' => $jenis->id,
+        'tipe_penilai' => 'penguji',
         'nama' => 'Template Sidang TA',
         'nilai_penyebut' => 15,
         'nilai_pengali' => 100,
@@ -114,6 +115,7 @@ test('admin dapat membuat template penilaian', function () {
     $this->assertDatabaseHas('assessment_templates', [
         'prodi_id' => $prodi->id,
         'jenis_sidang_id' => $jenis->id,
+        'tipe_penilai' => 'penguji',
         'nama' => 'Template Sidang TA',
     ]);
 });
@@ -129,6 +131,7 @@ test('template penilaian unik per kombinasi prodi dan jenis sidang', function ()
         ->post(route('admin.assessment-templates.store'), [
             'prodi_id' => $prodi->id,
             'jenis_sidang_id' => $jenis->id,
+            'tipe_penilai' => 'penguji',
             'nama' => 'Duplikat',
             'nilai_penyebut' => 15,
             'nilai_pengali' => 100,
@@ -201,6 +204,7 @@ test('admin dapat mengupdate template penilaian', function () {
     $response = $this->actingAs($admin)->put(route('admin.assessment-templates.update', $template), [
         'prodi_id' => $template->prodi_id,
         'jenis_sidang_id' => $template->jenis_sidang_id,
+        'tipe_penilai' => 'penguji',
         'nama' => 'Template Update',
         'nilai_penyebut' => 10,
         'nilai_pengali' => 50,

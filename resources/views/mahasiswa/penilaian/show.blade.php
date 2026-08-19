@@ -22,47 +22,20 @@
         <div class="space-y-4">
             @foreach($submission->assessmentForms as $form)
                 @php
-                    $tipe = $form->tipe_penilai;
-                    $tipeLabel = $tipe === 'penguji' ? 'Dosen Penguji' : 'Dosen Pembimbing';
-                    $skorMap = collect($form->skor_per_item)->pluck('skor', 'item');
+                    $tipeLabel = $form->tipe_penilai === 'penguji' ? 'Dosen Penguji' : 'Dosen Pembimbing';
                 @endphp
-                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
-                    <div class="flex flex-col gap-2 border-b border-gray-200 bg-gray-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800 dark:bg-gray-800">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+                    <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             <strong class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ $form->dosen?->name ?? '-' }}</strong>
                             <span class="rounded-full bg-brand-500/10 px-2 py-0.5 text-xs font-medium text-brand-600 dark:bg-brand-500/20 dark:text-brand-400">{{ $tipeLabel }}</span>
                         </div>
-                        <span class="text-sm text-gray-600 dark:text-gray-300">
-                            Skor Akhir: <span class="text-lg font-bold text-brand-600 dark:text-brand-400">{{ number_format($form->skor_total, 1) }}</span>
-                        </span>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="border-b border-gray-200 text-xs uppercase text-gray-500 dark:border-gray-800 dark:text-gray-400">
-                                <tr>
-                                    <th class="px-5 py-3 font-medium">No</th>
-                                    <th class="px-5 py-3 font-medium">Item Penilaian</th>
-                                    <th class="px-5 py-3 font-medium text-right">Skor</th>
-                                    <th class="px-5 py-3 font-medium text-right">Maks</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                                @foreach($form->template?->items ?? [] as $idx => $item)
-                                    <tr>
-                                        <td class="px-5 py-3 text-gray-500 dark:text-gray-400">{{ $idx + 1 }}</td>
-                                        <td class="px-5 py-3 text-gray-800 dark:text-gray-200">{{ $item['name'] }}</td>
-                                        <td class="px-5 py-3 text-right font-semibold text-gray-800 dark:text-gray-200">{{ number_format((float) ($skorMap[$idx] ?? 0), 1) }}</td>
-                                        <td class="px-5 py-3 text-right text-gray-500 dark:text-gray-400">{{ $item['maksimal'] }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                        <span class="text-sm font-medium text-success-600 dark:text-success-400">Sudah Dinilai</span>
                     </div>
 
                     @if($form->catatan)
-                        <div class="border-t border-gray-200 px-5 py-3 dark:border-gray-800">
-                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Catatan</p>
+                        <div class="mt-3 border-t border-gray-200 pt-3 dark:border-gray-700">
+                            <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Catatan Dosen</p>
                             <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ $form->catatan }}</p>
                         </div>
                     @endif

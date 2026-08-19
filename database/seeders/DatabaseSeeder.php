@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\AssessmentTemplate;
+use App\Models\Fakultas;
 use App\Models\JenisSidang;
 use App\Models\Prodi;
 use App\Models\RevisionNote;
@@ -16,19 +17,25 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Fakultas
+        $ftik = Fakultas::create(['kode_fakultas' => 'FTIK', 'nama_fakultas' => 'Fakultas Teknologi Informasi dan Komunikasi']);
+        $feb = Fakultas::create(['kode_fakultas' => 'FEB', 'nama_fakultas' => 'Fakultas Ekonomi dan Bisnis']);
+        $fisip = Fakultas::create(['kode_fakultas' => 'FISIP', 'nama_fakultas' => 'Fakultas Ilmu Sosial dan Ilmu Politik']);
+
         $prodis = collect();
         $prodiData = [
-            ['kode_prodi' => 'TI', 'nama_prodi' => 'Teknik Informatika'],
-            ['kode_prodi' => 'SI', 'nama_prodi' => 'Sistem Informasi'],
-            ['kode_prodi' => 'DKV', 'nama_prodi' => 'Desain Komunikasi Visual'],
-            ['kode_prodi' => 'MBTI', 'nama_prodi' => 'Manajemen Bisnis dan Teknologi Informasi'],
-            ['kode_prodi' => 'ARS', 'nama_prodi' => 'Arsitektur'],
+            ['kode_prodi' => 'TI', 'nama_prodi' => 'Teknik Informatika', 'fakultas_id' => $ftik->id],
+            ['kode_prodi' => 'SI', 'nama_prodi' => 'Sistem Informasi', 'fakultas_id' => $ftik->id],
+            ['kode_prodi' => 'DKV', 'nama_prodi' => 'Desain Komunikasi Visual', 'fakultas_id' => $ftik->id],
+            ['kode_prodi' => 'MBTI', 'nama_prodi' => 'Manajemen Bisnis dan Teknologi Informasi', 'fakultas_id' => $feb->id],
+            ['kode_prodi' => 'ARS', 'nama_prodi' => 'Arsitektur', 'fakultas_id' => $ftik->id],
         ];
 
         foreach ($prodiData as $data) {
             $prodis->push(Prodi::create([
                 'kode_prodi' => $data['kode_prodi'],
                 'nama_prodi' => $data['nama_prodi'],
+                'fakultas_id' => $data['fakultas_id'],
             ]));
         }
 
@@ -42,13 +49,37 @@ class DatabaseSeeder extends Seeder
                 AssessmentTemplate::create([
                     'prodi_id' => $prodi->id,
                     'jenis_sidang_id' => $jenis->id,
-                    'nama' => 'Template '.$prodi->nama_prodi.' — '.$jenis->nama,
+                    'tipe_penilai' => 'dospem',
+                    'nama' => 'Penilaian Pembimbing '.$prodi->nama_prodi.' — '.$jenis->nama,
                     'nilai_penyebut' => 15,
                     'nilai_pengali' => 100,
                     'items' => [
-                        ['name' => 'Kualitas Laporan', 'maksimal' => 5, 'urutan' => 1],
-                        ['name' => 'Penguasaan Materi', 'maksimal' => 5, 'urutan' => 2],
-                        ['name' => 'Presentasi dan Komunikasi', 'maksimal' => 5, 'urutan' => 3],
+                        // max 10: columns 2,4,6,8,10
+                        ['name' => 'Sistematika penyusunan materi TA sebagai karya tulis ilmiah', 'maksimal' => 10, 'urutan' => 1],
+                        ['name' => 'Ketepatan penggunaan istilah dan bahasa', 'maksimal' => 5, 'urutan' => 2],
+                        ['name' => 'Up to date/tidaknya materi yang dibahas', 'maksimal' => 10, 'urutan' => 3],
+                        ['name' => 'Up to date/ tidaknya sumber informasi/ referensi yang digunakan', 'maksimal' => 10, 'urutan' => 4],
+                        ['name' => 'Bobot materi dan analisis', 'maksimal' => 10, 'urutan' => 5],
+                        ['name' => 'Kemampuan menarik kesimpulan dari materi bahan dan pengajuan saran', 'maksimal' => 5, 'urutan' => 6],
+                        ['name' => 'Aktivitas/disiplin dalam memenuhi jadwal konsultasi/asistensi', 'maksimal' => 5, 'urutan' => 7],
+                        ['name' => 'Ketepatan dalam pengendalian waktu dalam penyelesaian Tugas Akhir', 'maksimal' => 5, 'urutan' => 8],
+                    ],
+                ]);
+
+                AssessmentTemplate::create([
+                    'prodi_id' => $prodi->id,
+                    'jenis_sidang_id' => $jenis->id,
+                    'tipe_penilai' => 'penguji',
+                    'nama' => 'Penilaian Penguji '.$prodi->nama_prodi.' — '.$jenis->nama,
+                    'nilai_penyebut' => 12,
+                    'nilai_pengali' => 100,
+                    'items' => [
+                        ['name' => 'Penguasaan materi dan teori pendukung', 'maksimal' => 10, 'urutan' => 1],
+                        ['name' => 'Ketepatan metode penelitian', 'maksimal' => 10, 'urutan' => 2],
+                        ['name' => 'Kualitas analisis data dan hasil', 'maksimal' => 10, 'urutan' => 3],
+                        ['name' => 'Kemampuan presentasi dan komunikasi', 'maksimal' => 10, 'urutan' => 4],
+                        ['name' => 'Kemampuan menjawab pertanyaan penguji', 'maksimal' => 10, 'urutan' => 5],
+                        ['name' => 'Kesesuaian kesimpulan dengan hasil penelitian', 'maksimal' => 10, 'urutan' => 6],
                     ],
                 ]);
             }
@@ -139,17 +170,25 @@ class DatabaseSeeder extends Seeder
         $dospemByProdi = [
             'TI' => [$dosens[0]->id, $dosens[2]->id],
             'SI' => [$dosens[1]->id, $dosens[3]->id],
-            'DKV' => [$dosens[0]->id],
+            'DKV' => [$dosens[0]->id, $dosens[1]->id],
         ];
         foreach ($mahasiswa as $idx => $mhs) {
-            $mhs->dosenPembimbing()->attach($dospemByProdi[$mahasiswaData[$idx]['prodi_kode']]);
+            $dospemIds = $dospemByProdi[$mahasiswaData[$idx]['prodi_kode']];
+            $urutan = 1;
+            foreach ($dospemIds as $dospemId) {
+                $mhs->dosenPembimbing()->attach($dospemId, ['urutan' => $urutan]);
+                $urutan++;
+            }
         }
 
         $submissions = collect();
         foreach ($mahasiswa as $idx => $mhs) {
+            $schedule = $schedules[$idx % 3];
+            $mhs->schedulesAsPlot()->attach($schedule->id);
+
             $submissions->push(Submission::create([
                 'user_id' => $mhs->id,
-                'schedule_id' => $schedules[$idx % 3]->id,
+                'schedule_id' => $schedule->id,
                 'judul_laporan' => $mahasiswaData[$idx]['judul'],
                 'file_path' => null,
                 'status' => 'pending',

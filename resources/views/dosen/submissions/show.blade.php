@@ -123,4 +123,31 @@
     @endif
 
     <x-status-history :submission="$submission" />
+
+    @if($submission->assessmentForms->isNotEmpty())
+    <h2 class="mb-3 mt-6 text-lg font-semibold text-gray-800 dark:text-gray-200">Penilaian Sidang</h2>
+    <div class="space-y-4">
+        @foreach($submission->assessmentForms as $form)
+            @php
+                $tipeLabel = $form->tipe_penilai === 'penguji' ? 'Penguji' : 'Pembimbing';
+            @endphp
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+                <div class="flex items-center justify-between">
+                    <strong class="text-sm text-gray-800 dark:text-gray-200">{{ $form->dosen?->name ?? '-' }}</strong>
+                    <span class="rounded-full bg-brand-500/10 px-2 py-0.5 text-xs font-medium text-brand-600 dark:bg-brand-500/20 dark:text-brand-400">{{ $tipeLabel }}</span>
+                </div>
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                    Skor Akhir: <span class="font-semibold text-brand-600 dark:text-brand-400">{{ number_format($form->skor_total, 1) }}</span>
+                </p>
+                <a href="{{ route('dosen.penilaian.cetak', [$submission, $form]) }}"
+                   class="mt-3 inline-flex items-center justify-center gap-2 rounded-lg border border-brand-500 px-4 py-2 text-sm font-medium text-brand-500 transition hover:bg-brand-50 dark:border-brand-500 dark:text-brand-400 dark:hover:bg-brand-500/10">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V2h12v7m-6 6v6m-4-4h8a2 2 0 002-2V7a2 2 0 00-2-2H8a2 2 0 00-2 2v10a2 2 0 002 2h6"></path>
+                    </svg>
+                    Cetak
+                </a>
+            </div>
+        @endforeach
+    </div>
+    @endif
 @endsection

@@ -12,18 +12,25 @@
 
 <div x-data="{
     items: @js($template->items),
-    skors: @js(collect($template->items)->map(fn ($item, $idx) => (string) ($skorMap[$idx] ?? ''))->values()),
+    skors: @js(collect($template->items)->map(fn ($item, $idx) => (string) ($skorMap[$idx] ?? ''))->values()->toArray()),
     get penyebut() { return {{ $template->nilai_penyebut }}; },
     get pengali() { return {{ $template->nilai_pengali }}; },
+    getOptions(maksimal) {
+        const step = maksimal / 5;
+        return [step, 2*step, 3*step, 4*step, maksimal].map(v => v == Math.floor(v) ? Math.floor(v) : v);
+    },
     get total() {
         return this.skors.reduce((sum, s) => sum + (parseFloat(s) || 0), 0);
     },
     get skorAkhir() {
         const p = Math.max(1, this.penyebut);
         return Math.round((this.total / p * this.pengali) * 10) / 10;
+    },
+    selectScore(idx, val) {
+        this.skors[idx] = String(val);
     }
 }" class="max-w-3xl rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-    <form method="POST" action="{{ $action }}" class="space-y-5">
+    <form method="POST" action="{{ $isEdit ? route('dosen.penilaian.update', $assessmentForm) : route('dosen.penilaian.store', $submission) }}" class="space-y-5">
         @csrf
         @method($method)
         <input type="hidden" name="tipe_penilai" value="{{ $tipe }}">
@@ -38,29 +45,31 @@
             <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
                 <div class="grid grid-cols-12 gap-3 border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs font-medium uppercase text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
                     <div class="col-span-1">No</div>
-                    <div class="col-span-7">Item</div>
-                    <div class="col-span-2 text-center">Maks</div>
-                    <div class="col-span-2 text-right">Skor</div>
+                    <div class="col-span-6">Item</div>
+                    <div class="col-span-5">Nilai</div>
                 </div>
 
                 <template x-for="(item, idx) in items" :key="idx">
                     <div class="grid grid-cols-12 items-center gap-3 border-b border-gray-100 px-4 py-2.5 last:border-b-0 dark:border-gray-800">
                         <div class="col-span-1 text-sm text-gray-500 dark:text-gray-400" x-text="idx + 1"></div>
-                        <div class="col-span-7 text-sm text-gray-800 dark:text-gray-200" x-text="item.name"></div>
-                        <div class="col-span-2 text-center text-sm text-gray-500 dark:text-gray-400" x-text="item.maksimal"></div>
-                        <div class="col-span-2 text-right">
+                        <div class="col-span-6 text-sm text-gray-800 dark:text-gray-200" x-text="item.name"></div>
+                        <div class="col-span-5">
                             <input type="hidden"
                                    :name="'skor_per_item[' + idx + '][item]'"
                                    :value="idx">
-                            <input type="number"
-                                   min="0"
-                                   step="any"
-                                   :max="item.maksimal"
-                                   x-model="skors[idx]"
+                            <input type="hidden"
                                    :name="'skor_per_item[' + idx + '][skor]'"
-                                   required
-                                   placeholder="0"
-                                   class="h-10 w-20 rounded-lg border border-gray-300 bg-white px-3 text-right text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                                   x-model="skors[idx]">
+                            <div class="flex flex-wrap gap-1.5">
+                                <template x-for="opt in getOptions(item.maksimal)" :key="opt">
+                                    <button type="button"
+                                            @click="selectScore(idx, opt)"
+                                            :class="skors[idx] == String(opt) ? 'bg-brand-500 text-white font-bold' : 'border-gray-300 bg-white text-gray-700 hover:bg-brand-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-brand-500/10'">
+                                        <span x-text="opt"></span>
+                                    </button>
+                                </template>
+                            </div>
+                            <span class="mt-1 block text-xs text-gray-500 dark:text-gray-400" x-show="!skors[idx]" x-text="'Pilih nilai ' + item.maksimal + ' (' + getOptions(item.maksimal).join(', ') + ')'"></span>
                         </div>
                     </div>
                 </template>
@@ -76,7 +85,7 @@
                 Skor Akhir
                 <span class="ml-1 text-xs text-gray-500 dark:text-gray-400">(Σ <span x-text="total"></span> ÷ {{ $template->nilai_penyebut }} × {{ $template->nilai_pengali }})</span>
             </span>
-            <span class="text-xl font-bold text-brand-600 dark:text-brand-400" x-text="skorAkhir.toFixed(1)"></span>
+            <span class="text-xl font-bold text-brand-600 dark:text-brand-400" x-text="skorAkhir + ' / ' + {{ $template->nilai_pengali }}"></span>
         </div>
 
         <div>

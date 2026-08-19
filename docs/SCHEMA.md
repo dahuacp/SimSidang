@@ -6,7 +6,8 @@ Referensi cepat skema database, tanpa narasi produk (narasi lengkap ada di `PRD-
 | Tabel | Fungsi |
 |---|---|
 | `users` | Admin, Dosen, Mahasiswa (satu tabel, dibedakan kolom `role`). Kolom `prodi_id` FK → `prodis` (nullable — admin tidak punya prodi) |
-| `prodis` | Daftar program studi (CRUD oleh admin) |
+| `fakultas` | Daftar fakultas (CRUD oleh admin) |
+| `prodis` | Daftar program studi (CRUD oleh admin). Kolom `fakultas_id` FK → `fakultas` |
 | `schedules` | Ruang & grouping jadwal sidang |
 | `schedule_dosen` | Pivot: dosen mana ditugaskan ke jadwal mana |
 | `submissions` | Laporan utama yang diunggah mahasiswa |
@@ -17,7 +18,7 @@ Referensi cepat skema database, tanpa narasi produk (narasi lengkap ada di `PRD-
 
 ## ERD (ringkas)
 ```
-users (1) ───< submissions >─── (1) schedules
+fakultas (1) ───< prodis (1) ───< users (1) ───< submissions >─── (1) schedules
 users (1) ───< revision_notes (sebagai dosen_id)
 submissions (1) ───< revision_notes
 revision_notes (1) ───< revision_attachments
@@ -28,12 +29,21 @@ assistant_conversations (1) ───< assistant_messages
 
 ## Definisi Tabel
 
+### `fakultas`
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | bigint, PK | |
+| `kode_fakultas` | string, unique | mis. "FTIK", "FEB" |
+| `nama_fakultas` | string | mis. "Fakultas Teknologi Informasi dan Komunikasi" |
+| `timestamps` | | |
+
 ### `prodis`
 | Kolom | Tipe | Keterangan |
 |---|---|---|
 | `id` | bigint, PK | |
 | `kode_prodi` | string, unique | mis. "TI", "SI", "DKV" |
 | `nama_prodi` | string | mis. "Teknik Informatika" |
+| `fakultas_id` | FK → `fakultas.id`, nullable | wajib di app level untuk semua prodi |
 | `timestamps` | | |
 
 ### `users` (extend tabel bawaan Fortify)
@@ -96,6 +106,49 @@ assistant_conversations (1) ───< assistant_messages
 | unique | `(schedule_id, user_id)` | |
 | `timestamps` | | |
 
+### `jenis_sidangs`
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | bigint, PK | |
+| `nama` | string, unique | "TA", "KP", "Milestone Design" |
+| `deskripsi` | string, nullable | |
+| `timestamps` | | |
+
+### `pembimbingan` (pivot dosen pembimbing)
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | bigint, PK | |
+| `mahasiswa_id` | FK → `users` | |
+| `dosen_id` | FK → `users` | |
+| `urutan` | tinyint unsigned, default 1 | urutan dosen pembimbing (I=1, II=2) |
+| unique | `(mahasiswa_id, urutan)` | maksimal 2 dospem per mahasiswa |
+| `timestamps` | | |
+
+### `assessment_templates`
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | bigint, PK | |
+| `prodi_id` | FK → `prodis` | |
+| `jenis_sidang_id` | FK → `jenis_sidangs` | |
+| `nama` | string | |
+| `nilai_penyebut` | int, default 1 | penyebut A pada rumus `Σskor / A × B` |
+| `nilai_pengali` | int, default 100 | pengali B |
+| `items` | json | array item: `{name, maksimal, urutan}` |
+| unique | `(prodi_id, jenis_sidang_id)` | satu template per kombinasi |
+
+### `assessment_forms`
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | bigint, PK | |
+| `submission_id` | FK → `submissions` | |
+| `dosen_id` | FK → `users` | |
+| `tipe_penilai` | enum(`dospem`,`penguji`) | |
+| `template_id` | FK → `assessment_templates` | |
+| `skor_per_item` | json | `{item: idx, skor: value}` |
+| `skor_total` | float, nullable | auto-hitung `Σskor / A × B` |
+| `catatan` | text, nullable | |
+| unique | `(submission_id, dosen_id, tipe_penilai)` | |
+
 ### `assistant_conversations`
 | Kolom | Tipe | Keterangan |
 |---|---|---|
@@ -116,15 +169,23 @@ assistant_conversations (1) ───< assistant_messages
 
 ## Urutan Migration yang Disarankan
 1. `users` (extend — tambah `username`, `role`)
-2. `prodis`
-3. `add_prodi_id_to_users` (foreign key → `prodis`)
-4. `schedules`
-3. `schedule_dosen`
-4. `submissions`
-5. `revision_notes`
-6. `revision_attachments`
-7. `assistant_conversations`
-8. `assistant_messages`
+2. `fakultas`
+3. `prodis`
+4. `add_fakultas_id_to_prodis` (foreign key → `fakultas`)
+5. `add_prodi_id_to_users` (foreign key → `prodis`)
+6. `schedules`
+7. `schedule_dosen`
+8. `submissions`
+9. `revision_notes`
+10. `revision_attachments`
+11. `jenis_sidangs`
+12. `pembimbingan`
+13. `add_jenis_sidang_id_to_schedules`
+14. `add_urutan_to_pembimbingan`
+15. `assessment_templates`
+16. `assessment_forms`
+17. `assistant_conversations`
+18. `assistant_messages`
 
 ## Catatan Query
 - Selalu eager load relasi saat menampilkan daftar mahasiswa per dosen: `Submission::with(['user', 'revisionNotes'])`.

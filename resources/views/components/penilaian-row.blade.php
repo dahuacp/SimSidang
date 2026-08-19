@@ -1,7 +1,7 @@
 @props(['submission', 'tipe'])
 
 @php
-    $form = $submission->assessmentForms->first();
+    $form = $submission->assessmentForms->first(fn ($f) => $f->tipe_penilai === $tipe);
     $isi = $form ? $form->skor_total : null;
     $link = $form
         ? route('dosen.penilaian.edit', $form)
@@ -26,10 +26,18 @@
             <span class="text-sm text-gray-700 dark:text-gray-300">
                 Skor: <span class="font-semibold text-brand-600 dark:text-brand-400">{{ number_format($isi, 1) }}</span>
             </span>
-            <a href="{{ $link }}"
-               class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-brand-500 px-3 py-1.5 text-sm font-medium text-brand-500 transition hover:bg-brand-50 dark:border-brand-500 dark:text-brand-400 dark:hover:bg-brand-500/10">
-                Edit Penilaian
-            </a>
+<a href="{{ $link }}"
+           class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-brand-500 px-3 py-1.5 text-sm font-medium text-brand-500 transition hover:bg-brand-50 dark:border-brand-500 dark:text-brand-400 dark:hover:bg-brand-500/10">
+            Edit Penilaian
+        </a>
+        <a href="{{ route('dosen.penilaian.cetak', $form) }}"
+           target="_blank"
+           class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9V2h12v7m-6 6v6m-4-4h8a2 2 0 002-2V7a2 2 0 00-2-2H8a2 2 0 00-2 2v10a2 2 0 002 2h6"></path>
+            </svg>
+            Cetak
+        </a>
         @else
             <span class="text-sm text-gray-500 dark:text-gray-400">Belum dinilai</span>
             <a href="{{ $link }}"

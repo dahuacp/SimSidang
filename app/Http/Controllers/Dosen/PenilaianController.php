@@ -9,6 +9,7 @@ use App\Models\AssessmentForm;
 use App\Models\AssessmentTemplate;
 use App\Models\Submission;
 use App\Services\NotificationService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -42,7 +43,7 @@ class PenilaianController extends Controller
 
         abort_unless(Gate::allows('assess-penilaian', [$submission, $tipe]), 403);
 
-        $template = $this->resolveTemplate($submission);
+        $template = $this->resolveTemplate($submission, $tipe);
 
         if (! $template) {
             return redirect()->route('dosen.penilaian.index')
@@ -68,7 +69,7 @@ class PenilaianController extends Controller
 
         abort_unless(Gate::allows('assess-penilaian', [$submission, $tipe]), 403);
 
-        $template = $this->resolveTemplate($submission);
+        $template = $this->resolveTemplate($submission, $tipe);
 
         if (! $template) {
             return redirect()->route('dosen.penilaian.index')
@@ -126,15 +127,38 @@ class PenilaianController extends Controller
             ->with('success', 'Penilaian berhasil diperbarui.');
     }
 
+    public function cetak(AssessmentForm $assessmentForm)
+    {
+        $this->authorize('view', $assessmentForm);
+
+        $assessmentForm->load([
+            'submission.user.prodi.fakultas',
+            'submission.schedule.jenisSidang',
+            'dosen',
+            'template',
+        ]);
+
+        $dospem = $assessmentForm->submission->user->dosenPembimbingByUrutan ?? collect();
+
+        return Pdf::loadView('penilaian.cetak', [
+            'assessmentForm' => $assessmentForm,
+            'dospem' => $dospem,
+            'university' => config('university'),
+        ])
+            ->setPaper('a4', 'landscape')
+            ->stream('penilaian_'.$assessmentForm->submission->user->username.'.pdf');
+    }
+
     private function ensureTipeValid(string $tipe): void
     {
         abort_unless(in_array($tipe, ['dospem', 'penguji'], true), 422);
     }
 
-    private function resolveTemplate(Submission $submission): ?AssessmentTemplate
+    private function resolveTemplate(Submission $submission, string $tipe): ?AssessmentTemplate
     {
         return AssessmentTemplate::where('prodi_id', $submission->user->prodi_id)
             ->where('jenis_sidang_id', $submission->schedule->jenis_sidang_id)
+            ->where('tipe_penilai', $tipe)
             ->first();
     }
 }

@@ -14,6 +14,7 @@ class AssessmentTemplate extends Model
     protected $fillable = [
         'prodi_id',
         'jenis_sidang_id',
+        'tipe_penilai',
         'nama',
         'nilai_penyebut',
         'nilai_pengali',

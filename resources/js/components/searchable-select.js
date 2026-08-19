@@ -5,8 +5,10 @@ Alpine.data('searchableSelect', (config) => ({
     open: false,
     results: [],
     loading: false,
-    selected: config.multiple ? (config.initialSelected || []) : null,
+    selected: config.multiple ? (config.initialSelected || []) : (config.initialSelected || null),
     highlighted: 0,
+    maxedOut: false,
+    max: config.max ?? null,
 
     init() {
         if (config.initialSelected) {
@@ -67,6 +69,12 @@ Alpine.data('searchableSelect', (config) => ({
 
     select(item) {
         if (config.multiple) {
+            if (config.max && this.selected.length >= config.max) {
+                this.maxedOut = true;
+                clearTimeout(this._maxedOutTimer);
+                this._maxedOutTimer = setTimeout(() => { this.maxedOut = false; }, 2500);
+                return;
+            }
             if (!this.selected.some(s => s.id == item.id)) {
                 this.selected.push(item);
             }
@@ -92,6 +100,7 @@ Alpine.data('searchableSelect', (config) => ({
     remove(item) {
         if (config.multiple) {
             this.selected = this.selected.filter(s => s.id != item.id);
+            this.maxedOut = false;
         }
     },
 
@@ -101,6 +110,7 @@ Alpine.data('searchableSelect', (config) => ({
         this.open = false;
         this.results = [];
         this.highlighted = 0;
+        this.maxedOut = false;
     },
 
     selectHighlighted() {

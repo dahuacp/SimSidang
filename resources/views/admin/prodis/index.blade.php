@@ -31,6 +31,7 @@
                         <th class="px-4 py-3 font-medium">#</th>
                         <th class="px-4 py-3 font-medium">Kode</th>
                         <th class="px-4 py-3 font-medium">Nama Program Studi</th>
+                        <th class="px-4 py-3 font-medium">Fakultas</th>
                         <th class="px-4 py-3 font-medium">Jumlah Pengguna</th>
                         <th class="px-4 py-3 font-medium text-right">Aksi</th>
                     </tr>
@@ -41,6 +42,7 @@
                             <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $loop->iteration + ($prodis->currentPage() - 1) * $prodis->perPage() }}</td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $prodi->kode_prodi }}</td>
                             <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">{{ $prodi->nama_prodi }}</td>
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $prodi->fakultas?->nama_fakultas ?? '-' }}</td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $prodi->users_count }}</td>
                             <td class="px-4 py-3 text-right">
                                 <div class="inline-flex gap-2">
@@ -61,7 +63,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada program studi.</td>
+                            <td colspan="6" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada program studi.</td>
                         </tr>
                     @endforelse
                 </tbody>

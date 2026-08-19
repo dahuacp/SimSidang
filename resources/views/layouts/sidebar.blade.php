@@ -88,6 +88,13 @@
                 </svg>
                 <span>Pengguna</span>
             </a>
+            <a href="{{ route('admin.fakultas.index') }}"
+               class="menu-item {{ request()->routeIs('admin.fakultas.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m0 0l-1.5-3m1.5 3zM7 6h10"></path>
+                </svg>
+                <span>Fakultas</span>
+            </a>
             <a href="{{ route('admin.prodis.index') }}"
                class="menu-item {{ request()->routeIs('admin.prodis.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                 <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,13 +130,28 @@
                 </svg>
                 <span>Submission</span>
             </a>
-            <a href="{{ route('admin.rekap') }}"
-               class="menu-item {{ request()->routeIs('admin.rekap') || request()->routeIs('admin.export.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
-                <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m0 0l2 2m-2-2l-2 2"></path>
-                </svg>
-                <span>Rekap Export</span>
-            </a>
+            <div x-data="{ open: {{ in_array(request()->route()->getName(), ['admin.rekap', 'admin.rekap.*'], true) ? 'true' : 'false' }} }" class="flex flex-col gap-1">
+                <button type="button" @click="open = !open"
+                        class="menu-item w-full {{ in_array(request()->route()->getName(), ['admin.rekap', 'admin.rekap.*'], true) ? 'menu-item-active' : 'menu-item-inactive' }}">
+                    <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m0 0l2 2m-2-2l-2 2"></path>
+                    </svg>
+                    <span class="flex-1 text-left">Rekap Export</span>
+                    <svg class="w-4 h-4 transition-transform duration-200" :class="open ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+                <div x-show="open" class="ml-4 space-y-1">
+                    <a href="{{ route('admin.rekap') }}"
+                       class="menu-item {{ request()->routeIs('admin.rekap') && !request()->routeIs('admin.rekap.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        <span>Rekap</span>
+                    </a>
+                    <a href="{{ route('admin.rekap.cetak-penilaian') }}"
+                       class="menu-item {{ request()->routeIs('admin.rekap.cetak-penilaian') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                        <span>Cetak Penilaian</span>
+                    </a>
+                </div>
+            </div>
             <a href="{{ route('admin.assistant.index') }}"
                class="menu-item {{ request()->routeIs('admin.assistant*') ? 'menu-item-active' : 'menu-item-inactive' }}">
                 <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">

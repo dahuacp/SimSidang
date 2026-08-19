@@ -33,6 +33,7 @@
                         <th class="px-4 py-3 font-medium">Nama Template</th>
                         <th class="px-4 py-3 font-medium">Program Studi</th>
                         <th class="px-4 py-3 font-medium">Jenis Sidang</th>
+                        <th class="px-4 py-3 font-medium">Tipe Penilai</th>
                         <th class="px-4 py-3 font-medium">Rumus (A/B)</th>
                         <th class="px-4 py-3 font-medium">Item</th>
                         <th class="px-4 py-3 font-medium text-right">Aksi</th>
@@ -45,6 +46,11 @@
                             <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">{{ $template->nama }}</td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $template->prodi?->nama_prodi }}</td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $template->jenisSidang?->nama }}</td>
+                            <td class="px-4 py-3">
+                                <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $template->tipe_penilai === 'penguji' ? 'bg-error-500/10 text-error-600 dark:text-error-400' : 'bg-brand-500/10 text-brand-600 dark:text-brand-400' }}">
+                                    {{ $template->tipe_penilai === 'penguji' ? 'Penguji' : 'Pembimbing' }}
+                                </span>
+                            </td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">Σ / {{ $template->nilai_penyebut }} × {{ $template->nilai_pengali }}</td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ count($template->items) }}</td>
                             <td class="px-4 py-3 text-right">
@@ -66,7 +72,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada template penilaian.</td>
+                            <td colspan="8" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Tidak ada template penilaian.</td>
                         </tr>
                     @endforelse
                 </tbody>

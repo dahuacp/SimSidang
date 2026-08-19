@@ -65,9 +65,21 @@ class User extends Authenticatable
         return $this->belongsToMany(Schedule::class, 'schedule_dosen', 'user_id', 'schedule_id');
     }
 
+    public function schedulesAsPlot(): BelongsToMany
+    {
+        return $this->belongsToMany(Schedule::class, 'schedule_mahasiswa', 'user_id', 'schedule_id');
+    }
+
     public function dosenPembimbing(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'pembimbingan', 'mahasiswa_id', 'dosen_id');
+    }
+
+    public function dosenPembimbingByUrutan(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'pembimbingan', 'mahasiswa_id', 'dosen_id')
+            ->withPivot('urutan')
+            ->orderBy('urutan');
     }
 
     public function mahasiswaBimbingan(): BelongsToMany

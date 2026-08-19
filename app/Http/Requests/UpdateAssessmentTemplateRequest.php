@@ -23,9 +23,11 @@ class UpdateAssessmentTemplateRequest extends FormRequest
                 Rule::exists('prodis', 'id'),
                 Rule::unique('assessment_templates', 'prodi_id')
                     ->ignore($template->id)
-                    ->where('jenis_sidang_id', $this->input('jenis_sidang_id') ?? $template->jenis_sidang_id),
+                    ->where('jenis_sidang_id', $this->input('jenis_sidang_id') ?? $template->jenis_sidang_id)
+                    ->where('tipe_penilai', $this->input('tipe_penilai') ?? $template->tipe_penilai),
             ],
             'jenis_sidang_id' => ['required', 'integer', Rule::exists('jenis_sidangs', 'id')],
+            'tipe_penilai' => ['required', Rule::in(['dospem', 'penguji'])],
             'nama' => ['required', 'string', 'max:255'],
             'nilai_penyebut' => ['required', 'integer', 'min:1'],
             'nilai_pengali' => ['required', 'integer', 'min:0'],
@@ -43,9 +45,11 @@ class UpdateAssessmentTemplateRequest extends FormRequest
         return [
             'prodi_id.required' => 'Program studi wajib dipilih.',
             'prodi_id.exists' => 'Program studi yang dipilih tidak valid.',
-            'prodi_id.unique' => 'Template untuk kombinasi prodi dan jenis sidang ini sudah ada.',
+            'prodi_id.unique' => 'Template untuk kombinasi prodi, jenis sidang, dan tipe penilai ini sudah ada.',
             'jenis_sidang_id.required' => 'Jenis sidang wajib dipilih.',
             'jenis_sidang_id.exists' => 'Jenis sidang yang dipilih tidak valid.',
+            'tipe_penilai.required' => 'Tipe penilai wajib dipilih.',
+            'tipe_penilai.in' => 'Tipe penilai tidak valid.',
             'nama.required' => 'Nama template wajib diisi.',
             'nilai_penyebut.required' => 'Nilai penyebut (A) wajib diisi.',
             'nilai_penyebut.min' => 'Nilai penyebut (A) harus ≥ 1.',

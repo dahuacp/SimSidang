@@ -42,7 +42,7 @@ class SubmissionController extends Controller
     {
         $this->authorize('view', $submission);
 
-        $submission->load(['schedule', 'revisionNotes.attachments', 'revisionNotes.dosen', 'user', 'statusLogs.diubahOleh']);
+        $submission->load(['schedule', 'revisionNotes.attachments', 'revisionNotes.dosen', 'user.prodi.fakultas', 'statusLogs.diubahOleh', 'assessmentForms.dosen', 'assessmentForms.template']);
 
         return view('dosen.submissions.show', compact('submission'));
     }
