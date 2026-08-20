@@ -20,6 +20,13 @@ npm run dev             # terminal 2 — Vite HMR for resources/css + resources/
 php artisan test         # → ./vendor/bin/pest also works
 npm run lint
 ./vendor/bin/pint        # PSR-12 (Laravel Pint)
+
+# NOTE: pdo_sqlite is NOT installed on the dev box, so the default `php artisan test`
+# (DB_CONNECTION=sqlite :memory:) fails. Run the suite against MySQL instead:
+vendor/bin/pest --configuration phpunit.mysql.xml tests/Feature
+# WARNING: that wipes the `simsidang` dev DB (RefreshDatabase). Backup first:
+# mysqldump -usimsidang -psimsidang simsidang > /tmp/opencode/simsidang_backup.sql
+# Then restore afterwards: php artisan migrate:fresh --seed
 ```
 
 ## Critical constraints (agents miss these without help)

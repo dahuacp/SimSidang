@@ -6,13 +6,27 @@
 <div class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
     <h1 class="text-xl font-bold text-gray-800 dark:text-white/90 sm:text-2xl">Rekap Hasil Penilaian</h1>
     <div class="flex flex-wrap gap-2">
-        <form method="GET" class="flex gap-2" role="search">
-            <select name="prodi_id" class="h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700">
-                <option value="">Semua Prodi</option>
-                @foreach($prodis as $prodi)
-                <option value="{{ $prodi->id }}" {{ request('prodi_id') == $prodi->id ? 'selected' : '' }}>{{ $prodi->nama_prodi }}</option>
+        <form method="GET" class="flex flex-wrap gap-2" role="search" x-data="{ fakultas: {{ request('fakultas_id') ?: "''" }} }">
+            <select name="fakultas_id" x-model="fakultas" @change="$refs.prodiFilter.value = ''" class="h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700">
+                <option value="">Semua Fakultas</option>
+                @foreach($fakultas as $fakultasItem)
+                <option value="{{ $fakultasItem->id }}" {{ request('fakultas_id') == $fakultasItem->id ? 'selected' : '' }}>{{ $fakultasItem->nama_fakultas }}</option>
                 @endforeach
             </select>
+            <select name="prodi_id" x-ref="prodiFilter" class="h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700">
+                <option value="" x-show="!fakultas">Semua Prodi</option>
+                @foreach($prodis as $prodi)
+                <option value="{{ $prodi->id }}" data-fakultas="{{ $prodi->fakultas_id }}" x-show="!fakultas || $el.dataset.fakultas === String(fakultas)" {{ request('prodi_id') == $prodi->id ? 'selected' : '' }}>{{ $prodi->nama_prodi }}</option>
+                @endforeach
+            </select>
+            <select name="jenis_sidang_id" class="h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700">
+                <option value="">Semua Jenis Sidang</option>
+                @foreach($jenisSidangs as $jenisSidang)
+                <option value="{{ $jenisSidang->id }}" {{ request('jenis_sidang_id') == $jenisSidang->id ? 'selected' : '' }}>{{ $jenisSidang->nama }}</option>
+                @endforeach
+            </select>
+            <input type="date" name="start_date" value="{{ request('start_date') }}" class="h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700" aria-label="Tanggal mulai">
+            <input type="date" name="end_date" value="{{ request('end_date') }}" class="h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700" aria-label="Tanggal selesai">
             <select name="sort" class="h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700">
                 <option value="desc" {{ request('sort') == 'asc' ? '' : 'selected' }}>Nilai Tertinggi</option>
                 <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Nilai Terendah</option>

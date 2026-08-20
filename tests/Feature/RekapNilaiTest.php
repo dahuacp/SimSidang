@@ -2,6 +2,7 @@
 
 use App\Models\AssessmentForm;
 use App\Models\AssessmentTemplate;
+use App\Models\Fakultas;
 use App\Models\JenisSidang;
 use App\Models\Prodi;
 use App\Models\Schedule;
@@ -11,7 +12,8 @@ use App\Services\RekapNilaiService;
 
 function scenarioCetakNilai(): array
 {
-    $prodi = Prodi::factory()->create(['kode_prodi' => 'TI', 'nama_prodi' => 'Teknik Informatika']);
+    $fakultas = Fakultas::factory()->create(['kode_fakultas' => 'FTIK']);
+    $prodi = Prodi::factory()->create(['kode_prodi' => 'TI', 'nama_prodi' => 'Teknik Informatika', 'fakultas_id' => $fakultas->id]);
     $jenis = JenisSidang::factory()->create(['nama' => 'TA']);
 
     $templatePenguji = AssessmentTemplate::create([
@@ -73,7 +75,7 @@ function scenarioCetakNilai(): array
         'catatan' => 'Lanjutkan.',
     ]);
 
-    return compact('prodi', 'jenis', 'templatePenguji', 'templateDospem', 'mahasiswa', 'dosenPenguji', 'dospem', 'schedule', 'submission');
+    return compact('fakultas', 'prodi', 'jenis', 'templatePenguji', 'templateDospem', 'mahasiswa', 'dosenPenguji', 'dospem', 'schedule', 'submission');
 }
 
 test('admin dapat mengakses halaman rekap nilai', function () {
@@ -101,6 +103,54 @@ test('rekap nilai dapat difilter per prodi', function () {
         ->get(route('admin.rekap.nilai', ['prodi_id' => $s['prodi']->id]))
         ->assertOk()
         ->assertSee($s['prodi']->nama);
+});
+
+test('rekap nilai dapat difilter per fakultas', function () {
+    $s = scenarioCetakNilai();
+    $admin = User::factory()->admin()->create();
+    $fakultasLain = Fakultas::factory()->create();
+
+    $this->actingAs($admin)
+        ->get(route('admin.rekap.nilai', ['fakultas_id' => $s['fakultas']->id]))
+        ->assertOk()
+        ->assertSee($s['mahasiswa']->name);
+
+    $this->actingAs($admin)
+        ->get(route('admin.rekap.nilai', ['fakultas_id' => $fakultasLain->id]))
+        ->assertOk()
+        ->assertDontSee($s['mahasiswa']->name);
+});
+
+test('rekap nilai dapat difilter per jenis sidang', function () {
+    $s = scenarioCetakNilai();
+    $admin = User::factory()->admin()->create();
+    $jenisLain = JenisSidang::factory()->create();
+
+    $this->actingAs($admin)
+        ->get(route('admin.rekap.nilai', ['jenis_sidang_id' => $s['jenis']->id]))
+        ->assertOk()
+        ->assertSee($s['mahasiswa']->name);
+
+    $this->actingAs($admin)
+        ->get(route('admin.rekap.nilai', ['jenis_sidang_id' => $jenisLain->id]))
+        ->assertOk()
+        ->assertDontSee($s['mahasiswa']->name);
+});
+
+test('rekap nilai dapat difilter per rentang tanggal sidang', function () {
+    $s = scenarioCetakNilai();
+    $admin = User::factory()->admin()->create();
+    $today = now()->toDateString();
+
+    $this->actingAs($admin)
+        ->get(route('admin.rekap.nilai', ['start_date' => $today, 'end_date' => $today]))
+        ->assertOk()
+        ->assertSee($s['mahasiswa']->name);
+
+    $this->actingAs($admin)
+        ->get(route('admin.rekap.nilai', ['start_date' => now()->subDay()->toDateString(), 'end_date' => now()->subDay()->toDateString()]))
+        ->assertOk()
+        ->assertDontSee($s['mahasiswa']->name);
 });
 
 test('rekap nilai dapat diurutkan', function () {

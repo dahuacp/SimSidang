@@ -7,21 +7,23 @@ use Illuminate\Support\Collection;
 
 class RekapNilaiService
 {
-    public function getRows(?int $prodiId = null, string $sort = 'desc'): array
+    public function getRows(array $filters = [], string $sort = 'desc'): array
     {
-        return $this->computeRows($prodiId, $sort)['rows'];
+        return $this->computeRows($filters, $sort)['rows'];
     }
 
-    public function getChartData(?int $prodiId = null): array
+    public function getChartData(array $filters = []): array
     {
-        $data = $this->computeRows($prodiId, 'desc');
+        $data = $this->computeRows($filters, 'desc');
 
         return $data['chart'];
     }
 
-    protected function computeRows(?int $prodiId, string $sort): array
+    protected function computeRows(array $filters, string $sort): array
     {
         $weight = config('penilaian.bobot');
+        $startDate = $filters['start_date'] ?? null;
+        $endDate = $filters['end_date'] ?? null;
 
         $forms = AssessmentForm::with([
             'submission.user.prodi',
@@ -30,7 +32,15 @@ class RekapNilaiService
             'template',
         ])
             ->whereHas('submission')
-            ->when($prodiId, fn ($q, $id) => $q->whereHas('submission.user', fn ($q2) => $q2->where('prodi_id', $id)))
+            ->when($filters['prodi_id'] ?? null, fn ($q, $id) => $q->whereHas('submission.user', fn ($q2) => $q2->where('prodi_id', $id)))
+            ->when($filters['fakultas_id'] ?? null, fn ($q, $id) => $q->whereHas('submission.user.prodi', fn ($q2) => $q2->where('fakultas_id', $id)))
+            ->when($filters['jenis_sidang_id'] ?? null, fn ($q, $id) => $q->whereHas('submission.schedule', fn ($q2) => $q2->where('jenis_sidang_id', $id)))
+            ->when($startDate || $endDate, fn ($q) => $q->whereHas('submission.schedule', function ($q2) use ($startDate, $endDate) {
+                $dates = array_filter([$startDate, $endDate]);
+                count($dates) === 1
+                    ? $q2->whereDate('tanggal_sidang', $dates[0])
+                    : $q2->whereBetween('tanggal_sidang', $dates);
+            }))
             ->get()
             ->groupBy('submission_id');
 
