@@ -5,9 +5,8 @@
 @section('content')
     <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg sm:p-8 dark:border-gray-800 dark:bg-gray-900">
         <div class="mb-6 text-center">
-            <div class="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-brand-500/10 dark:bg-brand-500/15">
-                <span class="text-xl font-bold text-brand-600 dark:text-brand-400">S</span>
-            </div>
+            <img src="{{ asset('storage/docs/LOGOUNDAR.png') }}" alt="Logo Universitas Darul Ulum"
+                 class="mx-auto mb-3 h-20 w-auto object-contain">
             <h1 class="mb-1 text-xl font-bold text-gray-800 dark:text-white/90">Masuk SISIDANG</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400">Sistem Manajemen Sidang Akademik</p>
         </div>
@@ -73,4 +72,8 @@
             </button>
         </form>
     </div>
+
+    <p class="mt-6 text-center text-xs text-gray-400 dark:text-gray-500">
+        Designed by Informatika Undar
+    </p>
 @endsection

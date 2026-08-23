@@ -51,8 +51,8 @@ class DatabaseSeeder extends Seeder
                     'jenis_sidang_id' => $jenis->id,
                     'tipe_penilai' => 'dospem',
                     'nama' => 'Penilaian Pembimbing '.$prodi->nama_prodi.' — '.$jenis->nama,
-                    'nilai_penyebut' => 15,
-                    'nilai_pengali' => 100,
+                    'nilai_penyebut' => 12,
+                    'nilai_pengali' => 7,
                     'items' => [
                         // max 10: columns 2,4,6,8,10
                         ['name' => 'Sistematika penyusunan materi TA sebagai karya tulis ilmiah', 'maksimal' => 10, 'urutan' => 1],

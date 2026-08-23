@@ -5,9 +5,9 @@
     <title>Penilaian Sidang — {{ $assessmentForm->submission->user->username }}</title>
     <style>
         * {
-            font-family: sans-serif;
+            font-family: 'DejaVu Sans', sans-serif;
             font-size: 10pt;
-            line-height: 1.4;
+            line-height: 1.3;
         }
         table {
             border-collapse: collapse;
@@ -30,7 +30,12 @@
         }
         .header-table td {
             border: none;
-            padding: 2px 4px;
+            padding: 2px 0;
+        }
+        .logo-cell {
+            text-align: center;
+            vertical-align: middle;
+            width: 100px;
         }
         .score-cell {
             text-align: center;
@@ -41,43 +46,63 @@
             color: white;
             font-weight: bold;
         }
+        .sig-table td {
+            border: none;
+        }
+        .plain-table td, .plain-table th {
+            border: none;
+        }
     </style>
 </head>
 <body style="margin: 20px;">
 
 @php
+    $isDospem = $assessmentForm->tipe_penilai === 'dospem';
     $fakultas = $assessmentForm->submission->user->prodi?->fakultas;
     $prodiList = $fakultas ? \App\Models\Prodi::where('fakultas_id', $fakultas->id)->pluck('nama_prodi')->toArray() : [];
-    $tipeLabel = $assessmentForm->tipe_penilai === 'penguji' ? 'Dosen Penguji' : 'Dosen Pembimbing';
-    $tipeLabelShort = $assessmentForm->tipe_penilai === 'penguji' ? 'Penguji' : 'Pembimbing';
+    $logoPath = public_path('storage/docs/LOGO.png');
+    $penilai = $dospem->firstWhere('id', $assessmentForm->dosen_id);
+    $urutan = $penilai?->pivot?->urutan;
+    $tipeLabelDetail = $isDospem
+        ? 'Dosen Pembimbing '.($urutan === 2 ? 'II' : ($urutan === 1 ? 'I' : ''))
+        : 'Dosen Penguji';
+    $judulUtama = $isDospem ? 'EVALUASI BIMBINGAN TUGAS AKHIR' : 'EVALUASI PENILAIAN SIDANG';
+    $labelNilai = $isDospem ? 'NILAI BIMBINGAN TUGAS AKHIR' : 'NILAI PENILAIAN SIDANG';
+    $tanggal = \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y');
 @endphp
 
 <table class="header-table" style="margin-bottom: 16px;">
     <tr>
-        <td class="bold">{{ $university['name'] ?? config('university.name') }}</td>
+        <td></td>
+        <td class="bold" style="font-size: 14pt; padding-left: 10px;">{{ $university['name'] ?? config('university.name') }}</td>
     </tr>
     <tr>
-        <td>{{ $fakultas?->nama_fakultas ?? '' }}</td>
+        <td class="logo-cell"></td>
+        <td></td>
     </tr>
     <tr>
-        <td>PRODI: {{ implode(', ', $prodiList) }}</td>
+        <td class="logo-cell" rowspan="4"><img src="{{ $logoPath }}" alt="Logo" style="max-width: 100px; height: auto;"></td>
+        <td class="bold" style="padding-left: 10px;">{{ $fakultas?->nama_fakultas ?? '' }}</td>
     </tr>
     <tr>
-        <td>Alamat : {{ $university['address'] ?? '' }} Telp.{{ $university['phone'] ?? '' }} Fax. {{ $university['fax'] ?? '' }}</td>
+        <td style="padding-left: 10px;">PRODI: {{ implode(', ', $prodiList) }}</td>
     </tr>
     <tr>
-        <td>Website: {{ $university['website'] ?? '' }}, Email: {{ $university['email'] ?? '' }}</td>
+        <td style="padding-left: 10px;">Alamat: {{ $university['address'] ?? '' }} Telp.{{ $university['phone'] ?? '' }} Fax. {{ $university['fax'] ?? '' }}</td>
+    </tr>
+    <tr>
+        <td style="padding-left: 10px;">Website: {{ $university['website'] ?? '' }}, Email: {{ $university['email'] ?? '' }}</td>
     </tr>
 </table>
 
-<table style="margin-bottom: 20px;">
+<table class="plain-table" style="margin-bottom: 20px;">
     <tr>
-        <td class="bold">EVALUASI PENILAIAN SIDANG</td>
-        <td>({{ $tipeLabel }})</td>
+        <td class="bold">{{ $judulUtama }}</td>
+        <td>({{ $tipeLabelDetail }})</td>
     </tr>
 </table>
 
-<table style="margin-bottom: 20px;">
+<table class="plain-table" style="margin-bottom: 20px;">
     <tr>
         <td class="bold">Nama Mahasiswa</td>
         <td>: {{ $assessmentForm->submission->user->name }}</td>
@@ -94,18 +119,12 @@
         <td class="bold">Judul Tugas Akhir</td>
         <td>: {{ $assessmentForm->submission->judul_laporan ?: '-' }}</td>
     </tr>
-    @if(isset($dospem[0]))
+    @foreach($dospem as $d)
     <tr>
-        <td class="bold">Dosen Pembimbing I</td>
-        <td>: {{ $dospem[0]->name }}{{ $dospem[0]->title ? ', '.$dospem[0]->title : '' }}</td>
+        <td class="bold">Dosen Pembimbing {{ $d->pivot?->urutan == 2 ? 'II' : 'I' }}</td>
+        <td>: {{ $d->name }}{{ $d->title ? ', '.$d->title : '' }}</td>
     </tr>
-    @endif
-    @if(isset($dospem[1]))
-    <tr>
-        <td class="bold">Dosen Pembimbing II</td>
-        <td>: {{ $dospem[1]->name }}{{ $dospem[1]->title ? ', '.$dospem[1]->title : '' }}</td>
-    </tr>
-    @endif
+    @endforeach
 </table>
 
 <table>
@@ -148,15 +167,15 @@
     </tbody>
 </table>
 
-<table style="margin-top: 16px;">
+<table class="plain-table" style="margin-top: 16px;">
     <tr>
-        <td class="bold">NILAI PENILAIAN SIDANG = Σ nilai / {{ $assessmentForm->template->nilai_penyebut }} × {{ $assessmentForm->template->nilai_pengali }}</td>
+        <td class="bold">{{ $labelNilai }} = &#8721; nilai / {{ $assessmentForm->template->nilai_penyebut }} &times; {{ $assessmentForm->template->nilai_pengali }}</td>
         <td class="bold center" style="width: 100px;">{{ $assessmentForm->skor_total }}</td>
     </tr>
 </table>
 
 @if($assessmentForm->catatan)
-<table style="margin-top: 10px;">
+<table class="plain-table" style="margin-top: 10px;">
     <tr>
         <td class="bold">CATATAN :</td>
         <td>{{ $assessmentForm->catatan }}</td>
@@ -164,18 +183,22 @@
 </table>
 @endif
 
-<table style="margin-top: 24px;">
+<table class="sig-table" style="margin-top: 24px;">
     <tr>
-        <td>{!! \Carbon\Carbon::now()->format('d M Y') !!},</td>
+        <td></td>
+        <td style="text-align: right;">{{ 'Jombang, '.$tanggal }}</td>
+    </tr>
+    <tr>
+        <td></td>
+        <td class="bold" style="text-align: right;">{{ $tipeLabelDetail }}</td>
+    </tr>
+    <tr>
+        <td style="height: 50px;"></td>
         <td></td>
     </tr>
     <tr>
         <td></td>
-        <td>{{ $assessmentForm->dosen->name }}{{ $assessmentForm->dosen->title ? ', '.$assessmentForm->dosen->title : '' }}</td>
-    </tr>
-    <tr>
-        <td></td>
-        <td class="bold">{{ $tipeLabel }}</td>
+        <td style="text-align: right; padding-right: 40px;">{{ $assessmentForm->dosen->name }}{{ $assessmentForm->dosen->title ? ', '.$assessmentForm->dosen->title : '' }}</td>
     </tr>
 </table>
 

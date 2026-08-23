@@ -18,18 +18,15 @@
         </include>
     </source>
     <php>
+        <!-- Kredensial database (DB_*) sengaja TIDAK di-hardcode di sini agar
+             diambil dari .env (dotenv tidak menimpa env yang sudah diset).
+             PENTING: RefreshDatabase akan MENGHAPUS seluruh tabel di DB .env.
+             Backup sebelum run: mysqldump -u<user> -p <db> > backup.sql -->
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="mysql"/>
-        <env name="DB_HOST" value="127.0.0.1"/>
-        <env name="DB_PORT" value="3306"/>
-        <env name="DB_DATABASE" value="simsidang"/>
-        <env name="DB_USERNAME" value="simsidang"/>
-        <env name="DB_PASSWORD" value="simsidang"/>
-        <env name="DB_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

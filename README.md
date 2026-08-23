@@ -1,59 +1,191 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="docs/LOGO.png" width="140" alt="SIMSIDANG">
 </p>
 
-## About Laravel
+<h1 align="center">SIMSIDANG</h1>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+<p align="center"><strong>Sistem Manajemen Sidang Akademik</strong> — digitalisasi alur sidang Tugas Akhir &amp; Kerja Praktek: dari upload laporan, pencatatan revisi pasca-sidang, hingga rekap penilaian.</p>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tentang Sistem Ini
 
-## Learning Laravel
+SIMSIDANG mendigitalisasi proses revisi pasca-sidang akademik. Mahasiswa mengunggah laporan TA/KP, dosen memberikan catatan revisi per poin saat sidang, mahasiswa membalas dengan bukti perbaikan, dan dosen memverifikasi sampai titik revisi ditandai selesai (`resolved`). Admin mengelola data induk, jadwal sidang, rekap nilai, serta memantau kondisi sistem melalui **Asisten Virtual** berbasis LLM (read-only). buatan informatika undar
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Alur Kerja Utama
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Admin** membuat jadwal sidang, menetapkan dosen penguji, dan memasukkan mahasiswa ke grup sidang.
+2. **Mahasiswa** mengunggah laporan (submission) terkait jadwalnya.
+3. Setelah sidang, **Dosen** menulis catatan revisi per poin (`open`).
+4. **Mahasiswa** merespons tiap poin revisi dengan mengunggah lampiran bukti perbaikan.
+5. **Dosen** memverifikasi bukti, lalu menandai poin revisi sebagai `resolved`.
+6. **Dosen** mengisi penilaian sesuai template prodi; hasil dapat dicetak (PDF) dan direkap oleh admin (Excel/PDF).
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Fitur
 
-## Agentic Development
+### Umum (semua role)
+- Dashboard sesuai role (mahasiswa / dosen / admin)
+- Notifikasi in-app dengan badge jumlah belum dibaca
+- Unduh file yang aman — submission & lampiran disimpan di disk privat (`FILESYSTEM_DISK=local`), hanya bisa diakses lewat route terproteksi
+- Login menggunakan **username (NIM/NIDN)**, bukan email (via Laravel Fortify)
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### Mahasiswa
+- Upload submission laporan sidang (PDF ≤ 10 MB)
+- Pantau status submission & daftar poin revisi
+- Upload lampiran bukti perbaikan per poin revisi (.pdf/.docx/.jpeg/.png ≤ 5 MB)
+- Lihat dan cetak hasil penilaian (PDF)
+
+### Dosen
+- Daftar & detail submission mahasiswa
+- **AI-read**: ekstraksi otomatis isi PDF laporan untuk membantu pembacaan awal
+- Catatan revisi per poin: simpan draft, publikasikan, tandai `resolved`
+- Penilaian berbasis template assessment per prodi/jenis sidang + cetak PDF
+
+### Admin
+- CRUD data induk: pengguna, fakultas, program studi, jenis sidang, template penilaian
+- Manajemen jadwal sidang: kelompok sidang, ruangan, waktu, import massal via Excel (+ unduhan template)
+- Penempatan dosen pembimbing pada tiap submission
+- Rekap nilai seluruh sidang + export Excel/PDF
+- **Asisten Virtual (FR-05)**: chat berbasis LLM dengan tool-calling *read-only* untuk query data agregat (rate-limited, tanpa akses tulis ke database)
+
+## Teknologi
+
+| Layer | Teknologi |
+|---|---|
+| Backend | Laravel 13, PHP 8.4+, MySQL 8 |
+| Auth | Laravel Fortify (login `username`, Gate RBAC: `mahasiswa` / `dosen` / `admin`) |
+| Frontend | Tailwind CSS v4, Alpine.js, ApexCharts — dibundel via Vite |
+| PDF / Excel | barryvdh/laravel-dompdf, maatwebsite/excel |
+| Parsing PDF | smalot/pdfparser (fitur AI-read) |
+| Testing | Pest |
+
+## Instalasi
+
+### Prasyarat
+- PHP 8.4+ (ekstensi: `pdo_mysql`, `mbstring`, `fileinfo`, `gd`)
+- Composer
+- Node.js 18+ & npm
+- MySQL 8.x
+
+### Langkah
 
 ```bash
-composer require laravel/boost --dev
+# 1. Clone repo
+git clone <repo-url> simsidang
+cd simsidang
 
-php artisan boost:install
+# 2. Install dependency
+composer install
+npm install
+
+# 3. Siapkan environment
+cp .env.example .env
+php artisan key:generate
+
+# 4. Buat database, lalu sesuaikan kredensial di .env
+mysql -u root -e "CREATE DATABASE simsidang CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+# edit .env → DB_DATABASE, DB_USERNAME, DB_PASSWORD
+
+# 5. Migrasi + data awal
+php artisan migrate --seed
+
+# 6. Pastikan folder storage writable
+chmod -R 775 storage bootstrap/cache
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Akun Demo (hasil seeder)
 
-## Contributing
+| Role | Username | Password |
+|---|---|---|
+| Admin | `telo` | `kaspe` |
+| Dosen | `00110200001` – `00110200004` | `password` |
+| Mahasiswa | `20200101001` – `20200101006` | `password` |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+> Seeder juga membuat contoh fakultas, prodi, template penilaian, jadwal sidang, submission, dan poin revisi agar alur bisa langsung dicoba.
 
-## Code of Conduct
+## Menjalankan Aplikasi
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Mode Development
 
-## Security Vulnerabilities
+Jalankan dua proses paralel (dua terminal terpisah):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan serve    # Terminal 1 — API/web server
+npm run dev          # Terminal 2 — Vite HMR (CSS & JS)
+```
 
-## License
+Atau satu perintah saja (server + queue + log tail + vite sekaligus):
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# SimSidang
+```bash
+composer dev
+```
+
+Akses aplikasi di `http://localhost:8000`.
+
+### Build Produksi
+
+```bash
+npm run build
+php artisan optimize
+```
+
+> Dependensi production sudah lengkap — `composer install --no-dev` aman digunakan saat deploy.
+
+## Konfigurasi `.env` Penting
+
+| Variabel | Fungsi |
+|---|---|
+| `DB_*` | Koneksi MySQL 8 |
+| `FILESYSTEM_DISK=local` | File submission disimpan privat (jangan diubah ke `public`) |
+| `ASSISTANT_LLM_URL` / `_API_KEY` / `_MODEL` | Endpoint LLM kompatibel OpenAI (OpenAI, Ollama, LM Studio, vLLM) untuk Asisten Virtual FR-05 |
+| `ASSISTANT_RATE_PER_MINUTE` / `_PER_CONVERSATION` | Batas rate chat asisten |
+| `UNIVERSITY_*` | Identitas kampus pada kop PDF penilaian |
+| `NILAI_DOSPEM_WEIGHT` / `NILAI_PENGUJI_WEIGHT` | Bobot rekap nilai (total harus 100) |
+
+## Testing
+
+```bash
+vendor/bin/pest --configuration phpunit.mysql.xml tests/Feature
+```
+
+> **Peringatan:** suite Feature memakai `RefreshDatabase` dan akan **mengosongkan database** yang dikonfigurasi di `.env`. Backup dulu, lalu seed ulang setelahnya:
+
+```bash
+mysqldump -u<user> -p <database> > backup.sql      # sebelum test
+php artisan migrate:fresh --seed                    # pulihkan setelah test
+```
+
+## Kualitas Kode
+
+```bash
+npm run lint           # ESLint (resources/js)
+./vendor/bin/pint      # Laravel Pint — PSR-12
+```
+
+## Struktur Proyek Singkat
+
+```
+app/
+  Http/Controllers/     # dikelompokkan per role: Mahasiswa/, Dosen/, Admin/
+  Http/Requests/        # validasi form terpusat
+  Models/
+resources/
+  css/app.css           # Tailwind v4 (@theme brand indigo #6366f1)
+  js/components/        # komponen Alpine.js
+  views/                # Blade templates
+routes/web.php
+docs/                   # dokumentasi lengkap project
+```
+
+## Dokumentasi Lanjutan
+
+| Dokumen | Isi |
+|---|---|
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Prioritas fitur per tahap (Tahap 1 → 3) |
+| [`docs/SCHEMA.md`](docs/SCHEMA.md) | Skema database & urutan migrasi |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Struktur folder & alur request |
+| [`docs/FRONTEND-GUIDE.md`](docs/FRONTEND-GUIDE.md) | Checklist porting template → Blade |
+| [`docs/CODING-STANDARDS.md`](docs/CODING-STANDARDS.md) | PSR-12, struktur test, format commit |
+| [`docs/GLOSSARY.md`](docs/GLOSSARY.md) | Istilah domain → penamaan kode |
+| [`docs/SETUP.md`](docs/SETUP.md) | Detail setup environment |
+| [`docs/MEMORY.md`](docs/MEMORY.md) | Log keputusan & histori pengerjaan |
