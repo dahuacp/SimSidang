@@ -17,9 +17,15 @@
                 <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
                     <tr>
                         <th class="px-4 py-3 font-medium">#</th>
-                        <th class="px-4 py-3 font-medium">Mahasiswa</th>
-                        <th class="px-4 py-3 font-medium">Judul</th>
-                        <th class="px-4 py-3 font-medium">Grup Sidang</th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Mahasiswa" field="name" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Judul" field="judul" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Grup Sidang" field="nama_grup_sidang" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
                         <th class="px-4 py-3 font-medium">Penilaian</th>
                     </tr>
                 </thead>
@@ -61,7 +67,5 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $submissions->links() }}
-    </div>
+    <x-table.pagination :items="$submissions" :params="['search' => $search, 'sort' => $sortBy, 'dir' => $sortDir]" />
 @endsection

@@ -30,13 +30,39 @@
                 <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
                     <tr>
                         <th class="px-4 py-3 font-medium">#</th>
-                        <th class="px-4 py-3 font-medium">Nama Template</th>
-                        <th class="px-4 py-3 font-medium">Program Studi</th>
-                        <th class="px-4 py-3 font-medium">Jenis Sidang</th>
-                        <th class="px-4 py-3 font-medium">Tipe Penilai</th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Nama Template" field="nama" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Program Studi" field="prodi_id" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Jenis Sidang" field="jenis_sidang_id" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Tipe Penilai" field="tipe_penilai" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
                         <th class="px-4 py-3 font-medium">Rumus (A/B)</th>
                         <th class="px-4 py-3 font-medium">Item</th>
                         <th class="px-4 py-3 font-medium text-right">Aksi</th>
+                    </tr>
+                    <tr class="border-t border-gray-200 dark:border-gray-800">
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2">
+                            <form method="GET" class="mt-1">
+                                <x-table.column-filter name="prodi_id" type="select" :options="$prodis" :value="$prodi" placeholder="Filter prodi..." />
+                            </form>
+                        </th>
+                        <th class="px-4 py-2">
+                            <form method="GET" class="mt-1">
+                                <x-table.column-filter name="jenis_sidang_id" type="select" :options="$jenisSidangs" :value="$jenisSidang" placeholder="Filter jenis sidang..." />
+                            </form>
+                        </th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
@@ -80,7 +106,5 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $templates->links() }}
-    </div>
+    <x-table.pagination :items="$templates" :params="['search' => $search, 'sort' => $sortBy, 'dir' => $sortDir, 'prodi_id' => $prodi, 'jenis_sidang_id' => $jenisSidang]" />
 @endsection

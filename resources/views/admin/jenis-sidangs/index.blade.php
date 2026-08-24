@@ -30,8 +30,12 @@
                 <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
                     <tr>
                         <th class="px-4 py-3 font-medium">#</th>
-                        <th class="px-4 py-3 font-medium">Nama</th>
-                        <th class="px-4 py-3 font-medium">Deskripsi</th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Nama" field="nama" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Deskripsi" field="deskripsi" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
                         <th class="px-4 py-3 font-medium">Jml Jadwal</th>
                         <th class="px-4 py-3 font-medium text-right">Aksi</th>
                     </tr>
@@ -70,7 +74,5 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $jenisSidangs->links() }}
-    </div>
+    <x-table.pagination :items="$jenisSidangs" :params="['search' => $search, 'sort' => $sortBy, 'dir' => $sortDir]" />
 @endsection

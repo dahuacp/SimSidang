@@ -15,14 +15,32 @@ class SubmissionController extends Controller
         $this->authorize('viewAdminMenu', User::class);
 
         $search = $request->input('search');
+        $sortBy = $request->input('sort', 'created_at');
+        $sortDir = $request->input('dir', 'desc');
+        $status = $request->input('status');
+
+        $allowedSorts = ['name', 'judul', 'status', 'created_at'];
+        $allowedDir = ['asc', 'desc'];
+
+        $sortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'created_at';
+        $sortDir = in_array($sortDir, $allowedDir) ? $sortDir : 'desc';
 
         $submissions = Submission::with(['user', 'schedule'])
             ->when($search, fn ($q, $s) => $q->where('judul_laporan', 'like', "%$s%")->orWhereHas('user', fn ($q2) => $q2->where('name', 'like', "%$s%")->orWhere('username', 'like', "%$s%")))
-            ->orderBy('created_at', 'desc')
+            ->when($status, fn ($q, $v) => $q->where('status', $v))
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.submissions.index', compact('submissions', 'search'));
+        $statusOptions = [
+            'draft' => 'Draft',
+            'submitted' => 'Dikumpulkan',
+            'revised' => 'Direvisi',
+            'approved' => 'Disetujui',
+            'completed' => 'Selesai',
+        ];
+
+        return view('admin.submissions.index', compact('submissions', 'search', 'sortBy', 'sortDir', 'status', 'statusOptions'));
     }
 
     public function show(Submission $submission)

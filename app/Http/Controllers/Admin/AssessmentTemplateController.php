@@ -17,17 +17,32 @@ class AssessmentTemplateController extends Controller
         $this->authorize('viewAny', AssessmentTemplate::class);
 
         $search = $request->input('search');
+        $sortBy = $request->input('sort', 'nama');
+        $sortDir = $request->input('dir', 'asc');
+        $prodi = $request->input('prodi_id');
+        $jenisSidang = $request->input('jenis_sidang_id');
+
+        $allowedSorts = ['nama', 'tipe_penilai'];
+        $allowedDir = ['asc', 'desc'];
+
+        $sortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'nama';
+        $sortDir = in_array($sortDir, $allowedDir) ? $sortDir : 'asc';
 
         $templates = AssessmentTemplate::with(['prodi', 'jenisSidang'])
             ->when($search, fn ($q, $s) => $q
                 ->where('nama', 'like', "%{$s}%")
                 ->orWhereHas('prodi', fn ($q) => $q->where('nama_prodi', 'like', "%{$s}%"))
                 ->orWhereHas('jenisSidang', fn ($q) => $q->where('nama', 'like', "%{$s}%")))
-            ->orderBy('nama')
+            ->when($prodi, fn ($q, $v) => $q->where('prodi_id', $v))
+            ->when($jenisSidang, fn ($q, $v) => $q->where('jenis_sidang_id', $v))
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.assessment-templates.index', compact('templates', 'search'));
+        $prodis = Prodi::pluck('nama_prodi', 'id');
+        $jenisSidangs = JenisSidang::pluck('nama', 'id');
+
+        return view('admin.assessment-templates.index', compact('templates', 'search', 'sortBy', 'sortDir', 'prodi', 'jenisSidang', 'prodis', 'jenisSidangs'));
     }
 
     public function create()

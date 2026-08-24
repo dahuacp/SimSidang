@@ -16,14 +16,24 @@ class UserController extends Controller
         $this->authorize('viewAdminMenu', User::class);
 
         $search = $request->input('search');
+        $sortBy = $request->input('sort', 'name');
+        $sortDir = $request->input('dir', 'asc');
+        $role = $request->input('role');
+
+        $allowedSorts = ['name', 'username', 'role', 'created_at'];
+        $allowedDir = ['asc', 'desc'];
+
+        $sortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'name';
+        $sortDir = in_array($sortDir, $allowedDir) ? $sortDir : 'asc';
 
         $users = User::with('prodi')
             ->when($search, fn ($q, $s) => $q->where('name', 'like', "%$s%")->orWhere('username', 'like', "%$s%"))
-            ->orderBy('name')
+            ->when($role, fn ($q, $r) => $q->where('role', $r))
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.users.index', compact('users', 'search'));
+        return view('admin.users.index', compact('users', 'search', 'sortBy', 'sortDir', 'role'));
     }
 
     public function create()

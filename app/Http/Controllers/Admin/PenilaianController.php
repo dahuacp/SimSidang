@@ -16,17 +16,25 @@ class PenilaianController extends Controller
         $this->authorize('viewAdminMenu', User::class);
 
         $search = $request->input('search');
+        $sortBy = $request->input('sort', 'created_at');
+        $sortDir = $request->input('dir', 'desc');
+
+        $allowedSorts = ['name', 'judul', 'created_at'];
+        $allowedDir = ['asc', 'desc'];
+
+        $sortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'created_at';
+        $sortDir = in_array($sortDir, $allowedDir) ? $sortDir : 'desc';
 
         $submissions = Submission::with(['user.prodi.fakultas', 'schedule', 'assessmentForms.dosen', 'assessmentForms.template'])
             ->whereHas('assessmentForms')
             ->when($search, fn ($q, $s) => $q
                 ->where('judul_laporan', 'like', "%$s%")
                 ->orWhereHas('user', fn ($q2) => $q2->where('name', 'like', "%$s%")->orWhere('username', 'like', "%$s%")))
-            ->orderBy('created_at', 'desc')
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.rekap.cetak-penilaian', compact('submissions', 'search'));
+        return view('admin.rekap.cetak-penilaian', compact('submissions', 'search', 'sortBy', 'sortDir'));
     }
 
     public function cetak(Submission $submission, AssessmentForm $assessmentForm)

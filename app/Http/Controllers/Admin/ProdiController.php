@@ -17,15 +17,27 @@ class ProdiController extends Controller
         $this->authorize('viewAdminMenu', User::class);
 
         $search = $request->input('search');
+        $sortBy = $request->input('sort', 'nama_prodi');
+        $sortDir = $request->input('dir', 'asc');
+        $fakultas = $request->input('fakultas_id');
+
+        $allowedSorts = ['kode_prodi', 'nama_prodi'];
+        $allowedDir = ['asc', 'desc'];
+
+        $sortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'nama_prodi';
+        $sortDir = in_array($sortDir, $allowedDir) ? $sortDir : 'asc';
 
         $prodis = Prodi::with('fakultas')
             ->when($search, fn ($q, $s) => $q->where('nama_prodi', 'like', "%$s%")->orWhere('kode_prodi', 'like', "%$s%"))
             ->withCount('users')
-            ->orderBy('nama_prodi')
+            ->when($fakultas, fn ($q, $v) => $q->where('fakultas_id', $v))
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.prodis.index', compact('prodis', 'search'));
+        $fakultasList = Fakultas::pluck('nama_fakultas', 'id');
+
+        return view('admin.prodis.index', compact('prodis', 'search', 'sortBy', 'sortDir', 'fakultas', 'fakultasList'));
     }
 
     public function create()

@@ -29,11 +29,26 @@
                 <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
                     <tr>
                         <th class="px-4 py-3 font-medium">#</th>
-                        <th class="px-4 py-3 font-medium">Nama</th>
-                        <th class="px-4 py-3 font-medium">NIM/NIDN</th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Nama" field="name" :current-sort="$sortBy" :current-dir="$sortDir" />
+                            <form method="GET" class="mt-1">
+                                <x-table.column-filter name="name" :value="$filters['name'] ?? ''" placeholder="Filter nama..." />
+                            </form>
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="NIM/NIDN" field="username" :current-sort="$sortBy" :current-dir="$sortDir" />
+                            <form method="GET" class="mt-1">
+                                <x-table.column-filter name="username" :value="$filters['username'] ?? ''" placeholder="Filter NIM/NIDN..." />
+                            </form>
+                        </th>
                         <th class="px-4 py-3 font-medium">Program Studi</th>
                         <th class="px-4 py-3 font-medium">Email</th>
-                        <th class="px-4 py-3 font-medium">Peran</th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Peran" field="role" :current-sort="$sortBy" :current-dir="$sortDir" />
+                            <form method="GET" class="mt-1">
+                                <x-table.column-filter name="role" type="select" :options="['admin' => 'Admin', 'dosen' => 'Dosen', 'mahasiswa' => 'Mahasiswa']" :value="$filters['role'] ?? ''" placeholder="Filter peran..." />
+                            </form>
+                        </th>
                         <th class="px-4 py-3 font-medium text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -75,7 +90,5 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $users->links() }}
-    </div>
+    <x-table.pagination :items="$users" :params="['search' => $search, 'sort' => $sortBy, 'dir' => $sortDir]" />
 @endsection

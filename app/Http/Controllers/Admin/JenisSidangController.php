@@ -16,16 +16,24 @@ class JenisSidangController extends Controller
         $this->authorize('viewAdminMenu', User::class);
 
         $search = $request->input('search');
+        $sortBy = $request->input('sort', 'nama');
+        $sortDir = $request->input('dir', 'asc');
+
+        $allowedSorts = ['nama', 'deskripsi'];
+        $allowedDir = ['asc', 'desc'];
+
+        $sortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'nama';
+        $sortDir = in_array($sortDir, $allowedDir) ? $sortDir : 'asc';
 
         $jenisSidangs = JenisSidang::when($search, fn ($q, $s) => $q
             ->where('nama', 'like', "%{$s}%")
             ->orWhere('deskripsi', 'like', "%{$s}%"))
             ->withCount('schedules')
-            ->orderBy('nama')
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.jenis-sidangs.index', compact('jenisSidangs', 'search'));
+        return view('admin.jenis-sidangs.index', compact('jenisSidangs', 'search', 'sortBy', 'sortDir'));
     }
 
     public function create()

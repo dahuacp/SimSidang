@@ -27,7 +27,21 @@
         </div>
     </div>
 
-    @php $submissions = \App\Models\Submission::with(['user','schedule'])->when(request('search'), fn($q,$s) => $q->where('judul_laporan','like',"%$s%")->orWhereHas('user', fn($q2) => $q2->where('name','like',"%$s%")->orWhere('username','like',"%$s%")))->orderBy('created_at','desc')->paginate(15)->withQueryString() @endphp
+    @php
+        $search = request('search');
+        $sortBy = request('sort', 'created_at');
+        $sortDir = request('dir', 'desc');
+        $allowedSorts = ['name', 'judul', 'status', 'created_at'];
+        $allowedDir = ['asc', 'desc'];
+        $sortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'created_at';
+        $sortDir = in_array($sortDir, $allowedDir) ? $sortDir : 'desc';
+        
+        $submissions = \App\Models\Submission::with(['user','schedule'])
+            ->when($search, fn($q,$s) => $q->where('judul_laporan','like',"%$s%")->orWhereHas('user', fn($q2) => $q2->where('name','like',"%$s%")->orWhere('username','like',"%$s%")))
+            ->orderBy($sortBy, $sortDir)
+            ->paginate(15)
+            ->withQueryString()
+    @endphp
 
     <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
         <div class="overflow-x-auto">
@@ -35,10 +49,18 @@
                 <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
                     <tr>
                         <th class="px-4 py-3 font-medium">#</th>
-                        <th class="px-4 py-3 font-medium">Mahasiswa</th>
-                        <th class="px-4 py-3 font-medium">Grup Sidang</th>
-                        <th class="px-4 py-3 font-medium">Judul</th>
-                        <th class="px-4 py-3 font-medium">Status</th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Mahasiswa" field="name" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Grup Sidang" field="nama_grup_sidang" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Judul" field="judul_laporan" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Status" field="status" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
                         <th class="px-4 py-3 font-medium">Poin Revisi</th>
                     </tr>
                 </thead>
@@ -65,7 +87,5 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $submissions->links() }}
-    </div>
+    <x-table.pagination :items="$submissions" :params="['search' => $search, 'sort' => $sortBy, 'dir' => $sortDir]" />
 @endsection

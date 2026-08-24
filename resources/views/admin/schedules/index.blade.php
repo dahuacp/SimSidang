@@ -46,14 +46,35 @@
                 <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
                     <tr>
                         <th class="px-4 py-3 font-medium">#</th>
-                        <th class="px-4 py-3 font-medium">Grup Sidang</th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Grup Sidang" field="nama_grup_sidang" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
                         <th class="px-4 py-3 font-medium">Jenis</th>
-                        <th class="px-4 py-3 font-medium">Ruangan</th>
-                        <th class="px-4 py-3 font-medium">Tanggal</th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Ruangan" field="ruangan" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Tanggal" field="tanggal_sidang" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
                         <th class="px-4 py-3 font-medium">Jam</th>
                         <th class="px-4 py-3 font-medium">Dosen</th>
                         <th class="px-4 py-3 font-medium">Jml Mahasiswa</th>
                         <th class="px-4 py-3 font-medium text-right">Aksi</th>
+                    </tr>
+                    <tr class="border-t border-gray-200 dark:border-gray-800">
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2">
+                            <form method="GET" class="mt-1">
+                                <x-table.column-filter name="jenis_sidang_id" type="select" :options="$jenisSidangs" :value="$jenisSidang" placeholder="Filter jenis..." />
+                            </form>
+                        </th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
@@ -106,9 +127,7 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $schedules->appends(['search' => $search])->links() }}
-    </div>
+    <x-table.pagination :items="$schedules" :params="['search' => $search, 'sort' => $sortBy, 'dir' => $sortDir, 'jenis_sidang_id' => $jenisSidang]" />
 @endsection
 
 @push('scripts')

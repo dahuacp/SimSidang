@@ -29,11 +29,29 @@
                 <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
                     <tr>
                         <th class="px-4 py-3 font-medium">#</th>
-                        <th class="px-4 py-3 font-medium">Kode</th>
-                        <th class="px-4 py-3 font-medium">Nama Program Studi</th>
-                        <th class="px-4 py-3 font-medium">Fakultas</th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Kode" field="kode_prodi" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Nama Program Studi" field="nama_prodi" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Fakultas" field="fakultas_id" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
                         <th class="px-4 py-3 font-medium">Jumlah Pengguna</th>
                         <th class="px-4 py-3 font-medium text-right">Aksi</th>
+                    </tr>
+                    <tr class="border-t border-gray-200 dark:border-gray-800">
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2">
+                            <form method="GET" class="mt-1">
+                                <x-table.column-filter name="fakultas_id" type="select" :options="$fakultasList" :value="$fakultas" placeholder="Filter fakultas..." />
+                            </form>
+                        </th>
+                        <th class="px-4 py-2"></th>
+                        <th class="px-4 py-2"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
@@ -71,7 +89,5 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $prodis->links() }}
-    </div>
+    <x-table.pagination :items="$prodis" :params="['search' => $search, 'sort' => $sortBy, 'dir' => $sortDir, 'fakultas_id' => $fakultas]" />
 @endsection

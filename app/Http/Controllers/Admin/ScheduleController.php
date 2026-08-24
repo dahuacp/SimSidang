@@ -21,15 +21,27 @@ class ScheduleController extends Controller
         $this->authorize('viewAdminMenu', User::class);
 
         $search = $request->input('search');
+        $sortBy = $request->input('sort', 'tanggal_sidang');
+        $sortDir = $request->input('dir', 'desc');
+        $jenisSidang = $request->input('jenis_sidang_id');
+
+        $allowedSorts = ['nama_grup_sidang', 'tanggal_sidang', 'ruangan'];
+        $allowedDir = ['asc', 'desc'];
+
+        $sortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'tanggal_sidang';
+        $sortDir = in_array($sortDir, $allowedDir) ? $sortDir : 'desc';
 
         $schedules = Schedule::withCount('mahasiswas')
             ->with(['dosens', 'jenisSidang'])
             ->when($search, fn ($q, $s) => $q->where('nama_grup_sidang', 'like', "%$s%")->orWhere('ruangan', 'like', "%$s%"))
-            ->orderBy('tanggal_sidang', 'desc')
+            ->when($jenisSidang, fn ($q, $v) => $q->where('jenis_sidang_id', $v))
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.schedules.index', compact('schedules', 'search'));
+        $jenisSidangs = JenisSidang::pluck('nama', 'id');
+
+        return view('admin.schedules.index', compact('schedules', 'search', 'sortBy', 'sortDir', 'jenisSidang', 'jenisSidangs'));
     }
 
     public function create()

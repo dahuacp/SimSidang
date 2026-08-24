@@ -16,14 +16,22 @@ class FakultasController extends Controller
         $this->authorize('viewAdminMenu', User::class);
 
         $search = $request->input('search');
+        $sortBy = $request->input('sort', 'nama_fakultas');
+        $sortDir = $request->input('dir', 'asc');
 
-        $fakultas = Fakultas::when($search, fn ($q, $s) => $q->where('nama_fakultas', 'like', "%$s%")->orWhere('kode_fakultas', 'like', "%$s%"))
-            ->withCount('prodis')
-            ->orderBy('nama_fakultas')
+        $allowedSorts = ['kode_fakultas', 'nama_fakultas'];
+        $allowedDir = ['asc', 'desc'];
+
+        $sortBy = in_array($sortBy, $allowedSorts) ? $sortBy : 'nama_fakultas';
+        $sortDir = in_array($sortDir, $allowedDir) ? $sortDir : 'asc';
+
+        $fakultas = Fakultas::withCount('prodis')
+            ->when($search, fn ($q, $s) => $q->where('nama_fakultas', 'like', "%$s%")->orWhere('kode_fakultas', 'like', "%$s%"))
+            ->orderBy($sortBy, $sortDir)
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.fakultas.index', compact('fakultas', 'search'));
+        return view('admin.fakultas.index', compact('fakultas', 'search', 'sortBy', 'sortDir'));
     }
 
     public function create()

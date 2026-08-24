@@ -29,8 +29,12 @@
                 <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
                     <tr>
                         <th class="px-4 py-3 font-medium">#</th>
-                        <th class="px-4 py-3 font-medium">Kode</th>
-                        <th class="px-4 py-3 font-medium">Nama Fakultas</th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Kode" field="kode_fakultas" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
+                        <th class="px-4 py-3 font-medium">
+                            <x-table.sort-header label="Nama Fakultas" field="nama_fakultas" :current-sort="$sortBy" :current-dir="$sortDir" />
+                        </th>
                         <th class="px-4 py-3 font-medium">Jumlah Prodi</th>
                         <th class="px-4 py-3 font-medium text-right">Aksi</th>
                     </tr>
@@ -69,7 +73,5 @@
         </div>
     </div>
 
-    <div class="mt-4">
-        {{ $fakultas->links() }}
-    </div>
+    <x-table.pagination :items="$fakultas" :params="['search' => $search, 'sort' => $sortBy, 'dir' => $sortDir]" />
 @endsection

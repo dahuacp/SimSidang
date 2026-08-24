@@ -62,28 +62,20 @@
         @endif
 
         @can('viewDosenMenu')
-            <div x-data="{ open: false }" class="flex flex-col gap-1">
-                <button type="button" @click="open = !open"
-                        class="menu-item w-full {{ request()->routeIs('dosen.submissions.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
-                    <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4h-2M8 7l-4 4h16l-4-4M8 7L4 11v10a2 2 0 002 2h12a2 2 0 002-2V11l-4-4z"></path>
-                    </svg>
-                    <span class="flex-1 text-left" x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen">Sidang</span>
-                    <svg class="w-4 h-4 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l11 11M9 16l11-11"></path>
-                    </svg>
-                </button>
-                <div x-show="open" class="ml-4 space-y-1" x-cloak>
-                    <a href="{{ route('dosen.submissions.index') }}"
-                       class="menu-item w-full {{ request()->routeIs('dosen.submissions.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
-                        <span>Jadwal Sidang</span>
-                    </a>
-                    <a href="{{ route('dosen.penilaian.index') }}"
-                       class="menu-item w-full {{ request()->routeIs('dosen.penilaian.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
-                        <span>Penilaian</span>
-                    </a>
-                </div>
-            </div>
+            <a href="{{ route('dosen.submissions.index') }}"
+               class="menu-item {{ request()->routeIs('dosen.submissions.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4h-2M8 7l-4 4h16l-4-4M8 7L4 11v10a2 2 0 002 2h12a2 2 0 002-2V11l-4-4z"></path>
+                </svg>
+                <span x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen">Jadwal Sidang</span>
+            </a>
+            <a href="{{ route('dosen.penilaian.index') }}"
+               class="menu-item {{ request()->routeIs('dosen.penilaian.*') ? 'menu-item-active' : 'menu-item-inactive' }}">
+                <svg class="w-5 h-5 flex-shrink-0 menu-item-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen">Penilaian</span>
+            </a>
         @endcan
 
         @can('viewAdminMenu')
