@@ -8,6 +8,7 @@ use App\Models\Prodi;
 use App\Models\Schedule;
 use App\Models\Submission;
 use App\Models\User;
+use Carbon\Carbon;
 
 function scenarioCetak(string $tipePenilai = 'penguji'): array
 {
@@ -138,7 +139,8 @@ test('halaman cetak menampilkan data fakultas dan prodi mahasiswa', function () 
         ->toContain('Sistem Informasi')
         ->toContain('Winarti, S.Kom., M.Kom.')
         ->toContain('Arif Rahman Sudjatmika, S.Kom., M.Kom.')
-        ->toContain('EVALUASI PENILAIAN SIDANG');
+        ->toContain('EVALUASI PENILAIAN SIDANG')
+        ->toContain('data:image/png;base64');
 });
 
 test('kolom nilai mengikuti kelipatan maksimal item', function () {
@@ -161,4 +163,25 @@ test('kolom nilai mengikuti kelipatan maksimal item', function () {
         ->toContain('2')
         ->toContain('10')
         ->toContain('5');
+});
+
+test('tanggal cetak dan QR berasal dari tanggal pemberian nilai (form dospem)', function () {
+    $s = scenarioCetak('dospem');
+    $s['form']->forceFill(['created_at' => Carbon::create(2026, 3, 17, 10)])->save();
+
+    $view = view('penilaian.cetak', [
+        'assessmentForm' => $s['form']->load([
+            'submission.user.prodi.fakultas',
+            'submission.schedule.jenisSidang',
+            'dosen',
+            'template',
+        ]),
+        'dospem' => $s['mahasiswa']->dosenPembimbingByUrutan->load('prodi'),
+        'university' => config('university'),
+    ])->render();
+
+    expect($view)
+        ->toContain('Jombang, 17 Maret 2026')
+        ->toContain('EVALUASI BIMBINGAN TUGAS AKHIR')
+        ->toContain('data:image/png;base64');
 });

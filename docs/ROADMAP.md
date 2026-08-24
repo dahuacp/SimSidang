@@ -73,6 +73,16 @@ Tujuan: dospem + dosen penguji isi form penilaian (rule per prodi × jenis sidan
 - [x] Seeder lengkap + `migrate:fresh --seed`
 - [x] `php artisan test` lulus, `npm run lint`, `vendor/bin/pint`
 
+## Tahap 5 — Deteksi Konflik Jadwal
+Tujuan: cegah mahasiswa ter-plot ganda dan dosen double-booked pada jadwal yang waktunya overlap (ruangan tidak dicek).
+
+- [x] Service `ScheduleConflictService` (query overlap setengah-terbuka `[mulai, selesai)`)
+- [x] Validasi store/update jadwal: dosen bentrok ditolak; update juga cek ulang anggota ter-plot saat geser tanggal/jam
+- [x] Validasi plot mahasiswa (`StoreScheduleMahasiswaRequest`)
+- [x] Import CSV: row bentrok → `$failures`, termasuk konflik antar-row dalam satu file
+- [x] Blok tampilan `$errors` di view create/edit jadwal admin (belum ada)
+- [x] Test Pest (store/update/plot/import + kasus positif)
+
 ---
 
 ## Catatan

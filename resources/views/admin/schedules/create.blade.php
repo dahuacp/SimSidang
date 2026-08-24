@@ -5,6 +5,16 @@
 @section('content')
     <h1 class="mb-4 text-xl font-bold text-gray-800 dark:text-white/90 sm:text-2xl">Tambah Jadwal Sidang</h1>
 
+    @if ($errors->any())
+        <div class="mb-4 rounded-lg border border-error-500/20 bg-error-50 p-3 text-sm text-error-600 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-400">
+            <ul class="mb-0 list-disc space-y-1 ps-4">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('admin.schedules.store') }}" class="max-w-3xl">
         @csrf
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -105,6 +115,7 @@
                 </div>
             </div>
             <div class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Klik hasil untuk menambahkan. Klik × pada tag untuk menghapus.</div>
+            @error('dosens') <div class="mt-1 text-xs text-error-600 dark:text-error-500">{{ $message }}</div> @enderror
         </div>
 
         <div class="mt-6 flex gap-3">

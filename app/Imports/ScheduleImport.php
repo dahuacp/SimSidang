@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\JenisSidang;
 use App\Models\Schedule;
 use App\Models\User;
+use App\Services\ScheduleConflictService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,8 @@ class ScheduleImport implements ToCollection, WithHeadingRow, WithValidation
     public function collection(Collection $rows): void
     {
         $dosenIds = User::where('role', 'dosen')->pluck('id')->toArray();
+        $service = app(ScheduleConflictService::class);
+        $accepted = [];
 
         foreach ($rows as $i => $row) {
             try {
@@ -33,28 +36,68 @@ class ScheduleImport implements ToCollection, WithHeadingRow, WithValidation
                     }
                 }
 
-                $schedule = Schedule::create([
-                    'nama_grup_sidang' => $row['nama_grup_sidang'],
-                    'ruangan' => $row['ruangan'],
-                    'tanggal_sidang' => Carbon::parse($row['tanggal_sidang'])->toDateString(),
-                    'jam_mulai' => Carbon::parse($row['jam_mulai'])->format('H:i'),
-                    'jam_selesai' => Carbon::parse($row['jam_selesai'])->format('H:i'),
-                    'jenis_sidang_id' => $jenisSidang?->id,
-                ]);
+                $tanggal = Carbon::parse($row['tanggal_sidang'])->toDateString();
+                $jamMulai = Carbon::parse($row['jam_mulai'])->format('H:i');
+                $jamSelesai = Carbon::parse($row['jam_selesai'])->format('H:i');
 
+                $candidateIds = [];
                 $dosenCol = $row['dosen_ids'] ?? null;
                 if ($dosenCol) {
                     $ids = array_filter(array_map('trim', explode(',', $dosenCol)));
-                    $valid = array_intersect($ids, $dosenIds);
-                    if ($valid) {
-                        $schedule->dosens()->sync($valid);
-                    }
+                    $candidateIds = array_values(array_intersect($ids, $dosenIds));
+                }
+
+                $this->guardConflicts($service, $candidateIds, $tanggal, $jamMulai, $jamSelesai, $accepted);
+
+                $schedule = Schedule::create([
+                    'nama_grup_sidang' => $row['nama_grup_sidang'],
+                    'ruangan' => $row['ruangan'],
+                    'tanggal_sidang' => $tanggal,
+                    'jam_mulai' => $jamMulai,
+                    'jam_selesai' => $jamSelesai,
+                    'jenis_sidang_id' => $jenisSidang?->id,
+                ]);
+
+                if ($candidateIds) {
+                    $schedule->dosens()->sync($candidateIds);
                 }
 
                 DB::commit();
+
+                $accepted[] = [
+                    'tanggal' => $tanggal,
+                    'mulai' => $jamMulai,
+                    'selesai' => $jamSelesai,
+                    'dosen_ids' => $candidateIds,
+                ];
             } catch (\Throwable $e) {
                 DB::rollBack();
                 $this->failures[] = 'Baris '.($i + 2).': '.$e->getMessage();
+            }
+        }
+    }
+
+    private function guardConflicts(ScheduleConflictService $service, array $candidateIds, string $tanggal, string $jamMulai, string $jamSelesai, array $accepted): void
+    {
+        if ($candidateIds === []) {
+            return;
+        }
+
+        $conflicts = $service->findDosenConflicts($candidateIds, $tanggal, $jamMulai, $jamSelesai);
+
+        foreach ($conflicts as $entry) {
+            foreach ($service->describeConflict($entry) as $message) {
+                throw new \Exception($message);
+            }
+        }
+
+        foreach ($accepted as $row) {
+            if ($row['tanggal'] === $tanggal
+                && $row['mulai'] < $jamSelesai
+                && $row['selesai'] > $jamMulai
+                && count(array_intersect($row['dosen_ids'], $candidateIds)) > 0
+            ) {
+                throw new \Exception('Konflik dengan baris lain dalam file import (jadwal overlap dengan dosen yang sama).');
             }
         }
     }

@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Services\ScheduleConflictService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreScheduleMahasiswaRequest extends FormRequest
 {
@@ -31,5 +33,29 @@ class StoreScheduleMahasiswaRequest extends FormRequest
             'user_id.exists' => 'Mahasiswa yang dipilih tidak valid.',
             'user_id.unique' => 'Mahasiswa sudah ter-plot ke grup sidang ini.',
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
+            $schedule = $this->route('schedule');
+            $service = app(ScheduleConflictService::class);
+            $conflicts = $service->findMahasiswaConflicts(
+                [$this->integer('user_id')],
+                $schedule->tanggal_sidang->toDateString(),
+                $schedule->jam_mulai->format('H:i'),
+                $schedule->jam_selesai->format('H:i'),
+            );
+
+            foreach ($conflicts as $entry) {
+                foreach ($service->describeConflict($entry) as $message) {
+                    $validator->errors()->add('user_id', $message);
+                }
+            }
+        });
     }
 }

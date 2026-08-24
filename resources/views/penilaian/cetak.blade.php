@@ -56,6 +56,8 @@
 </head>
 <body style="margin: 20px;">
 
+@inject('qrService', 'App\Services\QrCodeService')
+
 @php
     $isDospem = $assessmentForm->tipe_penilai === 'dospem';
     $fakultas = $assessmentForm->submission->user->prodi?->fakultas;
@@ -68,7 +70,7 @@
         : 'Dosen Penguji';
     $judulUtama = $isDospem ? 'EVALUASI BIMBINGAN TUGAS AKHIR' : 'EVALUASI PENILAIAN SIDANG';
     $labelNilai = $isDospem ? 'NILAI BIMBINGAN TUGAS AKHIR' : 'NILAI PENILAIAN SIDANG';
-    $tanggal = \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y');
+    $tanggal = $assessmentForm->created_at->locale('id')->translatedFormat('d F Y');
 @endphp
 
 <table class="header-table" style="margin-bottom: 16px;">
@@ -193,8 +195,10 @@
         <td class="bold" style="text-align: right;">{{ $tipeLabelDetail }}</td>
     </tr>
     <tr>
-        <td style="height: 50px;"></td>
-        <td></td>
+        <td style="height: 90px;"></td>
+        <td style="text-align: right;">
+            <img src="{{ $qrService->penilaianSignature($assessmentForm) }}" alt="QR Tanda Tangan Elektronik" style="width: 80px; height: 80px;">
+        </td>
     </tr>
     <tr>
         <td></td>

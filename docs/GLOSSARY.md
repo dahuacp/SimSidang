@@ -29,6 +29,7 @@ Domain project ini berbahasa Indonesia (akademik), tapi konvensi Laravel biasany
 | Template Penilaian | Aturan item penilaian (per prodi × jenis sidang) | `assessment_templates` (`prodi_id`, `jenis_sidang_id`, `nama`, `nilai_penyebut` A, `nilai_pengali` B, `items` JSON) | `AssessmentTemplate` | Admin kelola; item punya `nama`, `maksimal`, `urutan` |
 | Form Penilaian | Isian penilaian yang diisi seorang dosen | `assessment_forms` (`submission_id`, `dosen_id`, `tipe_penilai`∈{dospem,penguji}, `template_id`, `skor_per_item` JSON, `skor_total`) | `AssessmentForm` | Skor total = Σskor / A × B; tidak ada pass/fail |
 | Cetak Hasil Penilaian | Output PDF form penilaian (admin/dosen/mahasiswa) | — | view `penilaian/cetak.blade.php` (DomPDF) | Header universitas dari `config('university')`; fakultas+prodi dari relasi `user.prodi.fakultas`; kolom nilai kelipatan `maksimal/5` per item |
+| Tanda Tangan Elektronik (QR) | QR code di lembar cetak penilaian, pengganti tanda tangan basah | — | `QrCodeService` (`signatureText`, `penilaianSignature`) | Isi QR: nama dosen + tanggal pemberian nilai (= `assessment_forms.created_at`, tidak berubah saat edit); PNG via GD + bacon-qr-code |
 | Nilai Penyebut (A) | Pembagi normalisasi skor total | `assessment_templates.nilai_penyebut` | — | integer, `min:1` |
 | Nilai Pengali (B) | Pengali/akar skala output skor total | `assessment_templates.nilai_pengali` | — | integer, `min:0` |
 

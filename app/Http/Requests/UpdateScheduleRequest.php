@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Services\ScheduleConflictService;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class UpdateScheduleRequest extends FormRequest
 {
@@ -36,5 +38,45 @@ class UpdateScheduleRequest extends FormRequest
             'jenis_sidang_id.required' => 'Jenis sidang wajib dipilih.',
             'jenis_sidang_id.exists' => 'Jenis sidang tidak valid.',
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
+            $schedule = $this->route('schedule');
+            $service = app(ScheduleConflictService::class);
+
+            $conflicts = $service->findDosenConflicts(
+                array_map('intval', (array) $this->input('dosens', [])),
+                (string) $this->input('tanggal_sidang'),
+                (string) $this->input('jam_mulai'),
+                (string) $this->input('jam_selesai'),
+                $schedule->id,
+            );
+
+            foreach ($conflicts as $entry) {
+                foreach ($service->describeConflict($entry) as $message) {
+                    $validator->errors()->add('dosens', $message);
+                }
+            }
+
+            $mahasiswaConflicts = $service->findMahasiswaConflicts(
+                $schedule->mahasiswas()->pluck('users.id')->all(),
+                (string) $this->input('tanggal_sidang'),
+                (string) $this->input('jam_mulai'),
+                (string) $this->input('jam_selesai'),
+                $schedule->id,
+            );
+
+            foreach ($mahasiswaConflicts as $entry) {
+                foreach ($service->describeConflict($entry) as $message) {
+                    $validator->errors()->add('mahasiswas', $message);
+                }
+            }
+        });
     }
 }
